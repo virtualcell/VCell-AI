@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "vcell-backend"
+version = "0.1.0"
+description = ""
+authors = ["Kacem Mathlouthi <kacem.mathlouthi@insat.ucar.tn>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.115.12"
+uvicorn = {extras = ["standard"], version = "^0.34.3"}
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
