@@ -19,17 +19,22 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: '3.12'  # You can change to your preferred version
+        python-version: '3.12'
 
     - name: Install Poetry
       run: |
         curl -sSL https://install.python-poetry.org | python3 -
         export PATH="$HOME/.poetry/bin:$PATH"  # Ensure Poetry is in the PATH
 
+    - name: Change to Backend Directory
+      run: cd backend  # Change to the backend folder
+
     - name: Install dependencies with Poetry
       run: |
+        cd backend  # Change to the backend folder again if needed
         poetry install  # Install the dependencies using Poetry
 
     - name: Run Tests with Poetry
       run: |
-        poetry run pytest tests/vcelldb_api_tests.py --maxfail=1 --disable-warnings -q  # Run the tests
+        cd backend
+        poetry run pytest tests/vcelldb_api_tests.py --maxfail=1 --disable-warnings -q
