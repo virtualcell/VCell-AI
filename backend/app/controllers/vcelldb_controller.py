@@ -5,8 +5,8 @@ from app.schemas.vcelldb_schema import BiomodelRequestParams, SimulationRequestP
 from app.services.vcelldb_service import (
     fetch_biomodels,
     fetch_simulation_details,
-    get_vcml_url,
-    get_sbml_url,
+    get_vcml_file,
+    get_sbml_file,
     get_diagram_url,
 )
 
@@ -54,26 +54,26 @@ async def get_simulation_details_controller(params: SimulationRequestParams) -> 
         raise HTTPException(status_code=500, detail=str(e))
 
 
-async def get_vcml_url_controller(biomodel_id: str) -> str:
+async def get_vcml_controller(biomodel_id: str) -> str:
     """
     Controller function to fetch the URL of the VCML file for a biomodel.
     Raises:
         HTTPException: If the URL cannot be generated.
     """
     try:
-        return await get_vcml_url(biomodel_id)
+        return await get_vcml_file(biomodel_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail="Error fetching VCML URL.")
 
 
-async def get_sbml_url_controller(biomodel_id: str) -> str:
+async def get_sbml_controller(biomodel_id: str) -> str:
     """
     Controller function to fetch the URL of the SBML file for a biomodel.
     Raises:
         HTTPException: If the URL cannot be generated.
     """
     try:
-        return await get_sbml_url(biomodel_id)
+        return await get_sbml_file(biomodel_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail="Error fetching SBML URL.")
 

@@ -40,30 +40,36 @@ async def fetch_simulation_details(params: SimulationRequestParams) -> dict:
         return response.json()
 
 
-async def get_vcml_url(biomodel_id: str) -> str:
+async def get_vcml_file(biomodel_id: str) -> str:
     """
-    Gets VCML download URL for a given biomodel.
+    Fetches the VCML file content for a given biomodel.
 
     Args:
         biomodel_id (str): ID of the biomodel.
 
     Returns:
-        str: URL pointing to the VCML file.
+        str: VCML content of the biomodel.
     """
-    return f"{VCELL_API_BASE_URL}/biomodel/{biomodel_id}/biomodel.vcml"
+    async with httpx.AsyncClient() as client:
+        response = await client.get(f"{VCELL_API_BASE_URL}/biomodel/{biomodel_id}/biomodel.vcml")
+        response.raise_for_status()
+        return response.text
 
 
-async def get_sbml_url(biomodel_id: str) -> str:
+async def get_sbml_file(biomodel_id: str) -> str:
     """
-    Gets SBML download URL for a given biomodel.
+    Fetches the SBML file content for a given biomodel.
 
     Args:
         biomodel_id (str): ID of the biomodel.
 
     Returns:
-        str: URL pointing to the SBML file.
+        str: SBML content of the biomodel.
     """
-    return f"{VCELL_API_BASE_URL}/biomodel/{biomodel_id}/biomodel.sbml"
+    async with httpx.AsyncClient() as client:
+        response = await client.get(f"{VCELL_API_BASE_URL}/biomodel/{biomodel_id}/biomodel.sbml")
+        response.raise_for_status()
+        return response.text
 
 
 async def get_diagram_url(biomodel_id: str) -> str:

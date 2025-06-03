@@ -4,8 +4,8 @@ from app.schemas.vcelldb_schema import BiomodelRequestParams, SimulationRequestP
 from app.controllers.vcelldb_controller import (
     get_biomodels_controller,
     get_simulation_details_controller,
-    get_vcml_url_controller,
-    get_sbml_url_controller,
+    get_vcml_controller,
+    get_sbml_controller,
     get_diagram_url_controller,
 )
 
@@ -38,23 +38,23 @@ async def get_simulations(
 
 
 @router.get("/biomodel/{biomodel_id}/biomodel.vcml", response_model=str)
-async def get_vcml_url(biomodel_id: str):
+async def get_vcml(biomodel_id: str):
     """
-    Endpoint to get VCML file download URL for a given biomodel.
+    Endpoint to get VCML file contents for a given biomodel.
     """
     try:
-        return await get_vcml_url_controller(biomodel_id)
+        return await get_vcml_controller(biomodel_id)
     except HTTPException as e:
         raise e
 
 
 @router.get("/biomodel/{biomodel_id}/biomodel.sbml", response_model=str)
-async def get_sbml_url(biomodel_id: str):
+async def get_sbml(biomodel_id: str):
     """
-    Endpoint to get SBML file download URL for a given biomodel.
+    Endpoint to get SBML file contents for a given biomodel.
     """
     try:
-        return await get_sbml_url_controller(biomodel_id)
+        return await get_sbml_controller(biomodel_id)
     except HTTPException as e:
         raise e
 
