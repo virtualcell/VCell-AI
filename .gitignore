@@ -3,3 +3,4 @@
 *.py[cod]
 /frontend/node_modules/
 backend/.pytest_cache
+.vscode/

@@ -56,7 +56,7 @@ async def get_simulation_details_controller(params: SimulationRequestParams) -> 
 
 async def get_vcml_controller(biomodel_id: str) -> str:
     """
-    Controller function to fetch the URL of the VCML file for a biomodel.
+    Controller function to fetch the contents of the VCML file for a biomodel.
     Raises:
         HTTPException: If the URL cannot be generated.
     """
@@ -68,7 +68,7 @@ async def get_vcml_controller(biomodel_id: str) -> str:
 
 async def get_sbml_controller(biomodel_id: str) -> str:
     """
-    Controller function to fetch the URL of the SBML file for a biomodel.
+    Controller function to fetch the contents of the SBML file for a biomodel.
     Raises:
         HTTPException: If the URL cannot be generated.
     """

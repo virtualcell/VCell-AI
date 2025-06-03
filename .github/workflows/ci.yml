@@ -32,7 +32,7 @@ jobs:
     - name: Install dependencies with Poetry
       run: |
         cd backend  # Change to the backend folder again if needed
-        poetry install  # Install the dependencies using Poetry
+        poetry install --no-root # Install the dependencies using Poetry
 
     - name: Run Tests with Poetry
       run: |
