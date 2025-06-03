@@ -1,4 +1,5 @@
 import httpx
+from typing import List
 from fastapi import HTTPException
 from app.schemas.vcelldb_schema import BiomodelRequestParams, SimulationRequestParams
 from app.services.vcelldb_service import (
@@ -9,7 +10,7 @@ from app.services.vcelldb_service import (
     get_diagram_url,
 )
 
-async def get_biomodels_controller(params: BiomodelRequestParams) -> dict:
+async def get_biomodels_controller(params: BiomodelRequestParams) -> List[dict]:
     """
     Controller function to retrieve biomodels based on filters and sorting.
     Raises:

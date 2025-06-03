@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from typing import List
 from app.schemas.vcelldb_schema import BiomodelRequestParams, SimulationRequestParams
 from app.controllers.vcelldb_controller import (
     get_biomodels_controller,
@@ -10,7 +11,7 @@ from app.controllers.vcelldb_controller import (
 
 router = APIRouter()
 
-@router.get("/biomodel", response_model=dict)
+@router.get("/biomodel", response_model=List[dict])
 async def get_biomodels(params: BiomodelRequestParams = Depends()):
     """
     Endpoint to retrieve biomodels based on provided filters and sorting.
