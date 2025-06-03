@@ -34,4 +34,4 @@ class BiomodelRequestParams(BaseModel, use_enum_values=True):
 
 class SimulationRequestParams(BaseModel):
     bmId: str  # Biomodel ID for which simulations will be fetched
-    simId: Optional[str] = None  # Simulation ID to fetch specific simulation details (optional)
+    simId: str # Simulation ID to fetch specific simulation details
