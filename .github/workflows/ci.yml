@@ -36,5 +36,5 @@ jobs:
 
     - name: Run Tests with Poetry
       run: |
-        cd backend
+        cd backend/app
         poetry run pytest tests/vcelldb_api_tests.py --maxfail=1 --disable-warnings -q
