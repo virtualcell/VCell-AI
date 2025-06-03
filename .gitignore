@@ -2,3 +2,4 @@
 /__pycache__/
 *.py[cod]
 /frontend/node_modules/
+backend/.pytest_cache
