@@ -11,6 +11,7 @@ from app.controllers.vcelldb_controller import (
 
 router = APIRouter()
 
+
 @router.get("/biomodel", response_model=List[dict])
 async def get_biomodels(params: BiomodelRequestParams = Depends()):
     """
@@ -23,7 +24,9 @@ async def get_biomodels(params: BiomodelRequestParams = Depends()):
 
 
 @router.get("/biomodel/{biomodel_id}/simulations", response_model=dict)
-async def get_simulations(biomodel_id: str, params: SimulationRequestParams = Depends()):
+async def get_simulations(
+    biomodel_id: str, params: SimulationRequestParams = Depends()
+):
     """
     Endpoint to retrieve simulations for a specific biomodel by biomodel ID.
     """

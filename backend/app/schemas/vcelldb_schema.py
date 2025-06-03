@@ -29,9 +29,11 @@ class BiomodelRequestParams(BaseModel, use_enum_values=True):
     savedHigh: Optional[date] = None  # Upper bound of the save date range
     startRow: Optional[int] = 1  # Starting row of the result set (default is 1)
     maxRows: Optional[int] = 10  # Maximum number of rows to return (default is 10)
-    orderBy: Optional[OrderByEnum] = OrderByEnum.date_desc  # Order of results (default is "date_desc")
+    orderBy: Optional[OrderByEnum] = (
+        OrderByEnum.date_desc
+    )  # Order of results (default is "date_desc")
 
 
 class SimulationRequestParams(BaseModel):
     bmId: str  # Biomodel ID for which simulations will be fetched
-    simId: str # Simulation ID to fetch specific simulation details
+    simId: str  # Simulation ID to fetch specific simulation details

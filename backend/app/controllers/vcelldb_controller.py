@@ -10,6 +10,7 @@ from app.services.vcelldb_service import (
     get_diagram_url,
 )
 
+
 async def get_biomodels_controller(params: BiomodelRequestParams) -> List[dict]:
     """
     Controller function to retrieve biomodels based on filters and sorting.
@@ -20,9 +21,13 @@ async def get_biomodels_controller(params: BiomodelRequestParams) -> List[dict]:
         biomodels = await fetch_biomodels(params)
         return biomodels
     except httpx.HTTPStatusError as e:
-        raise HTTPException(status_code=e.response.status_code, detail="Error fetching biomodels.")
+        raise HTTPException(
+            status_code=e.response.status_code, detail="Error fetching biomodels."
+        )
     except httpx.RequestError as e:
-        raise HTTPException(status_code=500, detail="Error communicating with VCell API.")
+        raise HTTPException(
+            status_code=500, detail="Error communicating with VCell API."
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -37,9 +42,14 @@ async def get_simulation_details_controller(params: SimulationRequestParams) -> 
         simulation = await fetch_simulation_details(params)
         return simulation
     except httpx.HTTPStatusError as e:
-        raise HTTPException(status_code=e.response.status_code, detail="Error fetching simulation details.")
+        raise HTTPException(
+            status_code=e.response.status_code,
+            detail="Error fetching simulation details.",
+        )
     except httpx.RequestError as e:
-        raise HTTPException(status_code=500, detail="Error communicating with VCell API.")
+        raise HTTPException(
+            status_code=500, detail="Error communicating with VCell API."
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
