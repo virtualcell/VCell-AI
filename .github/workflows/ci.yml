@@ -1,0 +1,40 @@
+name: Backend CI
+
+on:
+  push:
+    branches:
+      - main  # Runs on every push to the main branch
+  pull_request:
+    branches:
+      - main  # Runs on PR to the main branch
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.12'
+
+    - name: Install Poetry
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 -
+        export PATH="$HOME/.poetry/bin:$PATH"  # Ensure Poetry is in the PATH
+
+    - name: Change to Backend Directory
+      run: cd backend  # Change to the backend folder
+
+    - name: Install dependencies with Poetry
+      run: |
+        cd backend  # Change to the backend folder again if needed
+        poetry install --no-root # Install the dependencies using Poetry
+
+    - name: Run Tests with Poetry
+      run: |
+        cd backend/app
+        poetry run pytest tests/vcelldb_api_tests.py --maxfail=1 --disable-warnings -q
