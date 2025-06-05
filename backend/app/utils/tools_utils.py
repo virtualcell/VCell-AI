@@ -1,4 +1,5 @@
 from app.services.vcelldb_service import fetch_biomodels, fetch_simulation_details, get_vcml_file
+from app.schemas.vcelldb_schema import BiomodelRequestParams, SimulationRequestParams
 
 # Function calling Definitions
 ToolsDefinitions = [
@@ -73,8 +74,14 @@ async def execute_tool(name, args):
         The result of the function call.
     """
     if name == "fetch_biomodels":
-        return await fetch_biomodels(args)
+        if args['savedLow'] == "":
+            args['savedLow'] = None
+        if args['savedHigh'] == "":
+            args['savedHigh'] = None
+        params = BiomodelRequestParams(**args)
+        return await fetch_biomodels(params)
     elif name == "fetch_simulation_details":
+        params = SimulationRequestParams(**args)
         return await fetch_simulation_details(args)
     elif name == "get_vcml_file":
         return await get_vcml_file(args["biomodel_id"])
