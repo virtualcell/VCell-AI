@@ -1,4 +1,4 @@
-from backend.app.utils.tools_utils import (
+from app.utils.tools_utils import (
     ToolsDefinitions as tools,
     execute_tool,
 )
@@ -23,6 +23,9 @@ async def get_response_with_tools(user_prompt: str):
 
     # Handle the tool calls
     tool_calls = response.choices[0].message.tool_calls
+
+    messages.append(response.choices[0].message)
+
     for tool_call in tool_calls:
         # Extract the function name and arguments
         name = tool_call.function.name
@@ -45,4 +48,4 @@ async def get_response_with_tools(user_prompt: str):
         tools=tools,
     )
 
-    print(completion.choices[0].message.content)
+    return completion.choices[0].message.content
