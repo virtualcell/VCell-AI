@@ -31,7 +31,7 @@ ToolsDefinitions = [
         "type": "function",
         "function": {
             "name": "fetch_simulation_details",
-            "description": "Fetch detailed information about a specific simulation for a given biomodel.",
+            "description": "Fetch detailed information about a specific simulation for a given biomodel. Use when you have both biomodel ID and simulation ID.",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -73,17 +73,28 @@ async def execute_tool(name, args):
     Returns:
         The result of the function call.
     """
-    if name == "fetch_biomodels":
-        if args['savedLow'] == "":
-            args['savedLow'] = None
-        if args['savedHigh'] == "":
-            args['savedHigh'] = None
-        params = BiomodelRequestParams(**args)
-        return await fetch_biomodels(params)
-    elif name == "fetch_simulation_details":
-        params = SimulationRequestParams(**args)
-        return await fetch_simulation_details(args)
-    elif name == "get_vcml_file":
-        return await get_vcml_file(args["biomodel_id"])
-    else:
-        return {"Error": "Function Failed to Execute."}
+    try:
+        if name == "fetch_biomodels":
+            # Handle empty fields and validate
+            if args.get('savedLow') == "":
+                args['savedLow'] = None
+            if args.get('savedHigh') == "":
+                args['savedHigh'] = None
+            params = BiomodelRequestParams(**args)
+            return await fetch_biomodels(params)
+
+        elif name == "fetch_simulation_details":
+            params = SimulationRequestParams(**args)
+            return await fetch_simulation_details(params)
+
+        elif name == "get_vcml_file":
+            return await get_vcml_file(args["biomodel_id"])
+
+        else:
+            return {}
+
+    except Exception as e:        
+        if name == "fetch_biomodels" or name == "fetch_simulation_details":
+            return []
+        else:
+            return {}
