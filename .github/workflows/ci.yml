@@ -40,7 +40,7 @@ jobs:
         echo "AZURE_ENDPOINT=${{ secrets.AZURE_ENDPOINT }}" >> backend/app/.env
         echo "AZURE_API_KEY=${{ secrets.AZURE_API_KEY }}" >> backend/app/.env
         echo "AZURE_DEPLOYMENT_NAME=${{ secrets.AZURE_DEPLOYMENT_NAME }}" >> backend/app/.env
-
+        echo "FRONTEND_URL=${{ secrets.FRONTEND_URL }}" >> backend/app/.env
     - name: Run Tests with Poetry
       run: |
         cd backend/app
