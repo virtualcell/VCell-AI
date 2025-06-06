@@ -25,22 +25,23 @@ async def get_response_with_tools(user_prompt: str):
     tool_calls = response.choices[0].message.tool_calls
 
     messages.append(response.choices[0].message)
-
-    for tool_call in tool_calls:
-        # Extract the function name and arguments
-        name = tool_call.function.name
-        args = json.loads(tool_call.function.arguments)
-        print(name)
-        print(args)
-        # Execute the tool function
-        result = await execute_tool(name, args)
-        
-        # Send the result back to the model
-        messages.append({
-            "role": "tool",
-            "tool_call_id": tool_call.id,
-            "content": str(result)
-        })
+    
+    if tool_calls:
+        for tool_call in tool_calls:
+            # Extract the function name and arguments
+            name = tool_call.function.name
+            args = json.loads(tool_call.function.arguments)
+            print(name)
+            print(args)
+            # Execute the tool function
+            result = await execute_tool(name, args)
+            
+            # Send the result back to the model
+            messages.append({
+                "role": "tool",
+                "tool_call_id": tool_call.id,
+                "content": str(result)
+            })
 
     # Send back the final response incorporating the tool result
     completion = client.chat.completions.create(
