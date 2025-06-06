@@ -10,7 +10,7 @@ client = get_openai_client()
 
 async def get_response_with_tools(user_prompt: str): 
     messages = [
-        {"role": "system", "content": "You are a helpful assistant. Stick strictly to the user's query and provide precise answers. Do not make assumptions or infer missing information; if details are missing, just leave it empty."},
+        {"role": "system", "content": "You are a VCell BioModel assistant helping users understand biological models. Stick strictly to the user's query and provide precise answers. Do not make assumptions or infer missing information; if details are missing, just leave it empty. If asked on unrelevant topics, politely decline to answer. Explain obtained results in a clear, elaborate, human-readable manner."},
         {"role": "user", "content": user_prompt}
     ]
 
@@ -48,6 +48,7 @@ async def get_response_with_tools(user_prompt: str):
         model=settings.AZURE_DEPLOYMENT_NAME,
         messages=messages,
         tools=tools,
+        max_tokens=10000,
     )
 
     return completion.choices[0].message.content

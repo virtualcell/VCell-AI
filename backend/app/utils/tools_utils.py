@@ -7,18 +7,18 @@ ToolsDefinitions = [
         "type": "function",
         "function": {
             "name": "fetch_biomodels",
-            "description": "Fetch a list of biomodels based on user query parameters like name, category, and owner.",
+            "description": "Retrieves a list of biomodels from the VCell database based on various filtering criteria such as the biomodel name, category, owner, and saved date range. This allows to search for specific biomodels based on their attributes and retrieve the results.",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "bmName": {"type": "string", "description": "Name of the biomodel"},
-                    "category": {"type": "string", "enum": ["all", "public", "shared", "tutorial", "educational"], "description": "Category of biomodel"},
-                    "owner": {"type": "string", "description": "Owner of the biomodel"},
-                    "savedLow": {"type": "string", "format": "date", "description": "Lower bound of the saved date range (YYYY-MM-DD)"},
-                    "savedHigh": {"type": "string", "format": "date", "description": "Upper bound of the saved date range (YYYY-MM-DD)"},
-                    "startRow": {"type": "integer", "default": 1, "description": "Starting row for pagination"},
-                    "maxRows": {"type": "integer", "default": 10, "description": "Maximum number of results to return"},
-                    "orderBy": {"type": "string", "enum": ["date_desc", "date_asc", "name_desc", "name_asc"], "default": "date_desc", "description": "Sort order"}
+                    "bmName": {"type": "string", "description": "The name or part of the name of the biomodel you are searching for. This can be used to find biomodels that match the provided name or keyword."},
+                    "category": {"type": "string", "enum": ["all", "public", "shared", "tutorial", "educational"], "description": "The category under which the biomodels are classified. Options include: 'all', 'public', 'shared', 'tutorial', and 'educational'."},
+                    "owner": {"type": "string", "description": "The owner of the biomodel. This filter allows users to search for biomodels owned by a specific user."},
+                    "savedLow": {"type": "string", "format": "date", "description": "The lower bound of the saved date range for biomodels. Only biomodels saved after this date will be included in the results (format: YYYY-MM-DD)."},
+                    "savedHigh": {"type": "string", "format": "date", "description": "The upper bound of the saved date range for biomodels. Only biomodels saved before this date will be included in the results (format: YYYY-MM-DD)."},
+                    "startRow": {"type": "integer", "default": 1, "description": "The starting row for pagination. This determines the first result to be included in the response."},
+                    "maxRows": {"type": "integer", "default": 10, "description": "The maximum number of results to return per page."},
+                    "orderBy": {"type": "string", "enum": ["date_desc", "date_asc", "name_desc", "name_asc"], "default": "date_desc", "description": "The order in which the biomodels should be sorted."}
                 },
                 "required": ["bmName", "category", "owner", "savedLow", "savedHigh", "startRow", "maxRows", "orderBy"],
                 "additionalProperties": False
@@ -30,7 +30,7 @@ ToolsDefinitions = [
         "type": "function",
         "function": {
             "name": "fetch_simulation_details",
-            "description": "Fetch detailed information about a specific simulation for a given biomodel. Use when you have both biomodel ID and simulation ID.",
+            "description": "Fetches detailed information about a specific simulation for a given biomodel. This function allows to retrieve all available details about a simulation, including simulation parameters, solver information, and result data. The request requires both the biomodel ID and the simulation ID to locate the correct simulation.",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -47,7 +47,7 @@ ToolsDefinitions = [
         "type": "function",
         "function": {
             "name": "get_vcml_file",
-            "description": "Fetches the VCML file content for a given biomodel to obtain more details on that biomodel.",
+            "description": "Retrieves the VCML (Virtual Cell Markup Language) file content for a specified biomodel. VCML files provide a detailed, machine-readable description of a biomodel’s structure and behavior, which is used for simulation and model analysis. This function allows to download the VCML representation of a biomodel for further analysis.",
             "parameters": {
                 "type": "object",
                 "properties": {
