@@ -8,7 +8,7 @@ class CategoryEnum(str, Enum):
     all = "all"
     public = "public"
     shared = "shared"
-    tutorials = "tutorials"
+    tutorials = "tutorial"
     educational = "educational"
 
 

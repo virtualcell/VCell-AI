@@ -12,7 +12,7 @@ ToolsDefinitions = [
                 "type": "object",
                 "properties": {
                     "bmName": {"type": "string", "description": "Name of the biomodel"},
-                    "category": {"type": "string", "enum": ["all", "public", "shared", "tutorials", "educational"], "description": "Category of biomodel"},
+                    "category": {"type": "string", "enum": ["all", "public", "shared", "tutorial", "educational"], "description": "Category of biomodel"},
                     "owner": {"type": "string", "description": "Owner of the biomodel"},
                     "savedLow": {"type": "string", "format": "date", "description": "Lower bound of the saved date range (YYYY-MM-DD)"},
                     "savedHigh": {"type": "string", "format": "date", "description": "Upper bound of the saved date range (YYYY-MM-DD)"},
