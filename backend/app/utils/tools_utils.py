@@ -8,7 +8,6 @@ ToolsDefinitions = [
         "function": {
             "name": "fetch_biomodels",
             "description": "Fetch a list of biomodels based on user query parameters like name, category, and owner.",
-            "stric": True,
             "parameters": {
                 "type": "object",
                 "properties": {
