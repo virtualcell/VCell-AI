@@ -34,7 +34,15 @@ jobs:
         cd backend  # Change to the backend folder again if needed
         poetry install --no-root # Install the dependencies using Poetry
 
+    - name: Create .env file with GitHub Secrets
+      run: |
+        echo "AZURE_API_VERSION=${{ secrets.AZURE_API_VERSION }}" >> backend/app/.env
+        echo "AZURE_ENDPOINT=${{ secrets.AZURE_ENDPOINT }}" >> backend/app/.env
+        echo "AZURE_API_KEY=${{ secrets.AZURE_API_KEY }}" >> backend/app/.env
+        echo "AZURE_DEPLOYMENT_NAME=${{ secrets.AZURE_DEPLOYMENT_NAME }}" >> backend/app/.env
+        echo "FRONTEND_URL=${{ secrets.FRONTEND_URL }}" >> backend/app/.env
     - name: Run Tests with Poetry
       run: |
         cd backend/app
         poetry run pytest tests/vcelldb_api_tests.py --maxfail=1 --disable-warnings -q
+        poetry run pytest tests/tool_calling_tests.py --maxfail=1 --disable-warnings -q

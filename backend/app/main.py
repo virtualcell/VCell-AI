@@ -1,7 +1,9 @@
 import uvicorn
 from fastapi import FastAPI
 
+# Routers
 from app.routes.vcelldb_router import router as vcelldb_router
+from app.routes.llms_router import router as llms_router
 
 ascii_art = """
 ╔════════════════════════════════════════════════════════════════════════════════════╗
@@ -17,6 +19,7 @@ print(ascii_art)
 
 # Including the routers
 app.include_router(vcelldb_router, tags=["VCellDB API Wrapper"])
+app.include_router(llms_router, tags=["LLM with Tool Calling"])
 
 if __name__ == "__main__":
     uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
