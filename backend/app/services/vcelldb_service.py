@@ -81,3 +81,19 @@ async def get_diagram_url(biomodel_id: str) -> str:
         str: URL pointing to the biomodel's diagram image.
     """
     return f"{VCELL_API_BASE_URL}/biomodel/{biomodel_id}/diagram"
+
+
+async def get_diagram_image(biomodel_id: str) -> bytes:
+    """
+    Fetches the diagram image for a given biomodel from the VCell API and returns the image bytes.
+
+    Args:
+        biomodel_id (str): ID of the biomodel.
+
+    Returns:
+        bytes: The image content (PNG) of the biomodel diagram.
+    """
+    async with httpx.AsyncClient() as client:
+        response = await client.get(f"{VCELL_API_BASE_URL}/biomodel/{biomodel_id}/diagram")
+        response.raise_for_status()
+        return response.content
