@@ -57,6 +57,10 @@ const historyItems = [
 export function AppSidebar() {
   const pathname = usePathname()
 
+  if (pathname == "/") {
+    return null; // Hide sidebar on the landing page
+  }
+
   return (
     <Sidebar className="border-r border-slate-200">
       <SidebarHeader className="border-b border-slate-200 p-4">
