@@ -19,7 +19,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 interface OnboardingModalProps {
@@ -128,14 +127,14 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
               <Label className="text-slate-700 font-medium">Better Approach:</Label>
 
               {/* Mock Tool Parameters */}
-              <Card className="border-slate-200">
-                <CardHeader className="bg-slate-50 border-b border-slate-200 py-3">
-                  <CardTitle className="text-sm flex items-center gap-2">
+              <Card className="border-slate-200 p-2 sm:p-3 text-xs">
+                <CardHeader className="bg-slate-50 border-b border-slate-200 py-2 sm:py-2.5 text-xs">
+                  <CardTitle className="text-xs sm:text-sm flex items-center gap-1">
                     <Settings className="h-4 w-4" />
                     Tool Parameters
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-3 space-y-3">
+                <CardContent className="p-2 sm:p-3 text-xs">
                   <div className="space-y-2">
                     <Label className="text-xs text-slate-600">Model Type</Label>
                     <RadioGroup value="tutorial" className="grid grid-cols-1 gap-1">
@@ -333,52 +332,48 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader className="border-b border-slate-200 pb-4">
+      <DialogContent className="max-w-xl max-h-[70vh] p-2 sm:p-3 overflow-y-auto text-xs sm:text-sm">
+        <DialogHeader className="border-b border-slate-200 pb-1 sm:pb-2">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1 sm:gap-2">
               {steps[currentStep].icon}
               <div>
-                <DialogTitle className="text-xl text-slate-900">{steps[currentStep].title}</DialogTitle>
-                <DialogDescription className="text-slate-600">{steps[currentStep].subtitle}</DialogDescription>
+                <DialogTitle className="text-base sm:text-lg text-slate-900">{steps[currentStep].title}</DialogTitle>
+                <DialogDescription className="text-[11px] sm:text-xs text-slate-600">{steps[currentStep].subtitle}</DialogDescription>
               </div>
             </div>
-            <Button variant="ghost" size="sm" onClick={handleClose}>
-              <X className="h-4 w-4" />
-            </Button>
           </div>
 
           {/* Progress Indicator */}
-          <div className="flex items-center gap-2 mt-4">
+          <div className="flex items-center gap-0.5 sm:gap-1 mt-1 sm:mt-2">
             {steps.map((_, index) => (
               <div
                 key={index}
-                className={`h-2 flex-1 rounded-full transition-colors ${
+                className={`h-1 sm:h-1.5 flex-1 rounded-full transition-colors ${
                   index <= currentStep ? "bg-blue-600" : "bg-slate-200"
                 }`}
               />
             ))}
           </div>
-          <div className="text-sm text-slate-500 text-center mt-2">
+          <div className="text-[10px] sm:text-xs text-slate-500 text-center mt-0.5 sm:mt-1">
             Step {currentStep + 1} of {steps.length}
           </div>
         </DialogHeader>
 
-        <div className="py-6">{steps[currentStep].content}</div>
+        <div className="py-2 sm:py-3">{steps[currentStep].content}</div>
 
-        <div className="flex items-center justify-between border-t border-slate-200 pt-4">
-          <Button variant="outline" onClick={prevStep} disabled={currentStep === 0} className="flex items-center gap-2">
+        <div className="flex items-center justify-between border-t border-slate-200 pt-2 sm:pt-3">
+          <Button variant="outline" onClick={prevStep} disabled={currentStep === 0} className="flex items-center gap-1 sm:gap-2 px-1.5 sm:px-2 py-0.5 sm:py-1 text-xs">
             <ChevronLeft className="h-4 w-4" />
             Previous
           </Button>
-
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             {currentStep === steps.length - 1 ? (
-              <Button onClick={handleClose} className="bg-blue-600 hover:bg-blue-700 text-white">
+              <Button onClick={handleClose} className="bg-blue-600 hover:bg-blue-700 text-white px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs">
                 Get Started
               </Button>
             ) : (
-              <Button onClick={nextStep} className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2">
+              <Button onClick={nextStep} className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs">
                 Next
                 <ChevronRight className="h-4 w-4" />
               </Button>
