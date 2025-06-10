@@ -12,39 +12,44 @@ export default function DiagramsPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [copied, setCopied] = useState(false)
+  const vcellUrl = `https://vcell.cam.uchc.edu/api/v0/biomodel/${biomodelId}/diagram`;
 
-  const handleRetrieveDiagram = async () => {
-    if (!biomodelId.trim()) {
-      setError("Please enter a biomodel ID")
-      return
-    }
-    setIsLoading(true)
-    setError("")
-    setImageUrl(null)
-    try {
-      const res = await fetch(`https://vcell.cam.uchc.edu/api/v0/biomodel/${biomodelId}/diagram`)
-      if (!res.ok) {
-        if (res.status === 404) {
-          setError("Biomodel not found. Please check the ID and try again.")
-        } else {
-          setError("Failed to fetch diagram. Please try again later.")
-        }
-        setIsLoading(false)
-        return
-      }
-      const blob = await res.blob()
-      setImageUrl(URL.createObjectURL(blob))
-    } catch (e) {
-      setError("Network error. Please try again.")
-    } finally {
-      setIsLoading(false)
-    }
+const handleRetrieveDiagram = async () => {
+  if (!biomodelId.trim()) {
+    setError("Please enter a biomodel ID");
+    return;
   }
 
+  setIsLoading(true);
+  setError("");
+  setImageUrl(null);
+
+  const backendUrl = `${import.meta.env.VITE_API_URL}/biomodel/${biomodelId}/diagram/image`;
+
+  try {
+    const res = await fetch(backendUrl);
+    if (!res.ok) {
+      if (res.status === 404) {
+        setError("Biomodel not found. Please check the ID and try again.");
+      } else {
+        setError("Failed to fetch diagram. Please try again later.");
+      }
+      return;
+    }
+
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    setImageUrl(blobUrl);
+  } catch (e) {
+    setError("Network error. Please try again.");
+  } finally {
+    setIsLoading(false);
+  }
+};
   const copyUrlToClipboard = async () => {
     if (!imageUrl) return
     try {
-      await navigator.clipboard.writeText(imageUrl)
+      await navigator.clipboard.writeText(vcellUrl)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch (err) {
@@ -53,8 +58,8 @@ export default function DiagramsPage() {
   }
 
   const openDiagramInNewTab = () => {
-    if (imageUrl) {
-      window.open(imageUrl, "_blank")
+    if (biomodelId && imageUrl) {
+      window.open(vcellUrl, "_blank")
     }
   }
 

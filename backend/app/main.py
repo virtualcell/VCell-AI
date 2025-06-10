@@ -1,5 +1,7 @@
 import uvicorn
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from app.core.config import settings
 
 # Routers
 from app.routes.vcelldb_router import router as vcelldb_router
@@ -16,6 +18,15 @@ ascii_art = """
 app = FastAPI()
 
 print(ascii_art)
+
+# CORS setup
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[settings.FRONTEND_URL],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Including the routers
 app.include_router(vcelldb_router, tags=["VCellDB API Wrapper"])
