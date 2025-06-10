@@ -8,7 +8,6 @@ import {
   Send,
   Bot,
   User,
-  Settings,
   Search,
   FileText,
   Code,
@@ -17,13 +16,12 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import ToolParameters from "@/components/ToolParameters"
+import Link from "next/link"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { ToolParameters } from "@/components/ToolParameters"
 
 interface Message {
   id: string
@@ -40,7 +38,6 @@ interface ChatParameters {
   owner: string
   savedLow: string
   savedHigh: string
-  startRow: number
   maxRows: number
   orderBy: string
 }
@@ -58,7 +55,6 @@ export default function ChatPage() {
 
   const [inputMessage, setInputMessage] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const [showParameters, setShowParameters] = useState(true)
   const [showQuickActions, setShowQuickActions] = useState(true)
 
   const [parameters, setParameters] = useState<ChatParameters>({
@@ -67,7 +63,6 @@ export default function ChatPage() {
     owner: "",
     savedLow: "",
     savedHigh: "",
-    startRow: 1,
     maxRows: 10,
     orderBy: "date_desc",
   })
@@ -109,7 +104,7 @@ export default function ChatPage() {
         content: `I found ${mockResults.length} biomodels matching your criteria:\n\n${mockResults
           .map(
             (model) =>
-              `• **${model.name}** (ID: ${model.bmId})\n  Owner: ${model.ownerName}\n  Simulations: ${model.simulations}\n  Saved: ${new Date(model.savedDate).toLocaleDateString()}`,
+              `• **${model.name}** (ID: ${model.bmId})\n  Owner: ${model.ownerName}\n  Simulations: ${model.simulations}\n}`,
           )
           .join("\n\n")}\n\nWould you like me to retrieve VCML/SBML files or diagrams for any of these models?`,
         toolUsed: "biomodel_search",
@@ -212,10 +207,6 @@ export default function ChatPage() {
     }
   }
 
-  const updateParameter = (key: keyof ChatParameters, value: any) => {
-    setParameters((prev) => ({ ...prev, [key]: value }))
-  }
-
   const getToolIcon = (toolUsed?: string) => {
     switch (toolUsed) {
       case "biomodel_search":
@@ -255,6 +246,31 @@ export default function ChatPage() {
           <p className="text-slate-600">
             Interact with our AI assistant for biomodel analysis and research support with integrated tool access.
           </p>
+        </div>
+
+        {/* Persistent Warning */}
+        <div className="mb-6">
+          <Alert className="border-amber-200 bg-amber-50">
+            <AlertDescription className="text-amber-800">
+              <strong>⚠️ Important:</strong> Responses are AI generated and may contain errors, or hallucinations. Please verify results using our available tools:{" "}
+              <Link href="/" className="text-blue-600 hover:underline">
+                Biomodel Search
+              </Link>
+              ,{" "}
+              <Link href="/vcml" className="text-blue-600 hover:underline">
+                VCML
+              </Link>
+              ,{" "}
+              <Link href="/sbml" className="text-blue-600 hover:underline">
+                SBML
+              </Link>
+              ,{" "}
+              <Link href="/diagrams" className="text-blue-600 hover:underline">
+                Diagrams
+              </Link>
+              .
+            </AlertDescription>
+          </Alert>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -304,7 +320,6 @@ export default function ChatPage() {
                                 </Badge>
                               </div>
                             )}
-                            <div className="text-xs opacity-70 mt-1">{message.timestamp.toLocaleTimeString()}</div>
                           </div>
                         </div>
                       </div>
@@ -401,12 +416,7 @@ export default function ChatPage() {
 
           {/* Tool Parameters Panel */}
           <div className="lg:col-span-1">
-            <ToolParameters
-              parameters={parameters}
-              updateParameter={updateParameter}
-              showParameters={showParameters}
-              setShowParameters={setShowParameters}
-            />
+            <ToolParameters parameters={parameters} onParametersChange={setParameters} />
           </div>
         </div>
       </div>
