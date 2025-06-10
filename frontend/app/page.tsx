@@ -1,8 +1,8 @@
 "use client"
 
-import { ArrowRight, MessageSquare, Wrench, Database, Shield } from "lucide-react"
+import { ArrowRight, MessageSquare, Wrench, Shield } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
 
 export default function LandingPage() {
