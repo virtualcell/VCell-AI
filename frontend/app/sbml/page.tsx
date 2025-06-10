@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { XmlViewer } from "@/components/xml-viewer"
+import XMLViewer from 'react-xml-viewer'
 
 export default function SBMLPage() {
   const [biomodelId, setBiomodelId] = useState("")
@@ -144,7 +144,7 @@ export default function SBMLPage() {
             </CardHeader>
             <CardContent className="p-0">
               <div className="max-h-96 overflow-y-auto">
-                <XmlViewer data={sbmlContent} title="SBML File" />
+                <XMLViewer xml={sbmlContent}/>
               </div>
             </CardContent>
           </Card>
