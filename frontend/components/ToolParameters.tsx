@@ -39,7 +39,7 @@ export function ToolParameters({ parameters, onParametersChange }: ToolParameter
       owner: "",
       savedLow: "",
       savedHigh: "",
-      maxRows: 10,
+      maxRows: 100,
       orderBy: "date_desc",
     })
   }

@@ -63,7 +63,7 @@ export default function ChatPage() {
     owner: "",
     savedLow: "",
     savedHigh: "",
-    maxRows: 10,
+    maxRows: 100,
     orderBy: "date_desc",
   })
 
