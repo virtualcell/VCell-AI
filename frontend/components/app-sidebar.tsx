@@ -47,11 +47,11 @@ const navigationItems = [
 ]
 
 const historyItems = [
-  "Cardiac cell model analysis",
-  "Protein interaction network",
-  "Gene regulatory circuit",
-  "Metabolic pathway study",
-  "Signal transduction model",
+  "Calcium Biomodel Comparison",
+  "Protein Details on Tutorial Models",
+  "Biomodels authored by ModelBrick",
+  "Count of Rule-based models",
+  "VCML File Analysis of Calcium Models",
 ]
 
 export function AppSidebar() {
@@ -63,8 +63,8 @@ export function AppSidebar() {
         <div className="flex items-center gap-2">
           <Database className="h-6 w-6 text-blue-600" />
           <div>
-            <h2 className="text-lg font-semibold text-slate-900">VCell Tools</h2>
-            <p className="text-sm text-slate-600">Scientific Analysis Platform</p>
+            <h2 className="text-lg font-semibold text-slate-900">VCell Platform</h2>
+            <p className="text-sm text-slate-600">Model Explorer Platform</p>
           </div>
         </div>
       </SidebarHeader>
@@ -115,8 +115,7 @@ export function AppSidebar() {
 
       <SidebarFooter className="border-t border-slate-200 p-4">
         <div className="text-xs text-slate-500">
-          <p>VCell Scientific Platform</p>
-          <p>Version 2.0.1</p>
+          <p>VCell Model Explorer Platform</p>
         </div>
       </SidebarFooter>
     </Sidebar>
