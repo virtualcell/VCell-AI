@@ -12,9 +12,7 @@ import { Badge } from "@/components/ui/badge"
 interface DiagramInfo {
   url: string
   title: string
-  description: string
   format: string
-  dimensions: string
 }
 
 export default function DiagramsPage() {
@@ -32,22 +30,33 @@ export default function DiagramsPage() {
 
     setIsLoading(true)
     setError("")
+    setDiagramInfo(null)
 
-    // Mock diagram info for demonstration
-    const mockDiagramInfo: DiagramInfo = {
-      url: `https://vcell.org/webstart/diagram?bmId=${biomodelId}&format=png&width=800&height=600`,
-      title: "Cardiac Myocyte Calcium Dynamics - Network Diagram",
-      description:
-        "Visual representation of the calcium handling network in cardiac myocytes, showing compartments, species, and reaction pathways.",
-      format: "PNG",
-      dimensions: "800x600 pixels",
-    }
-
-    // Simulate API delay
-    setTimeout(() => {
-      setDiagramInfo(mockDiagramInfo)
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL
+      const res = await fetch(`${apiUrl}/biomodel/${biomodelId}/diagram/image`)
+      console.log("Fetching diagram from:", `${apiUrl}/biomodel/${biomodelId}/diagram/image`)
+      const contentType = res.headers.get("content-type")
+      if (res.ok && contentType && contentType.startsWith("image")) {
+        // If image, create object URL
+        const blob = await res.blob()
+        const imageUrl = URL.createObjectURL(blob)
+        setDiagramInfo({
+          url: imageUrl,
+          title: `Diagram for Biomodel ${biomodelId}`,
+          format: contentType.split("/")[1].toUpperCase(),
+        })
+      } else if (contentType && contentType.includes("application/json")) {
+        const data = await res.json()
+        setError(data.detail || "Diagram not found.")
+      } else {
+        setError("Unexpected response from server.")
+      }
+    } catch (err) {
+      setError("Failed to fetch diagram.")
+    } finally {
       setIsLoading(false)
-    }, 1000)
+    }
   }
 
   const copyUrlToClipboard = async () => {
@@ -118,42 +127,34 @@ export default function DiagramsPage() {
           </CardContent>
         </Card>
 
-        {/* Diagram Information Display */}
+        {/* Diagram Information & Preview Card (Fused) */}
         {diagramInfo && (
-          <div className="space-y-6">
-            {/* Diagram Info Card */}
-            <Card className="shadow-sm border-slate-200">
-              <CardHeader className="bg-slate-50 border-b border-slate-200">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-slate-900">Diagram Information</CardTitle>
-                    <CardDescription>Biomodel ID: {biomodelId}</CardDescription>
-                  </div>
-                  <div className="flex gap-2">
-                    <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                      {diagramInfo.format}
-                    </Badge>
-                    <Badge variant="outline">{diagramInfo.dimensions}</Badge>
-                  </div>
+          <Card className="shadow-sm border-slate-200">
+            <CardHeader className="bg-slate-50 border-b border-slate-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-slate-900">Diagram Information</CardTitle>
+                  <CardDescription>Biomodel ID: {biomodelId}</CardDescription>
                 </div>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-slate-900 mb-2">{diagramInfo.title}</h3>
-                    <p className="text-slate-600 leading-relaxed">{diagramInfo.description}</p>
-                  </div>
-
-                  <div className="space-y-3">
-                    <Label className="text-slate-700 font-medium">Diagram URL:</Label>
-                    <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-md border">
-                      <code className="flex-1 text-sm text-slate-800 break-all font-mono">{diagramInfo.url}</code>
-                      <Button size="sm" variant="outline" onClick={copyUrlToClipboard} className="h-8 shrink-0">
-                        {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                      </Button>
-                    </div>
-                  </div>
-
+                <div className="flex gap-2">
+                  <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                    {diagramInfo.format}
+                  </Badge>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-slate-900 mb-2">{diagramInfo.title}</h3>
+                </div>
+                <div className="flex flex-col items-center space-y-4">
+                  {/* Show the diagram image */}
+                  <img
+                    src={diagramInfo.url}
+                    alt={diagramInfo.title}
+                    className="max-w-full max-h-96 rounded border border-slate-200 bg-white shadow"
+                  />
                   <div className="flex gap-3 pt-2">
                     <Button onClick={openDiagramInNewTab} className="bg-green-600 hover:bg-green-700 text-white">
                       <ExternalLink className="h-4 w-4 mr-2" />
@@ -161,74 +162,24 @@ export default function DiagramsPage() {
                     </Button>
                     <Button
                       variant="outline"
-                      onClick={() => window.open(diagramInfo.url, "_blank")}
+                      onClick={() => {
+                        const link = document.createElement('a');
+                        link.href = diagramInfo.url;
+                        link.download = diagramInfo.title.replace(/\s+/g, '_') + '.' + diagramInfo.format.toLowerCase();
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                      }}
                       className="border-slate-300"
                     >
                       <Eye className="h-4 w-4 mr-2" />
-                      View in New Tab
+                      Download Diagram
                     </Button>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Diagram Preview Card */}
-            <Card className="shadow-sm border-slate-200">
-              <CardHeader className="bg-slate-50 border-b border-slate-200">
-                <CardTitle className="text-slate-900">Diagram Preview</CardTitle>
-                <CardDescription>Visual representation of the biomodel network</CardDescription>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="bg-white border-2 border-dashed border-slate-300 rounded-lg p-8 text-center">
-                  <div className="space-y-4">
-                    <Diagram3 className="h-16 w-16 text-slate-400 mx-auto" />
-                    <div>
-                      <p className="text-slate-600 mb-2">Click the button below to view the diagram in a new window</p>
-                      <p className="text-sm text-slate-500">
-                        The diagram will open in your browser with full interactive capabilities
-                      </p>
-                    </div>
-                    <Button onClick={openDiagramInNewTab} className="bg-blue-600 hover:bg-blue-700 text-white">
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      View Full Diagram
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Technical Details Card */}
-            <Card className="shadow-sm border-slate-200">
-              <CardHeader className="bg-slate-50 border-b border-slate-200">
-                <CardTitle className="text-slate-900">Technical Details</CardTitle>
-                <CardDescription>Additional information about the diagram</CardDescription>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-3">
-                    <div>
-                      <Label className="text-slate-700 font-medium">Format</Label>
-                      <p className="text-slate-600">{diagramInfo.format} Image</p>
-                    </div>
-                    <div>
-                      <Label className="text-slate-700 font-medium">Dimensions</Label>
-                      <p className="text-slate-600">{diagramInfo.dimensions}</p>
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    <div>
-                      <Label className="text-slate-700 font-medium">Access Method</Label>
-                      <p className="text-slate-600">Direct URL Link</p>
-                    </div>
-                    <div>
-                      <Label className="text-slate-700 font-medium">Availability</Label>
-                      <p className="text-slate-600">Real-time Generation</p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+            </CardContent>
+          </Card>
         )}
       </div>
     </div>
