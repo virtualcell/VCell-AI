@@ -1,13 +1,23 @@
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { SidebarProvider } from '@/components/ui/sidebar'
+import { AppSidebar } from '@/components/common/AppSidebar'
 import './App.css'
 
 function App() {
   return (
-    <div className="h-screen flex items-center justify-center bg-gray-100">
-      <h1 className="text-4xl font-bold text-blue-600">
-        VCell Frontend Test
-      </h1>
-    </div>
-  );
+    <Router>
+      <div className="flex h-screen">
+        <SidebarProvider defaultOpen={true}>
+          <AppSidebar />
+        </SidebarProvider>
+        <main className="flex-1 overflow-auto">
+          <Routes>
+            <Route path="/" element={<div> This is a test </div>} />
+          </Routes>
+        </main>
+      </div>
+    </Router>
+  )
 }
 
 export default App
