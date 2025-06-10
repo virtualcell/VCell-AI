@@ -35,7 +35,6 @@ export default function DiagramsPage() {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL
       const res = await fetch(`${apiUrl}/biomodel/${biomodelId}/diagram/image`)
-      console.log("Fetching diagram from:", `${apiUrl}/biomodel/${biomodelId}/diagram/image`)
       const contentType = res.headers.get("content-type")
       if (res.ok && contentType && contentType.startsWith("image")) {
         // If image, create object URL

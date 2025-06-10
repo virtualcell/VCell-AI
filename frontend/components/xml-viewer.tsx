@@ -237,7 +237,7 @@ export function XmlViewer({ data, title }: XmlViewerProps) {
           {copied ? <Check className="h-3 w-3 text-green-600" /> : <Copy className="h-3 w-3" />}
         </Button>
       </div>
-      <pre className="bg-slate-50 p-6 rounded-none text-sm font-mono overflow-x-auto border-0 leading-relaxed">
+      <pre className="bg-slate-50 p-6 rounded-none text-sm font-mono overflow-x-auto border-0 leading-relaxed whitespace-pre-wrap">
         <code className="text-slate-800">{formatXml(formattedXml)}</code>
       </pre>
     </div>
