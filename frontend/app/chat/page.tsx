@@ -22,6 +22,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import Link from "next/link"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { ToolParameters } from "@/components/ToolParameters"
+import { OnboardingModal } from "@/components/onboarding-modal"
 
 interface Message {
   id: string
@@ -56,6 +57,7 @@ export default function ChatPage() {
   const [inputMessage, setInputMessage] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [showQuickActions, setShowQuickActions] = useState(true)
+  const [showOnboarding, setShowOnboarding] = useState(false)
 
   const [parameters, setParameters] = useState<ChatParameters>({
     bmName: "",
@@ -77,6 +79,19 @@ export default function ChatPage() {
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  useEffect(() => {
+    // Check if user has seen onboarding before
+    const hasSeenOnboarding = localStorage.getItem("vcell-ai-onboarding-seen")
+    if (!hasSeenOnboarding) {
+      setShowOnboarding(true)
+    }
+  }, [])
+
+  const handleOnboardingClose = () => {
+    localStorage.setItem("vcell-ai-onboarding-seen", "true")
+    setShowOnboarding(false)
+  }
 
   const generateAIResponse = (userMessage: string): { content: string; toolUsed?: string; toolParams?: any } => {
     const lowerMessage = userMessage.toLowerCase()
@@ -242,7 +257,18 @@ export default function ChatPage() {
       <div className="container mx-auto p-6 max-w-7xl">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">AI Assistant</h1>
+          <div className="flex items-center justify-between mb-2">
+            <h1 className="text-3xl font-bold text-slate-900">AI Assistant</h1>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowOnboarding(true)}
+              className="flex items-center gap-2"
+            >
+              <MessageSquare className="h-4 w-4" />
+              How to Use
+            </Button>
+          </div>
           <p className="text-slate-600">
             Interact with our AI assistant for biomodel analysis and research support with integrated tool access.
           </p>
@@ -420,6 +446,8 @@ export default function ChatPage() {
           </div>
         </div>
       </div>
+      {/* Onboarding Modal */}
+      <OnboardingModal isOpen={showOnboarding} onClose={handleOnboardingClose} />
     </div>
   )
 }
