@@ -21,7 +21,7 @@ import {
 const navigationItems = [
   {
     title: "Biomodel Search",
-    url: "/",
+    url: "/search",
     icon: Search,
   },
   {
