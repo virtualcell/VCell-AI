@@ -102,7 +102,7 @@ export default function DiagramsPage() {
                 </Label>
                 <Input
                   id="biomodelId"
-                  placeholder="Enter biomodel ID (e.g., 123456789)"
+                  placeholder="Enter biomodel ID (e.g., 257427200)"
                   value={biomodelId}
                   onChange={(e) => setBiomodelId(e.target.value)}
                   className="border-slate-300 focus:border-blue-500"
