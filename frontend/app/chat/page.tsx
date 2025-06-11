@@ -10,14 +10,12 @@ import {
   User,
   Search,
   FileText,
-  Code,
   BarChart3Icon as Diagram3,
   Loader2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import Link from "next/link"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -93,86 +91,6 @@ export default function ChatPage() {
     setShowOnboarding(false)
   }
 
-  const generateAIResponse = (userMessage: string): { content: string; toolUsed?: string; toolParams?: any } => {
-    const lowerMessage = userMessage.toLowerCase()
-
-    // Biomodel search responses
-    if (lowerMessage.includes("search") || lowerMessage.includes("find") || lowerMessage.includes("biomodel")) {
-      const mockResults = [
-        {
-          bmId: 123456789,
-          name: "Cardiac Myocyte Calcium Dynamics",
-          ownerName: "Dr. Smith",
-          savedDate: "2024-01-15T10:30:00Z",
-          simulations: 15,
-        },
-        {
-          bmId: 987654321,
-          name: "Neural Network Synaptic Transmission",
-          ownerName: "Prof. Johnson",
-          savedDate: "2024-01-10T14:20:00Z",
-          simulations: 8,
-        },
-      ]
-
-      return {
-        content: `I found ${mockResults.length} biomodels matching your criteria:\n\n${mockResults
-          .map(
-            (model) =>
-              `• **${model.name}** (ID: ${model.bmId})\n  Owner: ${model.ownerName}\n  Simulations: ${model.simulations}\n}`,
-          )
-          .join("\n\n")}\n\nWould you like me to retrieve VCML/SBML files or diagrams for any of these models?`,
-        toolUsed: "biomodel_search",
-        toolParams: parameters,
-      }
-    }
-
-    // VCML retrieval responses
-    if (lowerMessage.includes("vcml") || lowerMessage.includes("virtual cell")) {
-      return {
-        content: `I can retrieve the VCML file for biomodel ID. VCML (Virtual Cell Markup Language) files contain the complete model definition including:\n\n• Compartment structures\n• Species definitions\n• Reaction kinetics\n• Mathematical descriptions\n• Simulation parameters\n\nPlease provide a specific biomodel ID, and I'll fetch the VCML content for you.`,
-        toolUsed: "vcml_retrieval",
-      }
-    }
-
-    // SBML retrieval responses
-    if (lowerMessage.includes("sbml") || lowerMessage.includes("systems biology")) {
-      return {
-        content: `I can retrieve the SBML file for any biomodel. SBML (Systems Biology Markup Language) files provide:\n\n• Standardized model representation\n• Species and compartment definitions\n• Reaction networks\n• Mathematical expressions\n• Parameter values\n\nSBML format is widely supported by systems biology tools. Which biomodel ID would you like the SBML file for?`,
-        toolUsed: "sbml_retrieval",
-      }
-    }
-
-    // Diagram responses
-    if (lowerMessage.includes("diagram") || lowerMessage.includes("visual") || lowerMessage.includes("image")) {
-      return {
-        content: `I can generate diagram visualizations for biomodels. These diagrams show:\n\n• Network topology\n• Compartment organization\n• Species interactions\n• Reaction pathways\n• Flux directions\n\nThe diagrams are generated in real-time and can be viewed directly in your browser. Which biomodel would you like to visualize?`,
-        toolUsed: "diagram_retrieval",
-      }
-    }
-
-    // Calcium-related responses
-    if (lowerMessage.includes("calcium") || lowerMessage.includes("ca2+")) {
-      return {
-        content: `I found several calcium-related biomodels in the database:\n\n• **Cardiac Myocyte Calcium Dynamics** - Models calcium handling in heart cells including L-type channels, ryanodine receptors, and SERCA pumps\n• **Neuronal Calcium Signaling** - Describes calcium dynamics in neurons and synaptic transmission\n• **Smooth Muscle Calcium Regulation** - Models calcium-induced calcium release in vascular smooth muscle\n\nWould you like me to search for more specific calcium models or retrieve files for any of these?`,
-        toolUsed: "biomodel_search",
-        toolParams: { ...parameters, bmName: "calcium" },
-      }
-    }
-
-    // General help responses
-    if (lowerMessage.includes("help") || lowerMessage.includes("what can you do")) {
-      return {
-        content: `I can help you with several VCell operations:\n\n🔍 **Biomodel Search**: Find models using various filters (name, owner, category, date range)\n📄 **VCML Retrieval**: Get Virtual Cell Markup Language files\n🧬 **SBML Retrieval**: Download Systems Biology Markup Language files\n📊 **Diagram Visualization**: Generate network diagrams\n\nYou can adjust the search parameters below and ask me questions like:\n• "Find cardiac models from Dr. Smith"\n• "Get the VCML file for biomodel 123456"\n• "Show me a diagram for model 789012"\n• "Search for calcium signaling models"`,
-      }
-    }
-
-    // Default response
-    return {
-      content: `I understand you're asking about "${userMessage}". I can help you search for biomodels, retrieve VCML/SBML files, and generate diagrams. \n\nCould you be more specific about what you'd like to do? For example:\n• Search for specific biomodels\n• Retrieve files for a particular model ID\n• Generate visualizations\n\nFeel free to adjust the search parameters below to refine your queries.`,
-    }
-  }
-
   const handleQuickAction = (message: string) => {
     setInputMessage(message)
     setShowQuickActions(false)
@@ -198,57 +116,45 @@ export default function ChatPage() {
     setInputMessage("")
     setIsLoading(true)
 
-    // Simulate AI processing delay
-    setTimeout(() => {
-      const aiResponse = generateAIResponse(inputMessage)
+    try {
+      // Send user message to backend
+      const res = await fetch(
+        `http://localhost:8000/query?user_prompt=${encodeURIComponent(inputMessage)}`,
+        {
+          method: "POST",
+          headers: { accept: "application/json" },
+          body: "",
+        },
+      )
+      const data = await res.json()
+      const aiResponse = data.response || "Sorry, I didn't get a response from the server."
+      console.log("AI Response:", aiResponse)
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: aiResponse.content,
+        content: aiResponse,
         timestamp: new Date(),
-        toolUsed: aiResponse.toolUsed,
-        toolParams: aiResponse.toolParams,
       }
-
       setMessages((prev) => [...prev, assistantMessage])
+    } catch (error) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 2).toString(),
+          role: "assistant",
+          content: "There was an error connecting to the backend. Please try again.",
+          timestamp: new Date(),
+        },
+      ])
+    } finally {
       setIsLoading(false)
-    }, 1500)
+    }
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
       handleSendMessage()
-    }
-  }
-
-  const getToolIcon = (toolUsed?: string) => {
-    switch (toolUsed) {
-      case "biomodel_search":
-        return <Search className="h-3 w-3" />
-      case "vcml_retrieval":
-        return <FileText className="h-3 w-3" />
-      case "sbml_retrieval":
-        return <Code className="h-3 w-3" />
-      case "diagram_retrieval":
-        return <Diagram3 className="h-3 w-3" />
-      default:
-        return null
-    }
-  }
-
-  const getToolName = (toolUsed?: string) => {
-    switch (toolUsed) {
-      case "biomodel_search":
-        return "Biomodel Search"
-      case "vcml_retrieval":
-        return "VCML Retrieval"
-      case "sbml_retrieval":
-        return "SBML Retrieval"
-      case "diagram_retrieval":
-        return "Diagram Generation"
-      default:
-        return null
     }
   }
 
@@ -338,14 +244,6 @@ export default function ChatPage() {
                             }`}
                           >
                             <div className="whitespace-pre-wrap text-sm leading-relaxed">{message.content}</div>
-                            {message.toolUsed && (
-                              <div className="mt-2 pt-2 border-t border-slate-200">
-                                <Badge variant="secondary" className="text-xs">
-                                  {getToolIcon(message.toolUsed)}
-                                  <span className="ml-1">{getToolName(message.toolUsed)}</span>
-                                </Badge>
-                              </div>
-                            )}
                           </div>
                         </div>
                       </div>
