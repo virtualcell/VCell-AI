@@ -3,7 +3,8 @@ from fastapi.testclient import TestClient
 
 import sys
 import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 from app.main import app
 
@@ -41,5 +42,9 @@ def test_llm_query_for_invalid_model():
 
     # Check if the response indicates no models found
     response = result["response"].lower()
-    assert "no models" in response or "no results" in response or "invalid" in response or "error" in response
-
+    assert (
+        "no models" in response
+        or "no results" in response
+        or "invalid" in response
+        or "error" in response
+    )

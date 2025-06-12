@@ -15,7 +15,9 @@ async def fetch_biomodels(params: BiomodelRequestParams) -> dict:
         dict: A dictionary containing a list of biomodels and total count.
     """
     async with httpx.AsyncClient() as client:
-        response = await client.get(f"{VCELL_API_BASE_URL}/biomodel", params=params.dict(exclude_none=True))
+        response = await client.get(
+            f"{VCELL_API_BASE_URL}/biomodel", params=params.dict(exclude_none=True)
+        )
         response.raise_for_status()
         return response.json()
 
@@ -49,7 +51,9 @@ async def get_vcml_file(biomodel_id: str) -> str:
         str: VCML content of the biomodel.
     """
     async with httpx.AsyncClient() as client:
-        response = await client.get(f"{VCELL_API_BASE_URL}/biomodel/{biomodel_id}/biomodel.vcml")
+        response = await client.get(
+            f"{VCELL_API_BASE_URL}/biomodel/{biomodel_id}/biomodel.vcml"
+        )
         response.raise_for_status()
         return response.text
 
@@ -65,7 +69,9 @@ async def get_sbml_file(biomodel_id: str) -> str:
         str: SBML content of the biomodel.
     """
     async with httpx.AsyncClient() as client:
-        response = await client.get(f"{VCELL_API_BASE_URL}/biomodel/{biomodel_id}/biomodel.sbml")
+        response = await client.get(
+            f"{VCELL_API_BASE_URL}/biomodel/{biomodel_id}/biomodel.sbml"
+        )
         response.raise_for_status()
         return response.text
 
@@ -94,6 +100,8 @@ async def get_diagram_image(biomodel_id: str) -> bytes:
         bytes: The image content (PNG) of the biomodel diagram.
     """
     async with httpx.AsyncClient() as client:
-        response = await client.get(f"{VCELL_API_BASE_URL}/biomodel/{biomodel_id}/diagram")
+        response = await client.get(
+            f"{VCELL_API_BASE_URL}/biomodel/{biomodel_id}/diagram"
+        )
         response.raise_for_status()
         return response.content
