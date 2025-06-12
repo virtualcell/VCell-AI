@@ -48,22 +48,7 @@ export default function ChatPage() {
       role: "assistant",
       content: `# Welcome to VCell AI Assistant! 🤖
 
-I'm here to help you with **biomodel analysis** and research support. I can:
-
-- Search for biomodels with specific criteria
-- Retrieve VCML and SBML files  
-- Generate and analyze diagrams
-- Answer questions about models and data
-
-## Getting Started
-
-Try asking me questions like:
-- *"List all tutorial models"*
-- *"Show me calcium models by ModelBricks"*
-- *"What solvers are used in VCell tutorial models?"*
-
-> **Note:** My responses support full markdown formatting including **bold text**, *italics*, lists, tables, and code blocks!
-
+I'm here to help you with **biomodel analysis** and research support.
 Feel free to ask anything! 🚀`,
       timestamp: new Date(),
     },
@@ -71,7 +56,6 @@ Feel free to ask anything! 🚀`,
 
   const [inputMessage, setInputMessage] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const [showQuickActions, setShowQuickActions] = useState(true)
   const [showOnboarding, setShowOnboarding] = useState(false)
 
   const [parameters, setParameters] = useState<ChatParameters>({
@@ -210,7 +194,6 @@ Feel free to ask anything! 🚀`,
                   <MessageSquare className="h-5 w-5" />
                   VCell AI Assistant
                 </CardTitle>
-                <CardDescription>Ask questions about biomodels and use integrated analysis tools</CardDescription>
               </CardHeader>
 
               {/* Messages Area */}
