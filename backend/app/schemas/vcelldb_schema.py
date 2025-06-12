@@ -28,7 +28,7 @@ class BiomodelRequestParams(BaseModel, use_enum_values=True):
     savedLow: Optional[date] = None  # Lower bound of the save date range
     savedHigh: Optional[date] = None  # Upper bound of the save date range
     startRow: Optional[int] = 1  # Starting row of the result set (default is 1)
-    maxRows: Optional[int] = 10  # Maximum number of rows to return (default is 10)
+    maxRows: Optional[int] = 100  # Maximum number of rows to return (default is 100)
     orderBy: Optional[OrderByEnum] = (
         OrderByEnum.date_desc
     )  # Order of results (default is "date_desc")

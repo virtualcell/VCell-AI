@@ -17,7 +17,7 @@ ToolsDefinitions = [
                     "savedLow": {"type": "string", "format": "date", "description": "The lower bound of the saved date range for biomodels. Only biomodels saved after this date will be included in the results (format: YYYY-MM-DD)."},
                     "savedHigh": {"type": "string", "format": "date", "description": "The upper bound of the saved date range for biomodels. Only biomodels saved before this date will be included in the results (format: YYYY-MM-DD)."},
                     "startRow": {"type": "integer", "default": 1, "description": "The starting row for pagination. This determines the first result to be included in the response."},
-                    "maxRows": {"type": "integer", "default": 10, "description": "The maximum number of results to return per page."},
+                    "maxRows": {"type": "integer", "default": 1000, "description": "The maximum number of results to return per page."},
                     "orderBy": {"type": "string", "enum": ["date_desc", "date_asc", "name_desc", "name_asc"], "default": "date_desc", "description": "The order in which the biomodels should be sorted."}
                 },
                 "required": ["bmName", "category", "owner", "savedLow", "savedHigh", "startRow", "maxRows", "orderBy"],
@@ -79,6 +79,7 @@ async def execute_tool(name, args):
                 args['savedLow'] = None
             if args.get('savedHigh') == "":
                 args['savedHigh'] = None
+            args['maxRows'] = 1000
             params = BiomodelRequestParams(**args)
             return await fetch_biomodels(params)
 

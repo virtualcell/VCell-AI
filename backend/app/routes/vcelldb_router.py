@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 from typing import List
 from app.schemas.vcelldb_schema import BiomodelRequestParams, SimulationRequestParams
 from app.controllers.vcelldb_controller import (
@@ -7,6 +7,7 @@ from app.controllers.vcelldb_controller import (
     get_vcml_controller,
     get_sbml_controller,
     get_diagram_url_controller,
+    get_diagram_image_controller,  # import the new controller
 )
 
 router = APIRouter()
@@ -68,3 +69,11 @@ async def get_diagram_url(biomodel_id: str):
         return await get_diagram_url_controller(biomodel_id)
     except HTTPException as e:
         raise e
+
+
+@router.get("/biomodel/{biomodel_id}/diagram/image")
+async def get_diagram_image(biomodel_id: str):
+    """
+    Endpoint to get the diagram image (PNG) for a given biomodel.
+    """
+    return await get_diagram_image_controller(biomodel_id)
