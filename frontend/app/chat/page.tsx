@@ -47,7 +47,7 @@ export default function ChatPage() {
       id: "1",
       role: "assistant",
       content:
-        "Hello! I'm your VCell AI assistant. I can help you search for biomodels, retrieve VCML and SBML files, and access diagram visualizations. Choose a quick action below or ask me anything about biomodels!",
+        "Hello! I'm your VCell AI assistant. I can help you search for biomodels, retrieve VCML and SBML files, and access diagram. Ask Anything!",
       timestamp: new Date(),
     },
   ])
@@ -63,7 +63,7 @@ export default function ChatPage() {
     owner: "",
     savedLow: "",
     savedHigh: "",
-    maxRows: 100,
+    maxRows: 1000,
     orderBy: "date_desc",
   })
 
@@ -184,23 +184,7 @@ export default function ChatPage() {
         <div className="mb-6">
           <Alert className="border-amber-200 bg-amber-50">
             <AlertDescription className="text-amber-800">
-              <strong>⚠️ Important:</strong> Responses are AI generated and may contain errors, or hallucinations. Please verify results using our available tools:{" "}
-              <Link href="/" className="text-blue-600 hover:underline">
-                Biomodel Search
-              </Link>
-              ,{" "}
-              <Link href="/vcml" className="text-blue-600 hover:underline">
-                VCML
-              </Link>
-              ,{" "}
-              <Link href="/sbml" className="text-blue-600 hover:underline">
-                SBML
-              </Link>
-              ,{" "}
-              <Link href="/diagrams" className="text-blue-600 hover:underline">
-                Diagrams
-              </Link>
-              .
+              <strong>⚠️ Important:</strong> Responses are AI generated and may contain errors, or hallucinations. Please use the option “Let AI analyze the JSON” if you suspect hallucination.
             </AlertDescription>
           </Alert>
         </div>
@@ -260,37 +244,37 @@ export default function ChatPage() {
                               variant="outline"
                               size="sm"
                               className="w-full justify-start text-xs h-8"
-                              onClick={() => handleQuickAction("Search for cardiac calcium models")}
+                              onClick={() => handleQuickAction("List all tutorial models")}
                             >
                               <Search className="h-3 w-3 mr-2" />
-                              Search Cardiac Models
+                              List all tutorial models.
                             </Button>
                             <Button
                               variant="outline"
                               size="sm"
                               className="w-full justify-start text-xs h-8"
-                              onClick={() => handleQuickAction("Get VCML file for biomodel 123456789")}
+                              onClick={() => handleQuickAction("List all models mentioning Calcium")}
                             >
                               <FileText className="h-3 w-3 mr-2" />
-                              Get VCML File
+                              List all models mentioning Calcium
                             </Button>
                             <Button
                               variant="outline"
                               size="sm"
                               className="w-full justify-start text-xs h-8"
-                              onClick={() => handleQuickAction("Show diagram for latest model")}
+                              onClick={() => handleQuickAction("What solvers are used in VCell tutorial models?")}
                             >
                               <Diagram3 className="h-3 w-3 mr-2" />
-                              Generate Diagram
+                              What solvers are used in VCell tutorial models?
                             </Button>
                             <Button
                               variant="outline"
                               size="sm"
                               className="w-full justify-start text-xs h-8"
-                              onClick={() => handleQuickAction("Help me understand biomodel formats")}
+                              onClick={() => handleQuickAction("What are different types of VCell applications used in Tutorial models")}
                             >
                               <MessageSquare className="h-3 w-3 mr-2" />
-                              Learn About Formats
+                              What are different types of VCell applications used in Tutorial models
                             </Button>
                           </div>
                         </div>

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 
@@ -39,7 +39,7 @@ export function ToolParameters({ parameters, onParametersChange }: ToolParameter
       owner: "",
       savedLow: "",
       savedHigh: "",
-      maxRows: 100,
+      maxRows: 1000,
       orderBy: "date_desc",
     })
   }
@@ -52,7 +52,7 @@ export function ToolParameters({ parameters, onParametersChange }: ToolParameter
             <CardTitle className="flex items-center justify-between text-slate-900 text-base font-semibold">
               <div className="flex items-center gap-2">
                 <Settings className="h-5 w-5" />
-                Tool Parameters
+                Search Parameters
               </div>
               <div className="text-xs text-slate-500">{showParameters ? "Hide" : "Show"}</div>
             </CardTitle>
@@ -179,8 +179,7 @@ export function ToolParameters({ parameters, onParametersChange }: ToolParameter
                 <Input
                   id="maxRows"
                   type="number"
-                  min="1"
-                  max="100"
+                  max="1000"
                   value={parameters.maxRows}
                   onChange={(e) => updateParameter("maxRows", Number.parseInt(e.target.value) || 10)}
                   className="h-8 text-sm border-slate-300"
