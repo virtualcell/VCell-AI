@@ -323,7 +323,7 @@ export default function ChatPage() {
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder="Ask about biomodels, request files, or generate diagrams..."
+                    placeholder="Ask any questions about VCell biomodels..."
                     className="flex-1 border-slate-300 focus:border-blue-500"
                     disabled={isLoading}
                   />
