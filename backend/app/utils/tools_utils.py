@@ -130,6 +130,7 @@ async def execute_tool(name, args):
     """
     try:
         if name == "fetch_biomodels":
+            logger.info(f"Executing tool: {name}")
             # Handle empty fields and validate
             if args.get("savedLow") == "":
                 args["savedLow"] = None
@@ -137,7 +138,6 @@ async def execute_tool(name, args):
                 args["savedHigh"] = None
             args["maxRows"] = 1000
             params = BiomodelRequestParams(**args)
-            logger.info(f"Fetching biomodels: {params}")
             return await fetch_biomodels(params)
 
         elif name == "fetch_simulation_details":

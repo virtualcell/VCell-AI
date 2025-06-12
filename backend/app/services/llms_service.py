@@ -41,8 +41,6 @@ async def get_response_with_tools(user_prompt: str):
             name = tool_call.function.name
             args = json.loads(tool_call.function.arguments)
 
-            logger.info(f"Tool Chosen: {name}")
-
             # Execute the tool function
             result = await execute_tool(name, args)
 

@@ -1,8 +1,11 @@
+from app.core.logger import get_logger
 import httpx
 from app.schemas.vcelldb_schema import BiomodelRequestParams, SimulationRequestParams
+from urllib.parse import urlencode
 
 VCELL_API_BASE_URL = "https://vcell.cam.uchc.edu/api/v0"
 
+logger = get_logger("vcelldb_service")
 
 async def fetch_biomodels(params: BiomodelRequestParams) -> dict:
     """
@@ -14,10 +17,23 @@ async def fetch_biomodels(params: BiomodelRequestParams) -> dict:
     Returns:
         dict: A dictionary containing a list of biomodels and total count.
     """
+    # Transform None to "" (optional, only if needed for empty fields)
+    params_dict = {k: (v if v is not None else "") for k, v in params.dict().items()}
+
+    logger.info(f"Fetching biomodels with parameters: {params_dict}")
+
+    # Construct the query string using urlencoded parameters (params_dict)
+    query_string = urlencode(params_dict)
+    
+    # Construct the full URL
+    url = f"{VCELL_API_BASE_URL}/biomodel?{query_string}"
+    
+    # Log the URL being queried
+    logger.info(f"Querying URL: {url}")
+    
+    # Perform the API request
     async with httpx.AsyncClient() as client:
-        response = await client.get(
-            f"{VCELL_API_BASE_URL}/biomodel", params=params.dict(exclude_none=True)
-        )
+        response = await client.get(url)
         response.raise_for_status()
         return response.json()
 
