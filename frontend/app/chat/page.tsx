@@ -17,7 +17,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import Link from "next/link"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { ToolParameters } from "@/components/ToolParameters"
 import { OnboardingModal } from "@/components/onboarding-modal"
@@ -262,6 +261,15 @@ export default function ChatPage() {
                               variant="outline"
                               size="sm"
                               className="w-full justify-start text-xs h-8"
+                              onClick={() => handleQuickAction("List all models by ModelBricks")}
+                            >
+                              <User className="h-3 w-3 mr-2" />
+                              List all models by ModelBricks
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-full justify-start text-xs h-8"
                               onClick={() => handleQuickAction("What solvers are used in VCell tutorial models?")}
                             >
                               <Diagram3 className="h-3 w-3 mr-2" />
@@ -275,6 +283,15 @@ export default function ChatPage() {
                             >
                               <MessageSquare className="h-3 w-3 mr-2" />
                               What are different types of VCell applications used in Tutorial models
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-full justify-start text-xs h-8"
+                              onClick={() => handleQuickAction("What Tutorial models use Spatial Stochastic applications?")}
+                            >
+                              <Bot className="h-3 w-3 mr-2" />
+                              What Tutorial models use Spatial Stochastic applications?
                             </Button>
                           </div>
                         </div>
