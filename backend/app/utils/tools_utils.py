@@ -20,6 +20,7 @@ ToolsDefinitions = [
                 "properties": {
                     "bmName": {
                         "type": "string",
+                        "default": "",
                         "description": "The name or part of the name of the biomodel you are searching for. This can be used to find biomodels that match the provided name or keyword.",
                     },
                     "category": {
@@ -29,15 +30,18 @@ ToolsDefinitions = [
                     },
                     "owner": {
                         "type": "string",
+                        "default": "",
                         "description": "The owner of the biomodel. This filter allows users to search for biomodels owned by a specific user.",
                     },
                     "savedLow": {
                         "type": "string",
+                        "default": "",
                         "format": "date",
                         "description": "The lower bound of the saved date range for biomodels. Only biomodels saved after this date will be included in the results (format: YYYY-MM-DD).",
                     },
                     "savedHigh": {
                         "type": "string",
+                        "default": "",
                         "format": "date",
                         "description": "The upper bound of the saved date range for biomodels. Only biomodels saved before this date will be included in the results (format: YYYY-MM-DD).",
                     },
