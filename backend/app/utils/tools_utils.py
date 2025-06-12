@@ -4,6 +4,9 @@ from app.services.vcelldb_service import (
     get_vcml_file,
 )
 from app.schemas.vcelldb_schema import BiomodelRequestParams, SimulationRequestParams
+from app.core.logger import get_logger
+
+logger = get_logger("tools_utils")
 
 # Function calling Definitions
 ToolsDefinitions = [
@@ -134,6 +137,7 @@ async def execute_tool(name, args):
                 args["savedHigh"] = None
             args["maxRows"] = 1000
             params = BiomodelRequestParams(**args)
+            logger.info(f"Fetching biomodels: {params}")
             return await fetch_biomodels(params)
 
         elif name == "fetch_simulation_details":

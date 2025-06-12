@@ -41,14 +41,20 @@ async def get_response_with_tools(user_prompt: str):
             name = tool_call.function.name
             args = json.loads(tool_call.function.arguments)
 
-            logger.info(f"Tool call: {name} with args: {args}")
+            logger.info(f"Tool Chosen: {name}")
 
             # Execute the tool function
             result = await execute_tool(name, args)
 
+            logger.info(f"Tool Result: {result}")
+
             # Send the result back to the model
             messages.append(
-                {"role": "tool", "tool_call_id": tool_call.id, "content": str(result)}
+                {
+                    "role": "tool",
+                    "tool_call_id": tool_call.id,
+                    "content": str(result)
+                }
             )
 
     # Send back the final response incorporating the tool result
@@ -59,4 +65,8 @@ async def get_response_with_tools(user_prompt: str):
         max_tokens=10000,
     )
 
-    return completion.choices[0].message.content
+    final_response = completion.choices[0].message.content
+
+    logger.info(f"LLM Response: {final_response}")
+
+    return final_response
