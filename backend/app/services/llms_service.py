@@ -22,6 +22,7 @@ You are a VCell BioModel Assistant, designed to help users understand and intera
 * If asked about irrelevant topics, politely decline to answer.
 """
 
+
 async def get_response_with_tools(user_prompt: str):
     messages = [
         {
@@ -60,11 +61,7 @@ async def get_response_with_tools(user_prompt: str):
 
             # Send the result back to the model
             messages.append(
-                {
-                    "role": "tool",
-                    "tool_call_id": tool_call.id,
-                    "content": str(result)
-                }
+                {"role": "tool", "tool_call_id": tool_call.id, "content": str(result)}
             )
 
     # Send back the final response incorporating the tool result
