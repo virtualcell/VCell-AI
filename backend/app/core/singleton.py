@@ -3,6 +3,7 @@ from app.core.config import settings
 
 openai_client = None
 
+
 # OpenAI
 def connect_openai():
     global openai_client

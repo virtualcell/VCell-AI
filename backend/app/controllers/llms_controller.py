@@ -1,6 +1,7 @@
 from fastapi import HTTPException
 from app.services.llms_service import get_response_with_tools
 
+
 async def get_llm_response(user_prompt: str) -> str:
     """
     Controller function to interact with the LLM service.

@@ -1,5 +1,12 @@
-from app.services.vcelldb_service import fetch_biomodels, fetch_simulation_details, get_vcml_file
+from app.services.vcelldb_service import (
+    fetch_biomodels,
+    fetch_simulation_details,
+    get_vcml_file,
+)
 from app.schemas.vcelldb_schema import BiomodelRequestParams, SimulationRequestParams
+from app.core.logger import get_logger
+
+logger = get_logger("tools_utils")
 
 # Function calling Definitions
 ToolsDefinitions = [
@@ -11,20 +18,64 @@ ToolsDefinitions = [
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "bmName": {"type": "string", "description": "The name or part of the name of the biomodel you are searching for. This can be used to find biomodels that match the provided name or keyword."},
-                    "category": {"type": "string", "enum": ["all", "public", "shared", "tutorial", "educational"], "description": "The category under which the biomodels are classified. Options include: 'all', 'public', 'shared', 'tutorial', and 'educational'."},
-                    "owner": {"type": "string", "description": "The owner of the biomodel. This filter allows users to search for biomodels owned by a specific user."},
-                    "savedLow": {"type": "string", "format": "date", "description": "The lower bound of the saved date range for biomodels. Only biomodels saved after this date will be included in the results (format: YYYY-MM-DD)."},
-                    "savedHigh": {"type": "string", "format": "date", "description": "The upper bound of the saved date range for biomodels. Only biomodels saved before this date will be included in the results (format: YYYY-MM-DD)."},
-                    "startRow": {"type": "integer", "default": 1, "description": "The starting row for pagination. This determines the first result to be included in the response."},
-                    "maxRows": {"type": "integer", "default": 1000, "description": "The maximum number of results to return per page."},
-                    "orderBy": {"type": "string", "enum": ["date_desc", "date_asc", "name_desc", "name_asc"], "default": "date_desc", "description": "The order in which the biomodels should be sorted."}
+                    "bmName": {
+                        "type": "string",
+                        "default": "",
+                        "description": "The name or part of the name of the biomodel you are searching for. This can be used to find biomodels that match the provided name or keyword.",
+                    },
+                    "category": {
+                        "type": "string",
+                        "enum": ["all", "public", "shared", "tutorial", "educational"],
+                        "description": "The category under which the biomodels are classified. Options include: 'all', 'public', 'shared', 'tutorial', and 'educational'.",
+                    },
+                    "owner": {
+                        "type": "string",
+                        "default": "",
+                        "description": "The owner of the biomodel. This filter allows users to search for biomodels owned by a specific user.",
+                    },
+                    "savedLow": {
+                        "type": "string",
+                        "default": "",
+                        "format": "date",
+                        "description": "The lower bound of the saved date range for biomodels. Only biomodels saved after this date will be included in the results (format: YYYY-MM-DD).",
+                    },
+                    "savedHigh": {
+                        "type": "string",
+                        "default": "",
+                        "format": "date",
+                        "description": "The upper bound of the saved date range for biomodels. Only biomodels saved before this date will be included in the results (format: YYYY-MM-DD).",
+                    },
+                    "startRow": {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "The starting row for pagination. This determines the first result to be included in the response.",
+                    },
+                    "maxRows": {
+                        "type": "integer",
+                        "default": 1000,
+                        "description": "The maximum number of results to return per page.",
+                    },
+                    "orderBy": {
+                        "type": "string",
+                        "enum": ["date_desc", "date_asc", "name_desc", "name_asc"],
+                        "default": "date_desc",
+                        "description": "The order in which the biomodels should be sorted.",
+                    },
                 },
-                "required": ["bmName", "category", "owner", "savedLow", "savedHigh", "startRow", "maxRows", "orderBy"],
-                "additionalProperties": False
+                "required": [
+                    "bmName",
+                    "category",
+                    "owner",
+                    "savedLow",
+                    "savedHigh",
+                    "startRow",
+                    "maxRows",
+                    "orderBy",
+                ],
+                "additionalProperties": False,
             },
-            "strict": True
-        }
+            "strict": True,
+        },
     },
     {
         "type": "function",
@@ -34,14 +85,20 @@ ToolsDefinitions = [
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "bmId": {"type": "string", "description": "Biomodel ID for which simulations will be fetched"},
-                    "simId": {"type": "string", "description": "Simulation ID to fetch specific simulation details"}
+                    "bmId": {
+                        "type": "string",
+                        "description": "Biomodel ID for which simulations will be fetched",
+                    },
+                    "simId": {
+                        "type": "string",
+                        "description": "Simulation ID to fetch specific simulation details",
+                    },
                 },
                 "required": ["bmId", "simId"],
-                "additionalProperties": False
+                "additionalProperties": False,
             },
-            "strict": True
-        }
+            "strict": True,
+        },
     },
     {
         "type": "function",
@@ -51,16 +108,19 @@ ToolsDefinitions = [
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "biomodel_id": {"type": "string", "description": "ID of the biomodel to retrieve VCML"}
+                    "biomodel_id": {
+                        "type": "string",
+                        "description": "ID of the biomodel to retrieve VCML",
+                    }
                 },
                 "required": ["biomodel_id"],
-                "additionalProperties": False
+                "additionalProperties": False,
             },
-            "strict": True
-        }
-    }
+            "strict": True,
+        },
+    },
 ]
-  
+
 
 # Tool Executor Function
 async def execute_tool(name, args):
@@ -74,12 +134,13 @@ async def execute_tool(name, args):
     """
     try:
         if name == "fetch_biomodels":
+            logger.info(f"Executing tool: {name}")
             # Handle empty fields and validate
-            if args.get('savedLow') == "":
-                args['savedLow'] = None
-            if args.get('savedHigh') == "":
-                args['savedHigh'] = None
-            args['maxRows'] = 1000
+            if args.get("savedLow") == "":
+                args["savedLow"] = None
+            if args.get("savedHigh") == "":
+                args["savedHigh"] = None
+            args["maxRows"] = 1000
             params = BiomodelRequestParams(**args)
             return await fetch_biomodels(params)
 
@@ -93,7 +154,7 @@ async def execute_tool(name, args):
         else:
             return {}
 
-    except Exception as e:        
+    except Exception as e:
         if name == "fetch_biomodels" or name == "fetch_simulation_details":
             return []
         else:

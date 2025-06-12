@@ -3,6 +3,7 @@ from app.controllers.llms_controller import get_llm_response
 
 router = APIRouter()
 
+
 @router.post("/query")
 async def query_llm(user_prompt: str):
     """

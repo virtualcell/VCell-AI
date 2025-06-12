@@ -103,6 +103,8 @@ async def get_diagram_image_controller(biomodel_id: str) -> Response:
     except httpx.HTTPStatusError as e:
         if e.response.status_code == 404:
             raise HTTPException(status_code=404, detail="Biomodel not found.")
-        raise HTTPException(status_code=e.response.status_code, detail="Error fetching diagram image.")
+        raise HTTPException(
+            status_code=e.response.status_code, detail="Error fetching diagram image."
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail="Error fetching diagram image.")
