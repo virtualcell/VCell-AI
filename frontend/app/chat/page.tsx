@@ -20,6 +20,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { ToolParameters } from "@/components/ToolParameters"
 import { OnboardingModal } from "@/components/onboarding-modal"
+import { MarkdownRenderer } from "@/components/markdown-renderer"
 
 interface Message {
   id: string
@@ -45,8 +46,25 @@ export default function ChatPage() {
     {
       id: "1",
       role: "assistant",
-      content:
-        "Hello! I'm your VCell AI assistant. I can help you search for biomodels, retrieve VCML and SBML files, and access diagram. Ask Anything!",
+      content: `# Welcome to VCell AI Assistant! 🤖
+
+I'm here to help you with **biomodel analysis** and research support. I can:
+
+- Search for biomodels with specific criteria
+- Retrieve VCML and SBML files  
+- Generate and analyze diagrams
+- Answer questions about models and data
+
+## Getting Started
+
+Try asking me questions like:
+- *"List all tutorial models"*
+- *"Show me calcium models by ModelBricks"*
+- *"What solvers are used in VCell tutorial models?"*
+
+> **Note:** My responses support full markdown formatting including **bold text**, *italics*, lists, tables, and code blocks!
+
+Feel free to ask anything! 🚀`,
       timestamp: new Date(),
     },
   ])
@@ -221,7 +239,11 @@ export default function ChatPage() {
                               message.role === "user" ? "bg-blue-600 text-white" : "bg-white border border-slate-200"
                             }`}
                           >
-                            <div className="whitespace-pre-wrap text-sm leading-relaxed">{message.content}</div>
+                            {message.role === "user" ? (
+                              <div className="whitespace-pre-wrap text-sm leading-relaxed">{message.content}</div>
+                            ) : (
+                              <MarkdownRenderer content={message.content} />
+                            )}
                           </div>
                         </div>
                       </div>
