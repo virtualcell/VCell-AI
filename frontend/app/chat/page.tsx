@@ -94,18 +94,11 @@ export default function ChatPage() {
 
   const handleQuickAction = (message: string) => {
     setInputMessage(message)
-    setShowQuickActions(false)
-    // Auto-send the message
-    setTimeout(() => {
-      handleSendMessage()
-    }, 100)
+    handleSendMessage()
   }
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim()) return
-
-    setShowQuickActions(false) // Hide quick actions when user starts chatting
-
     const userMessage: Message = {
       id: Date.now().toString(),
       role: "user",
@@ -233,7 +226,6 @@ export default function ChatPage() {
                         </div>
                       </div>
                     ))}
-                    {showQuickActions && messages.length === 1 && (
                       <div className="flex gap-3 justify-start">
                         <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center flex-shrink-0">
                           <Bot className="h-4 w-4" />
@@ -298,7 +290,6 @@ export default function ChatPage() {
                           </div>
                         </div>
                       </div>
-                    )}
                     {isLoading && (
                       <div className="flex gap-3 justify-start">
                         <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center flex-shrink-0">
