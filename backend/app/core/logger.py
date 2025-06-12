@@ -15,11 +15,16 @@ class CustomColourizedFormatter(ColourizedFormatter):
         }
         reset = "\033[0m"
 
-        # Apply color to the log level name
-        record.levelname = f"{level_color_map.get(record.levelname, '')}{record.levelname}{reset}"
-
-        # Format the log message using the parent class's format method
-        return super().format(record)
+        # Use a local variable for the colored level name
+        colored_levelname = f"{level_color_map.get(record.levelname, '')}{record.levelname}{reset}"
+        # Save the original levelname
+        original_levelname = record.levelname
+        # Temporarily set the colored levelname for formatting
+        record.levelname = colored_levelname
+        formatted = super().format(record)
+        # Restore the original levelname to avoid leaking color codes
+        record.levelname = original_levelname
+        return formatted
 
 def get_logger(name: str) -> logging.Logger:
     """Creates a logger object
@@ -40,25 +45,32 @@ def get_logger(name: str) -> logging.Logger:
         ch = logging.StreamHandler(sys.stdout)
         ch.setLevel(logging.DEBUG)
 
-        # Create a custom formatter with colored log levels
+        # Create a custom formatter with colored log levels for console logs
         formatter = CustomColourizedFormatter(
-            "{asctime} | {levelname:<8} | {message}",
+            "{asctime} | {levelname:<8} | {module} | {message}",
             style="{",
             datefmt="%Y-%m-%d %H:%M:%S",
             use_colors=True
         )
 
-        # Add formatter to the handler
+        # Add formatter to the handler for console output
         ch.setFormatter(formatter)
 
         # Add handler to the logger
         logger.addHandler(ch)
 
-        # Create file handler to log to a file
-        fh = logging.FileHandler('app.log')  # Change 'app.log' to your desired log file path
+        fh = logging.FileHandler('app.log')
+        fh.setLevel(logging.DEBUG)
 
-        # Add the same custom formatter to the file handler
-        fh.setFormatter(formatter)
+        # Plain formatter for log file (no color codes)
+        file_formatter = logging.Formatter(
+            "{asctime} | {levelname} | {module} | {message}",
+            style="{",
+            datefmt="%Y-%m-%d %H:%M:%S"
+        )
+
+        # Add the plain formatter to the file handler
+        fh.setFormatter(file_formatter)
 
         # Add file handler to the logger
         logger.addHandler(fh)

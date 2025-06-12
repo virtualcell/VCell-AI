@@ -6,3 +6,4 @@ backend/.pytest_cache
 .vscode/
 backend/.env
 backend/app/.env
+backend/app.log
