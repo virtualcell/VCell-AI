@@ -18,6 +18,7 @@ interface ChatParameters {
   savedHigh: string
   maxRows: number
   orderBy: string
+  biomodelId: string
 }
 
 interface ToolParametersProps {
@@ -34,6 +35,7 @@ export function ToolParameters({ parameters, onParametersChange }: ToolParameter
 
   const clearAllParameters = () => {
     onParametersChange({
+      biomodelId: "",
       bmName: "",
       category: "all",
       owner: "",
@@ -51,7 +53,7 @@ export function ToolParameters({ parameters, onParametersChange }: ToolParameter
           <CardHeader className="bg-slate-50 border-b border-slate-200 cursor-pointer hover:bg-slate-100 transition-colors">
             <CardTitle className="flex items-center justify-between text-slate-900 text-base font-semibold">
               <div className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
+                <Settings className="h-4 w-4" />
                 Search Parameters
               </div>
               <div className="text-xs text-slate-500">{showParameters ? "Hide" : "Show"}</div>
@@ -60,10 +62,22 @@ export function ToolParameters({ parameters, onParametersChange }: ToolParameter
         </CollapsibleTrigger>
 
         <CollapsibleContent>
-          <CardContent className="p-4 space-y-6">
+          <CardContent className="p-4 space-y-4">
             {/* Search Parameters */}
-            <div className="space-y-2">
-              <div className="space-y-2">
+            <div className="space-y-1">
+              <div className="space-y-1">
+                <Label htmlFor="biomodelId" className="text-sm text-slate-600">
+                  Biomodel ID
+                </Label>
+                <Input
+                  id="biomodelId"
+                  placeholder="Enter biomodel id..."
+                  value={parameters.biomodelId}
+                  onChange={(e) => updateParameter("biomodelId", e.target.value)}
+                  className="h-8 text-sm border-slate-300"
+                />
+              </div>
+              <div className="space-y-1">
                 <Label htmlFor="bmName" className="text-sm text-slate-600">
                   Model Name
                 </Label>
@@ -76,7 +90,7 @@ export function ToolParameters({ parameters, onParametersChange }: ToolParameter
                 />
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <RadioGroup
                   value={parameters.category}
                   onValueChange={(value) => updateParameter("category", value)}
@@ -115,7 +129,7 @@ export function ToolParameters({ parameters, onParametersChange }: ToolParameter
                 </RadioGroup>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label htmlFor="owner" className="text-sm text-slate-600">
                   Owner
                 </Label>
@@ -129,7 +143,7 @@ export function ToolParameters({ parameters, onParametersChange }: ToolParameter
               </div>
 
               <div className="grid grid-cols-2 gap-2">
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label htmlFor="savedLow" className="text-xs text-slate-600">
                     Saved After
                   </Label>
@@ -141,7 +155,7 @@ export function ToolParameters({ parameters, onParametersChange }: ToolParameter
                     className="h-8 text-xs border-slate-300"
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label htmlFor="savedHigh" className="text-xs text-slate-600">
                     Saved Before
                   </Label>
@@ -155,7 +169,7 @@ export function ToolParameters({ parameters, onParametersChange }: ToolParameter
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label htmlFor="orderBy" className="text-sm text-slate-600">
                   Sort By
                 </Label>
@@ -172,7 +186,7 @@ export function ToolParameters({ parameters, onParametersChange }: ToolParameter
                 </Select>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label htmlFor="maxRows" className="text-sm text-slate-600">
                   Max Results
                 </Label>
@@ -194,7 +208,7 @@ export function ToolParameters({ parameters, onParametersChange }: ToolParameter
                 onClick={clearAllParameters}
                 className="text-slate-600 hover:text-slate-900"
               >
-                <RotateCcw className="h-3 w-3 mr-1" />
+                <RotateCcw className="h-1 w-1 mr-1" />
                 Clear All
               </Button>
             </div>

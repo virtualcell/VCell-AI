@@ -31,6 +31,7 @@ interface Message {
 }
 
 interface ChatParameters {
+  biomodelId: string,
   bmName: string
   category: string
   owner: string
@@ -57,6 +58,7 @@ export default function ChatPage() {
   const [showOnboarding, setShowOnboarding] = useState(false)
 
   const [parameters, setParameters] = useState<ChatParameters>({
+    biomodelId: "",
     bmName: "",
     category: "all",
     owner: "",
