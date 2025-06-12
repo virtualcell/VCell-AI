@@ -46,7 +46,7 @@ export function ToolParameters({ parameters, onParametersChange }: ToolParameter
       savedHigh: "",
       maxRows: 1000,
       orderBy: "date_desc",
-      llmMode: "tool_calling", // new param for LLM mode
+      llmMode: "tool_calling",
     })
   }
 
@@ -89,7 +89,7 @@ export function ToolParameters({ parameters, onParametersChange }: ToolParameter
                   </div>
                 </RadioGroup>
               </div>
-              <div className="space-y-1">
+              <div className="space-y-1 flex items-center gap-2">
                 <Label htmlFor="maxRows" className="text-sm text-slate-600">
                   Max Results
                 </Label>
@@ -99,7 +99,7 @@ export function ToolParameters({ parameters, onParametersChange }: ToolParameter
                   max="1000"
                   value={parameters.maxRows}
                   onChange={(e) => updateParameter("maxRows", Number.parseInt(e.target.value) || 10)}
-                  className="h-7 text-sm border-slate-300 px-3"
+                  className="h-7 text-sm border-slate-300 px-3 w-20"
                 />
               </div>
             </CardContent>
@@ -225,7 +225,7 @@ export function ToolParameters({ parameters, onParametersChange }: ToolParameter
                     type="date"
                     value={parameters.savedLow}
                     onChange={(e) => updateParameter("savedLow", e.target.value)}
-                    className="h-7 text-xs border-slate-300 px-3"
+                    className="h-7 text-xs border-slate-300 px-3 w-28"
                   />
                 </div>
                 <div className="space-y-1">
@@ -237,7 +237,7 @@ export function ToolParameters({ parameters, onParametersChange }: ToolParameter
                     type="date"
                     value={parameters.savedHigh}
                     onChange={(e) => updateParameter("savedHigh", e.target.value)}
-                    className="h-7 text-xs border-slate-300 px-3"
+                    className="h-7 text-xs border-slate-300 px-3 w-28"
                   />
                 </div>
               </div>

@@ -26,8 +26,6 @@ interface Message {
   role: "user" | "assistant"
   content: string
   timestamp: Date
-  toolUsed?: string
-  toolParams?: any
 }
 
 interface ChatParameters {
@@ -39,6 +37,7 @@ interface ChatParameters {
   savedHigh: string
   maxRows: number
   orderBy: string
+  llmMode: string
 }
 
 export default function ChatPage() {
@@ -66,6 +65,7 @@ export default function ChatPage() {
     savedHigh: "",
     maxRows: 1000,
     orderBy: "date_desc",
+    llmMode: "tool_calling",
   })
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
