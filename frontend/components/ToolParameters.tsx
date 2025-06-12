@@ -51,46 +51,46 @@ export function ToolParameters({ parameters, onParametersChange }: ToolParameter
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {/* LLM Parameters Panel */}
-      <Card className="shadow-sm border-slate-200 text-xs">
+      <Card className="shadow-sm border-slate-200 text-sm">
         <Collapsible open={showLLMParams} onOpenChange={setShowLLMParams}>
           <CollapsibleTrigger asChild>
-            <CardHeader className="bg-slate-50 border-b border-slate-200 cursor-pointer hover:bg-slate-100 transition-colors py-2 px-3">
-              <CardTitle className="flex items-center justify-between text-slate-900 text-xs font-semibold">
-                <div className="flex items-center gap-1">
-                  <Settings className="h-3 w-3" />
+            <CardHeader className="bg-slate-50 border-b border-slate-200 cursor-pointer hover:bg-slate-100 transition-colors py-3 px-4">
+              <CardTitle className="flex items-center justify-between text-slate-900 text-sm font-semibold">
+                <div className="flex items-center gap-2">
+                  <Settings className="h-4 w-4" />
                   LLM Parameters
                 </div>
-                <div className="text-[10px] text-slate-500">{showLLMParams ? "Hide" : "Show"}</div>
+                <div className="text-xs text-slate-500">{showLLMParams ? "Hide" : "Show"}</div>
               </CardTitle>
             </CardHeader>
           </CollapsibleTrigger>
           <CollapsibleContent>
-            <CardContent className="p-2 space-y-2">
+            <CardContent className="p-3 space-y-3">
               <div className="space-y-1">
-                <Label className="text-xs text-slate-600">LLM Mode</Label>
+                <Label className="text-sm text-slate-600">LLM Mode</Label>
                 <RadioGroup
                   value={parameters.llmMode || "tool_calling"}
                   onValueChange={(value) => updateParameter("llmMode" as any, value)}
-                  className="flex flex-row gap-2"
+                  className="flex flex-row gap-3"
                 >
-                  <div className="flex items-center space-x-1">
-                    <RadioGroupItem value="tool_calling" id="llm-tool-calling" className="h-3 w-3" />
-                    <Label htmlFor="llm-tool-calling" className="text-xs text-slate-700 cursor-pointer">
-                      LLM with Tool Calling
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="tool_calling" id="llm-tool-calling" className="h-4 w-4" />
+                    <Label htmlFor="llm-tool-calling" className="text-sm text-slate-700 cursor-pointer">
+                      Tool Calling
                     </Label>
                   </div>
-                  <div className="flex items-center space-x-1">
-                    <RadioGroupItem value="json_analysis" id="llm-json-analysis" className="h-3 w-3" />
-                    <Label htmlFor="llm-json-analysis" className="text-xs text-slate-700 cursor-pointer">
-                      LLM with JSON Analysis
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="json_analysis" id="llm-json-analysis" className="h-4 w-4" />
+                    <Label htmlFor="llm-json-analysis" className="text-sm text-slate-700 cursor-pointer">
+                      JSON Analysis
                     </Label>
                   </div>
                 </RadioGroup>
               </div>
-              <div className="space-y-0.5">
-                <Label htmlFor="maxRows" className="text-xs text-slate-600">
+              <div className="space-y-1">
+                <Label htmlFor="maxRows" className="text-sm text-slate-600">
                   Max Results
                 </Label>
                 <Input
@@ -99,7 +99,7 @@ export function ToolParameters({ parameters, onParametersChange }: ToolParameter
                   max="1000"
                   value={parameters.maxRows}
                   onChange={(e) => updateParameter("maxRows", Number.parseInt(e.target.value) || 10)}
-                  className="h-6 text-xs border-slate-300 px-2"
+                  className="h-7 text-sm border-slate-300 px-3"
                 />
               </div>
             </CardContent>
@@ -108,25 +108,25 @@ export function ToolParameters({ parameters, onParametersChange }: ToolParameter
       </Card>
 
       {/* Search Parameters Panel */}
-      <Card className="shadow-sm border-slate-200 text-xs">
+      <Card className="shadow-sm border-slate-200 text-sm">
         <Collapsible open={showSearchParams} onOpenChange={setShowSearchParams}>
           <CollapsibleTrigger asChild>
-            <CardHeader className="bg-slate-50 border-b border-slate-200 cursor-pointer hover:bg-slate-100 transition-colors py-2 px-3">
-              <CardTitle className="flex items-center justify-between text-slate-900 text-xs font-semibold">
-                <div className="flex items-center gap-1">
-                  <Settings className="h-3 w-3" />
+            <CardHeader className="bg-slate-50 border-b border-slate-200 cursor-pointer hover:bg-slate-100 transition-colors py-3 px-4">
+              <CardTitle className="flex items-center justify-between text-slate-900 text-sm font-semibold">
+                <div className="flex items-center gap-2">
+                  <Settings className="h-4 w-4" />
                   Search Parameters
                 </div>
-                <div className="text-[10px] text-slate-500">{showSearchParams ? "Hide" : "Show"}</div>
+                <div className="text-xs text-slate-500">{showSearchParams ? "Hide" : "Show"}</div>
               </CardTitle>
             </CardHeader>
           </CollapsibleTrigger>
           <CollapsibleContent>
-            <CardContent className="p-2 space-y-2">
+            <CardContent className="p-3 space-y-3">
               {/* Search Parameters */}
-              <div className="space-y-0.5">
-                <div className="space-y-0.5">
-                  <Label htmlFor="biomodelId" className="text-xs text-slate-600">
+              <div className="space-y-1">
+                <div className="space-y-1">
+                  <Label htmlFor="biomodelId" className="text-sm text-slate-600">
                     Biomodel ID
                   </Label>
                   <Input
@@ -134,55 +134,11 @@ export function ToolParameters({ parameters, onParametersChange }: ToolParameter
                     placeholder="Enter biomodel id..."
                     value={parameters.biomodelId}
                     onChange={(e) => updateParameter("biomodelId", e.target.value)}
-                    className="h-6 text-xs border-slate-300 px-2"
-                  />
-                </div>
-                <div className="space-y-0.5">
-                  <Label htmlFor="bmName" className="text-xs text-slate-600">
-                    Model Name
-                  </Label>
-                  <Input
-                    id="bmName"
-                    placeholder="Enter model name..."
-                    value={parameters.bmName}
-                    onChange={(e) => updateParameter("bmName", e.target.value)}
-                    className="h-6 text-xs border-slate-300 px-2"
+                    className="h-7 text-sm border-slate-300 px-3"
                   />
                 </div>
                 <div className="space-y-1">
-                  <RadioGroup
-                    value={parameters.category}
-                    onValueChange={(value) => updateParameter("category", value)}
-                    className="flex flex-row flex-wrap gap-2"
-                  >
-                    <div className="flex items-center space-x-1">
-                      <RadioGroupItem value="all" id="all" className="h-3 w-3" />
-                      <Label htmlFor="all" className="text-xs text-slate-700 cursor-pointer">
-                        All
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <RadioGroupItem value="public" id="public" className="h-3 w-3" />
-                      <Label htmlFor="public" className="text-xs text-slate-700 cursor-pointer">
-                        Public
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <RadioGroupItem value="tutorial" id="tutorial" className="h-3 w-3" />
-                      <Label htmlFor="tutorial" className="text-xs text-slate-700 cursor-pointer">
-                        Tutorial
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <RadioGroupItem value="educational" id="educational" className="h-3 w-3" />
-                      <Label htmlFor="educational" className="text-xs text-slate-700 cursor-pointer">
-                        Educational
-                      </Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-                <div className="space-y-0.5">
-                  <Label htmlFor="owner" className="text-xs text-slate-600">
+                  <Label htmlFor="owner" className="text-sm text-slate-600">
                     Owner
                   </Label>
                   <Input
@@ -190,8 +146,52 @@ export function ToolParameters({ parameters, onParametersChange }: ToolParameter
                     placeholder="Enter owner name..."
                     value={parameters.owner}
                     onChange={(e) => updateParameter("owner", e.target.value)}
-                    className="h-6 text-xs border-slate-300 px-2"
+                    className="h-7 text-sm border-slate-300 px-3"
                   />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="bmName" className="text-sm text-slate-600">
+                    Model Name
+                  </Label>
+                  <Input
+                    id="bmName"
+                    placeholder="Enter model name..."
+                    value={parameters.bmName}
+                    onChange={(e) => updateParameter("bmName", e.target.value)}
+                    className="h-7 text-sm border-slate-300 px-3"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <RadioGroup
+                    value={parameters.category}
+                    onValueChange={(value) => updateParameter("category", value)}
+                    className="flex flex-row flex-wrap gap-3"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="all" id="all" className="h-4 w-4" />
+                      <Label htmlFor="all" className="text-sm text-slate-700 cursor-pointer">
+                        All
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="public" id="public" className="h-4 w-4" />
+                      <Label htmlFor="public" className="text-sm text-slate-700 cursor-pointer">
+                        Public
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="tutorial" id="tutorial" className="h-4 w-4" />
+                      <Label htmlFor="tutorial" className="text-sm text-slate-700 cursor-pointer">
+                        Tutorial
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="educational" id="educational" className="h-4 w-4" />
+                      <Label htmlFor="educational" className="text-sm text-slate-700 cursor-pointer">
+                        Educational
+                      </Label>
+                    </div>
+                  </RadioGroup>
                 </div>
               </div>
             </CardContent>
@@ -200,24 +200,24 @@ export function ToolParameters({ parameters, onParametersChange }: ToolParameter
       </Card>
 
       {/* Advanced Parameters Panel */}
-      <Card className="shadow-sm border-slate-200 text-xs">
+      <Card className="shadow-sm border-slate-200 text-sm">
         <Collapsible open={showAdvancedParams} onOpenChange={setShowAdvancedParams}>
           <CollapsibleTrigger asChild>
-            <CardHeader className="bg-slate-50 border-b border-slate-200 cursor-pointer hover:bg-slate-100 transition-colors py-2 px-3">
-              <CardTitle className="flex items-center justify-between text-slate-900 text-xs font-semibold">
-                <div className="flex items-center gap-1">
-                  <Settings className="h-3 w-3" />
+            <CardHeader className="bg-slate-50 border-b border-slate-200 cursor-pointer hover:bg-slate-100 transition-colors py-3 px-4">
+              <CardTitle className="flex items-center justify-between text-slate-900 text-sm font-semibold">
+                <div className="flex items-center gap-2">
+                  <Settings className="h-4 w-4" />
                   Advanced Parameters
                 </div>
-                <div className="text-[10px] text-slate-500">{showAdvancedParams ? "Hide" : "Show"}</div>
+                <div className="text-xs text-slate-500">{showAdvancedParams ? "Hide" : "Show"}</div>
               </CardTitle>
             </CardHeader>
           </CollapsibleTrigger>
           <CollapsibleContent>
-            <CardContent className="p-2 space-y-2">
-              <div className="grid grid-cols-2 gap-2">
-                <div className="space-y-0.5">
-                  <Label htmlFor="savedLow" className="text-[10px] text-slate-600">
+            <CardContent className="p-3 space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label htmlFor="savedLow" className="text-xs text-slate-600">
                     Saved After
                   </Label>
                   <Input
@@ -225,11 +225,11 @@ export function ToolParameters({ parameters, onParametersChange }: ToolParameter
                     type="date"
                     value={parameters.savedLow}
                     onChange={(e) => updateParameter("savedLow", e.target.value)}
-                    className="h-6 text-[10px] border-slate-300 px-2"
+                    className="h-7 text-xs border-slate-300 px-3"
                   />
                 </div>
-                <div className="space-y-0.5">
-                  <Label htmlFor="savedHigh" className="text-[10px] text-slate-600">
+                <div className="space-y-1">
+                  <Label htmlFor="savedHigh" className="text-xs text-slate-600">
                     Saved Before
                   </Label>
                   <Input
@@ -237,16 +237,16 @@ export function ToolParameters({ parameters, onParametersChange }: ToolParameter
                     type="date"
                     value={parameters.savedHigh}
                     onChange={(e) => updateParameter("savedHigh", e.target.value)}
-                    className="h-6 text-[10px] border-slate-300 px-2"
+                    className="h-7 text-xs border-slate-300 px-3"
                   />
                 </div>
               </div>
-              <div className="space-y-0.5">
-                <Label htmlFor="orderBy" className="text-xs text-slate-600">
+              <div className="space-y-1">
+                <Label htmlFor="orderBy" className="text-sm text-slate-600">
                   Sort By
                 </Label>
                 <Select value={parameters.orderBy} onValueChange={(value) => updateParameter("orderBy", value)}>
-                  <SelectTrigger className="h-6 text-xs border-slate-300 px-2">
+                  <SelectTrigger className="h-7 text-sm border-slate-300 px-3">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -268,9 +268,9 @@ export function ToolParameters({ parameters, onParametersChange }: ToolParameter
           size="sm"
           variant="outline"
           onClick={clearAllParameters}
-          className="text-slate-600 hover:text-slate-900 h-6 px-2 text-xs"
+          className="text-slate-600 hover:text-slate-900 h-7 px-3 text-sm"
         >
-          <RotateCcw className="h-3 w-3 mr-1" />
+          <RotateCcw className="h-4 w-4 mr-1" />
           Clear All
         </Button>
       </div>
