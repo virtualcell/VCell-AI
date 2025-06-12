@@ -15,7 +15,7 @@ async def fetch_biomodels(params: BiomodelRequestParams) -> dict:
         params (BiomodelRequestParams): Request parameters for filtering biomodels.
 
     Returns:
-        dict: A dictionary containing a list of biomodels and total count.
+        dict: A dictionary containing a list of biomodels with metadata.
     """
     # Transform None to "" (optional, only if needed for empty fields)
     params_dict = {k: (v if v is not None else "") for k, v in params.dict().items()}
@@ -35,7 +35,18 @@ async def fetch_biomodels(params: BiomodelRequestParams) -> dict:
     async with httpx.AsyncClient() as client:
         response = await client.get(url)
         response.raise_for_status()
-        return response.json()
+        raw_data = response.json()
+    
+    # Extract biomodels list (assuming API returns a list directly)
+    biomodels = raw_data if isinstance(raw_data, list) else raw_data.get('data', [])
+    
+    # Build response with metadata
+    return {
+        "search_params": params_dict,
+        "models_count": len(biomodels),
+        "unique_model_keys (bmkey)": [model.get('bmKey') for model in biomodels if model.get('bmKey')],
+        "data": biomodels,
+    }
 
 
 async def fetch_simulation_details(params: SimulationRequestParams) -> dict:
