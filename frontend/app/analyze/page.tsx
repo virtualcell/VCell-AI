@@ -66,6 +66,10 @@ export default function AnalyzePage() {
 
   const [followUpInput, setFollowUpInput] = useState("")
   const [isVcmlExpanded, setIsVcmlExpanded] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
+  const [diagramInfo, setDiagramInfo] = useState<any>(null)
+  const [vcmlContent, setVcmlContent] = useState("")
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const promptTemplates: PromptTemplate[] = [
@@ -111,37 +115,101 @@ export default function AnalyzePage() {
     setState({ ...state, prompt })
   }
 
-  const handleAnalyze = () => {
-    if (!state.biomodelId.trim() || !state.prompt.trim()) return
-
-    // Set loading state
-    setState({ ...state, status: "loading" })
-
-    // Still in development mode
-    setTimeout(() => {
-      const devResults = {
-        title: "Still in development mode",
-        description: "The biomodel analysis feature is currently under development.",
-        diagram: "/placeholder.svg?height=600&width=800",
-        vcml: "Still in development mode",
-        aiAnalysis: "Still in development mode",
-        vcmlAnalysis: "Still in development mode",
-        followUpMessages: [
-          {
-            id: "1",
-            role: "assistant" as "assistant",
-            content: "Still in development mode",
-          },
-        ],
+  // Fetch VCML file from backend
+  const handleRetrieveVcml = async (biomodelId: string) => {
+    setIsLoading(true)
+    setError("")
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL
+      const res = await fetch(`${apiUrl}/biomodel/${biomodelId}/biomodel.vcml`)
+      if (!res.ok) {
+        setError("Failed to fetch VCML from backend.")
+        setVcmlContent("")
+        return ""
+      } else {
+        let text = await res.text()
+        if (text.startsWith('"') && text.endsWith('"')) {
+          text = text.slice(1, -1)
+        }
+        setVcmlContent(text)
+        return text
       }
+    } catch (err) {
+      setError("Failed to fetch VCML from backend.")
+      setVcmlContent("")
+      return ""
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
-      // Update state with dev results
+  // Fetch diagram image from backend
+  const handleRetrieveDiagram = async (biomodelId: string) => {
+    setIsLoading(true)
+    setError("")
+    setDiagramInfo(null)
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL
+      const res = await fetch(`${apiUrl}/biomodel/${biomodelId}/diagram/image`)
+      const contentType = res.headers.get("content-type")
+      if (res.ok && contentType && contentType.startsWith("image")) {
+        const blob = await res.blob()
+        const imageUrl = URL.createObjectURL(blob)
+        const info = {
+          url: imageUrl,
+          title: `Diagram for Biomodel ${biomodelId}`,
+          format: contentType.split("/")[1].toUpperCase(),
+        }
+        setDiagramInfo(info)
+        return info
+      } else if (contentType && contentType.includes("application/json")) {
+        const data = await res.json()
+        setError(data.detail || "Diagram not found.")
+        return null
+      } else {
+        setError("Unexpected response from server.")
+        return null
+      }
+    } catch (err) {
+      setError("Failed to fetch diagram.")
+      return null
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Updated handleAnalyze to fetch VCML and diagram
+  const handleAnalyze = async () => {
+    if (!state.biomodelId.trim() || !state.prompt.trim()) return
+    setState({ ...state, status: "loading" })
+    setIsLoading(true)
+    setError("")
+    try {
+      const [vcml, diagram] = await Promise.all([
+        handleRetrieveVcml(state.biomodelId),
+        handleRetrieveDiagram(state.biomodelId),
+      ])
+      // Placeholder for AI analysis and VCML analysis
+      const aiAnalysis = "AI analysis is under development."
+      const vcmlAnalysis = "VCML analysis is under development."
       setState({
         ...state,
         status: "results",
-        results: devResults,
+        results: {
+          title: `Analysis for Biomodel ${state.biomodelId}`,
+          description: `Results for biomodel ID ${state.biomodelId}.`,
+          diagram: diagram?.url || "",
+          vcml: vcml || "",
+          aiAnalysis,
+          vcmlAnalysis,
+          followUpMessages: [],
+        },
       })
-    }, 1000)
+    } catch (err) {
+      setError("Failed to analyze biomodel.")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleFollowUpSubmit = () => {
