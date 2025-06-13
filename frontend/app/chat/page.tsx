@@ -15,19 +15,18 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { ToolParameters } from "@/components/ToolParameters"
 import { OnboardingModal } from "@/components/onboarding-modal"
+import { MarkdownRenderer } from "@/components/markdown-renderer"
 
 interface Message {
   id: string
   role: "user" | "assistant"
   content: string
   timestamp: Date
-  toolUsed?: string
-  toolParams?: any
 }
 
 interface ChatParameters {
@@ -39,6 +38,7 @@ interface ChatParameters {
   savedHigh: string
   maxRows: number
   orderBy: string
+  llmMode: string
 }
 
 export default function ChatPage() {
@@ -46,15 +46,16 @@ export default function ChatPage() {
     {
       id: "1",
       role: "assistant",
-      content:
-        "Hello! I'm your VCell AI assistant. I can help you search for biomodels, retrieve VCML and SBML files, and access diagram. Ask Anything!",
+      content: `# Welcome to VCell AI Assistant! 🤖
+
+I'm here to help you with **biomodel analysis** and research support.
+Feel free to ask anything! 🚀`,
       timestamp: new Date(),
     },
   ])
 
   const [inputMessage, setInputMessage] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const [showQuickActions, setShowQuickActions] = useState(true)
   const [showOnboarding, setShowOnboarding] = useState(false)
 
   const [parameters, setParameters] = useState<ChatParameters>({
@@ -66,6 +67,7 @@ export default function ChatPage() {
     savedHigh: "",
     maxRows: 1000,
     orderBy: "date_desc",
+    llmMode: "tool_calling",
   })
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -94,18 +96,11 @@ export default function ChatPage() {
 
   const handleQuickAction = (message: string) => {
     setInputMessage(message)
-    setShowQuickActions(false)
-    // Auto-send the message
-    setTimeout(() => {
-      handleSendMessage()
-    }, 100)
+    handleSendMessage()
   }
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim()) return
-
-    setShowQuickActions(false) // Hide quick actions when user starts chatting
-
     const userMessage: Message = {
       id: Date.now().toString(),
       role: "user",
@@ -120,7 +115,7 @@ export default function ChatPage() {
     try {
       // Send user message to backend
       const res = await fetch(
-        `http://localhost:8000/query?user_prompt=${encodeURIComponent(inputMessage)}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/query?user_prompt=${encodeURIComponent(inputMessage)}`,
         {
           method: "POST",
           headers: { accept: "application/json" },
@@ -129,7 +124,6 @@ export default function ChatPage() {
       )
       const data = await res.json()
       const aiResponse = data.response || "Sorry, I didn't get a response from the server."
-      console.log("AI Response:", aiResponse)
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
@@ -199,7 +193,6 @@ export default function ChatPage() {
                   <MessageSquare className="h-5 w-5" />
                   VCell AI Assistant
                 </CardTitle>
-                <CardDescription>Ask questions about biomodels and use integrated analysis tools</CardDescription>
               </CardHeader>
 
               {/* Messages Area */}
@@ -228,12 +221,15 @@ export default function ChatPage() {
                               message.role === "user" ? "bg-blue-600 text-white" : "bg-white border border-slate-200"
                             }`}
                           >
-                            <div className="whitespace-pre-wrap text-sm leading-relaxed">{message.content}</div>
+                            {message.role === "user" ? (
+                              <div className="whitespace-pre-wrap text-sm leading-relaxed">{message.content}</div>
+                            ) : (
+                              <MarkdownRenderer content={message.content} />
+                            )}
                           </div>
                         </div>
                       </div>
                     ))}
-                    {showQuickActions && messages.length === 1 && (
                       <div className="flex gap-3 justify-start">
                         <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center flex-shrink-0">
                           <Bot className="h-4 w-4" />
@@ -263,10 +259,10 @@ export default function ChatPage() {
                               variant="outline"
                               size="sm"
                               className="w-full justify-start text-xs h-8"
-                              onClick={() => handleQuickAction("List all models by ModelBricks")}
+                              onClick={() => handleQuickAction("List all models by ModelBrick")}
                             >
                               <User className="h-3 w-3 mr-2" />
-                              List all models by ModelBricks
+                              List all models by ModelBrick
                             </Button>
                             <Button
                               variant="outline"
@@ -298,7 +294,6 @@ export default function ChatPage() {
                           </div>
                         </div>
                       </div>
-                    )}
                     {isLoading && (
                       <div className="flex gap-3 justify-start">
                         <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center flex-shrink-0">

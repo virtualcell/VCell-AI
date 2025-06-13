@@ -7,6 +7,7 @@ VCELL_API_BASE_URL = "https://vcell.cam.uchc.edu/api/v0"
 
 logger = get_logger("vcelldb_service")
 
+
 async def fetch_biomodels(params: BiomodelRequestParams) -> dict:
     """
     Fetch a list of biomodels from the VCell API based on filtering and sorting parameters.
@@ -24,27 +25,29 @@ async def fetch_biomodels(params: BiomodelRequestParams) -> dict:
 
     # Construct the query string using urlencoded parameters (params_dict)
     query_string = urlencode(params_dict)
-    
+
     # Construct the full URL
     url = f"{VCELL_API_BASE_URL}/biomodel?{query_string}"
-    
+
     # Log the URL being queried
     logger.info(f"Querying URL: {url}")
-    
+
     # Perform the API request
     async with httpx.AsyncClient() as client:
         response = await client.get(url)
         response.raise_for_status()
         raw_data = response.json()
-    
+
     # Extract biomodels list (assuming API returns a list directly)
-    biomodels = raw_data if isinstance(raw_data, list) else raw_data.get('data', [])
-    
+    biomodels = raw_data if isinstance(raw_data, list) else raw_data.get("data", [])
+
     # Build response with metadata
     return {
         "search_params": params_dict,
         "models_count": len(biomodels),
-        "unique_model_keys (bmkey)": [model.get('bmKey') for model in biomodels if model.get('bmKey')],
+        "unique_model_keys (bmkey)": [
+            model.get("bmKey") for model in biomodels if model.get("bmKey")
+        ],
         "data": biomodels,
     }
 

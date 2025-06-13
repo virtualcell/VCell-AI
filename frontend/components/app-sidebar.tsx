@@ -1,6 +1,6 @@
 "use client"
 
-import { Search, FileText, Code, BarChart3Icon as Diagram3, MessageSquare, History, Database, Sparkles } from "lucide-react"
+import { Search, FileText, Code, BarChart3Icon as Diagram3, MessageSquare, History, Database, Sparkles, FlaskConical } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
@@ -92,6 +92,20 @@ export function AppSidebar() {
                       <Sparkles className="h-4 w-4 text-yellow-400" />
                     </span>
                     <span>Chatbot</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem key="BiomodelAnalysis">
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === "/analyze"}
+                  className="data-[active=true]:bg-yellow-50 data-[active=true]:text-yellow-700 data-[active=true]:border-r-2 data-[active=true]:border-yellow-500"
+                >
+                  <Link href="/analyze" className="flex items-center gap-3">
+                    <span className="relative flex items-center">
+                      <FlaskConical className="h-4 w-4 text-yellow-400" />
+                    </span>
+                    <span>Biomodel Analysis</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

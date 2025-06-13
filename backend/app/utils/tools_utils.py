@@ -18,6 +18,11 @@ ToolsDefinitions = [
             "parameters": {
                 "type": "object",
                 "properties": {
+                    "bmId": {
+                        "type": "string",
+                        "default": "",
+                        "description": "The unique identifier of the biomodel. This can be used to retrieve specific biomodels directly by their ID.",
+                    },
                     "bmName": {
                         "type": "string",
                         "default": "",
@@ -63,6 +68,7 @@ ToolsDefinitions = [
                     },
                 },
                 "required": [
+                    "bmId",
                     "bmName",
                     "category",
                     "owner",
@@ -81,7 +87,7 @@ ToolsDefinitions = [
         "type": "function",
         "function": {
             "name": "fetch_simulation_details",
-            "description": "Fetches detailed information about a specific simulation for a given biomodel. This function allows to retrieve all available details about a simulation, including simulation parameters, solver information, and result data. The request requires both the biomodel ID and the simulation ID to locate the correct simulation.",
+            "description": "Fetches detailed information about a specific simulation id. This function allows to retrieve all available details about a simulation, including simulation parameters, solver information, and result data. Use only when biomodel id and simulation id are given.",
             "parameters": {
                 "type": "object",
                 "properties": {
