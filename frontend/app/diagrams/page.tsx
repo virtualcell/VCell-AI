@@ -20,7 +20,6 @@ export default function DiagramsPage() {
   const [diagramInfo, setDiagramInfo] = useState<DiagramInfo | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
-  const [copied, setCopied] = useState(false)
 
   const handleRetrieveDiagram = async () => {
     if (!biomodelId.trim()) {
@@ -55,18 +54,6 @@ export default function DiagramsPage() {
       setError("Failed to fetch diagram.")
     } finally {
       setIsLoading(false)
-    }
-  }
-
-  const copyUrlToClipboard = async () => {
-    if (!diagramInfo?.url) return
-
-    try {
-      await navigator.clipboard.writeText(diagramInfo.url)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch (err) {
-      console.error("Failed to copy:", err)
     }
   }
 
