@@ -1,6 +1,6 @@
 "use client"
 
-import type React from "react"
+import React from "react"
 
 import { useState, useRef } from "react"
 import {
@@ -52,7 +52,7 @@ interface Message {
 interface PromptTemplate {
   title: string
   prompt: string
-  icon: React.ReactNode
+  icon: React.ReactElement<any>
   color: string
 }
 
@@ -188,10 +188,6 @@ export default function AnalyzePage() {
     }, 1500)
   }
 
-  const generateMockResponse = (query: string): string => {
-    return "Still in development mode"
-  }
-
   const handleReset = () => {
     setState({
       status: "input",
@@ -202,46 +198,61 @@ export default function AnalyzePage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="container mx-auto p-6 max-w-6xl">
+    <div className="min-h-screen bg-white flex flex-col justify-center items-center text-slate-900">
+      <div className="container mx-auto p-8 max-w-5xl">
         {state.status === "input" && (
-          <div className="space-y-8">
-            {/* Bold Header */}
-            <div className="text-center mb-12">
-              <h1 className="text-5xl font-extrabold text-slate-900 mb-4">Biomodel AI Analysis</h1>
+          <div className="space-y-10 flex flex-col items-center">
+            {/* Enhanced Header */}
+            <div className="text-center mb-10">
+              <h1 className="text-7xl font-extrabold text-blue-600 mb-3">
+                Biomodel AI Analysis
+              </h1>
+              <p className="text-slate-500 text-lg">
+                Unlock insights from your biomodels with the power of AI.
+              </p>
             </div>
 
-            {/* Two large search bars side by side */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                placeholder="Enter biomodel ID"
-                value={state.biomodelId}
-                onChange={(e) => setState({ ...state, biomodelId: e.target.value })}
-                className="text-xl h-16 px-6 border-2 border-slate-300 focus:border-blue-500 rounded-xl"
-              />
-              <Input
-                placeholder="What would you like to know?"
-                value={state.prompt}
-                onChange={(e) => setState({ ...state, prompt: e.target.value })}
-                className="text-xl h-16 px-6 border-2 border-slate-300 focus:border-blue-500 rounded-xl"
-              />
+            {/* Enhanced Two large search bars side by side */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl items-center">
+              <div className="relative">
+                <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 h-6 w-6 text-slate-400" />
+                <Input
+                  placeholder="Enter BioModel ID (e.g., 12345)"
+                  value={state.biomodelId}
+                  onChange={(e) => setState({ ...state, biomodelId: e.target.value })}
+                  className="text-xl h-16 pl-14 pr-6 bg-slate-50 border-2 border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded-xl shadow-sm transition-all duration-300 ease-in-out text-slate-900 placeholder-slate-400"
+                />
+              </div>
+              <div className="relative">
+                <MessageSquare className="absolute left-5 top-1/2 transform -translate-y-1/2 h-6 w-6 text-slate-400" />
+                <Input
+                  placeholder="What would you like to analyze?"
+                  value={state.prompt}
+                  onChange={(e) => setState({ ...state, prompt: e.target.value })}
+                  className="text-xl h-16 pl-14 pr-6 bg-slate-50 border-2 border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded-xl shadow-sm transition-all duration-300 ease-in-out text-slate-900 placeholder-slate-400"
+                />
+              </div>
             </div>
 
-            {/* Small quick action buttons */}
-            <div className="flex flex-wrap gap-2 justify-center">
-              {promptTemplates.map((template, index) => (
-                <Button
-                  key={index}
-                  variant="outline"
-                  onClick={() => handlePromptTemplateClick(template.prompt)}
-                  className={`text-xs py-1 px-3 ${template.color}`}
-                >
-                  <div className="flex items-center gap-1">
-                    {template.icon}
-                    <span>{template.title}</span>
-                  </div>
-                </Button>
-              ))}
+            {/* Enhanced Example Prompts */}
+            <div className="w-full max-w-4xl pt-4">
+              <p className="text-center text-slate-500 mb-5 text-sm">Or try one of these example prompts:</p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {promptTemplates.map((template, index) => (
+                  <Button
+                    key={index}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePromptTemplateClick(template.prompt)}
+                    className={`group flex items-center justify-start text-left p-3 rounded-lg border-slate-300 bg-white hover:bg-slate-50 hover:border-blue-500 transition-all duration-200 ease-in-out shadow-xs text-slate-700 hover:text-blue-600`}
+                  >
+                    <div className={`mr-3 p-1.5 rounded-md ${template.color.replace("bg-", "bg-opacity-10 ").replace("text-", "text-").replace("border-", "border-opacity-20 ")}`}>
+                      {React.cloneElement(template.icon, { className: "h-5 w-5" })}
+                    </div>
+                    <span className="text-xs font-medium group-hover:font-semibold">{template.title}</span>
+                  </Button>
+                ))}
+              </div>
             </div>
 
             {/* Analyze Button */}
