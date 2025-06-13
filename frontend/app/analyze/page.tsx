@@ -26,7 +26,6 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import XMLViewer from 'react-xml-viewer'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 
 interface AnalysisState {
   status: "input" | "loading" | "results"
@@ -75,37 +74,37 @@ export default function AnalyzePage() {
   const promptTemplates: PromptTemplate[] = [
     {
       title: "Describe biology of the model",
-      prompt: "Analyze and describe the biological context and significance of this model",
+      prompt: "Describe biology of the model",
       icon: <Dna className="h-4 w-4" />,
       color: "bg-green-100 text-green-800 border-green-200",
     },
     {
       title: "Describe parameters",
-      prompt: "List and explain all parameters in this model and their biological significance",
+      prompt: "Describe parameters",
       icon: <Gauge className="h-4 w-4" />,
       color: "bg-blue-100 text-blue-800 border-blue-200",
     },
     {
       title: "Describe species",
-      prompt: "Identify all species in this model and explain their biological roles",
+      prompt: "Describe species",
       icon: <Atom className="h-4 w-4" />,
       color: "bg-purple-100 text-purple-800 border-purple-200",
     },
     {
       title: "Describe reactions",
-      prompt: "Analyze all reactions in this model and explain their mechanisms",
+      prompt: "Describe reactions",
       icon: <Flask className="h-4 w-4" />,
       color: "bg-amber-100 text-amber-800 border-amber-200",
     },
     {
       title: "What Applications are used?",
-      prompt: "Identify the applications and use cases for this biomodel",
+      prompt: "What Applications are used?",
       icon: <Briefcase className="h-4 w-4" />,
       color: "bg-red-100 text-red-800 border-red-200",
     },
     {
       title: "What solvers are used?",
-      prompt: "Analyze the mathematical solvers and algorithms used in this model",
+      prompt: "What solvers are used?",
       icon: <Cog className="h-4 w-4" />,
       color: "bg-slate-100 text-slate-800 border-slate-200",
     },
@@ -404,39 +403,15 @@ export default function AnalyzePage() {
 
             {/* VCML File Section */}
             <div className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
-              <Collapsible>
-                <CollapsibleTrigger className="w-full">
-                  <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-                    <h3 className="text-xl font-semibold text-slate-900 flex items-center gap-2">
-                      <FileText className="h-5 w-5" />
-                      VCML File
-                    </h3>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setIsVcmlExpanded(!isVcmlExpanded)}
-                      className="flex items-center gap-1"
-                    >
-                      {isVcmlExpanded ? (
-                        <>
-                          <ChevronUp className="h-4 w-4" />
-                          <span>Collapse</span>
-                        </>
-                      ) : (
-                        <>
-                          <ChevronDown className="h-4 w-4" />
-                          <span>Expand</span>
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <div className="max-h-[400px] overflow-y-auto">
-                    <XMLViewer xml={state.results.vcml} />
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
+              <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+                <h3 className="text-xl font-semibold text-slate-900 flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  VCML File
+                </h3>
+              </div>
+              <div className="max-h-[400px] overflow-y-auto p-6">
+                <XMLViewer xml={state.results.vcml} />
+              </div>
             </div>
 
             {/* VCML Analysis Section */}
