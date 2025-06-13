@@ -115,7 +115,7 @@ Feel free to ask anything! 🚀`,
     try {
       // Send user message to backend
       const res = await fetch(
-        `http://localhost:8000/query?user_prompt=${encodeURIComponent(inputMessage)}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/query?user_prompt=${encodeURIComponent(inputMessage)}`,
         {
           method: "POST",
           headers: { accept: "application/json" },
@@ -124,7 +124,6 @@ Feel free to ask anything! 🚀`,
       )
       const data = await res.json()
       const aiResponse = data.response || "Sorry, I didn't get a response from the server."
-      console.log("AI Response:", aiResponse)
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
