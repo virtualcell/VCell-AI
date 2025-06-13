@@ -12,8 +12,6 @@ import {
   Send,
   Bot,
   User,
-  ChevronDown,
-  ChevronUp,
   Dna,
   Gauge,
   FlaskRoundIcon as Flask,
@@ -36,8 +34,9 @@ interface AnalysisState {
     description: string
     diagram: string
     vcml: string
-    aiAnalysis: string
+    diagramAnalysis: string
     vcmlAnalysis: string
+    aiAnalysis: string
     followUpMessages: Message[]
   } | null
 }
@@ -64,7 +63,6 @@ export default function AnalyzePage() {
   })
 
   const [followUpInput, setFollowUpInput] = useState("")
-  const [isVcmlExpanded, setIsVcmlExpanded] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [diagramInfo, setDiagramInfo] = useState<any>(null)
@@ -184,13 +182,32 @@ export default function AnalyzePage() {
     setIsLoading(true)
     setError("")
     try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL
+      // Call the /analyse endpoint
+      const analyseRes = await fetch(`${apiUrl}/analyse/${state.biomodelId}?user_prompt=${encodeURIComponent(state.prompt)}`, {
+        method: 'POST',
+        headers: { 'accept': 'application/json' },
+      })
+      if (!analyseRes.ok) throw new Error("Failed to analyze biomodel.")
+      const analyseData = await analyseRes.json()
+      // Fetch VCML and diagram in parallel
       const [vcml, diagram] = await Promise.all([
         handleRetrieveVcml(state.biomodelId),
         handleRetrieveDiagram(state.biomodelId),
       ])
-      // Placeholder for AI analysis and VCML analysis
-      const aiAnalysis = "AI analysis is under development."
-      const vcmlAnalysis = "VCML analysis is under development."
+      // Use the response fields for analysis
+      const aiAnalysis = analyseData.response?.ai_analysis || "No AI analysis available."
+      const diagramAnalysis = analyseData.response?.diagram_analysis || "No diagram analysis available."
+      const vcmlAnalysis = analyseData.response?.vcml_analysis || "No VCML analysis available."
+      console.log("AI Analysis:", aiAnalysis)
+      console.log("Diagram Analysis:", diagramAnalysis)
+      console.log("VCML Analysis:", vcmlAnalysis)
+      // Add the result to the chatbox as the first message
+      const initialMessage: Message = {
+        id: Date.now().toString(),
+        role: "assistant",
+        content: `${aiAnalysis}`,
+      }
       setState({
         ...state,
         status: "results",
@@ -199,9 +216,10 @@ export default function AnalyzePage() {
           description: `Results for biomodel ID ${state.biomodelId}.`,
           diagram: diagram?.url || "",
           vcml: vcml || "",
-          aiAnalysis,
+          diagramAnalysis,
           vcmlAnalysis,
-          followUpMessages: [],
+          aiAnalysis,
+          followUpMessages: [initialMessage],
         },
       })
     } catch (err) {
@@ -386,17 +404,17 @@ export default function AnalyzePage() {
               </div>
             </div>
 
-            {/* AI Analysis Section */}
+            {/* Diagram Analysis Section */}
             <div className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
               <div className="bg-slate-50 border-b border-slate-200 px-6 py-4">
                 <h3 className="text-xl font-semibold text-slate-900 flex items-center gap-2">
                   <Search className="h-5 w-5" />
-                  AI Analysis
+                  Diagram Analysis
                 </h3>
               </div>
               <div className="p-6">
                 <div className="prose max-w-none">
-                  <div className="whitespace-pre-wrap text-slate-800 leading-relaxed">{state.results.aiAnalysis}</div>
+                  <div className="whitespace-pre-wrap text-slate-800 leading-relaxed">{state.results.diagramAnalysis}</div>
                 </div>
               </div>
             </div>
