@@ -32,7 +32,8 @@ You are a VCell BioModel Assistant, designed to help users understand and intera
 * If asked about irrelevant topics, politely decline to answer.
 """
 
-async def get_llm_response(system_prompt: str ,user_prompt: str):
+
+async def get_llm_response(system_prompt: str, user_prompt: str):
     """
     Helper function to get a response from the LLM.
     args:
@@ -52,6 +53,7 @@ async def get_llm_response(system_prompt: str ,user_prompt: str):
     )
 
     return response.choices[0].message.content
+
 
 async def get_response_with_tools(user_prompt: str):
     messages = [
@@ -126,18 +128,17 @@ async def analyse_biomodel(biomodel_id: str, user_prompt: str):
         vcml_analysis = await get_llm_response(vcml_system_prompt, vcml_prompt)
         final_response["vcml_analysis"] = vcml_analysis
 
-
         # Fetch Biomodel Information using BiomodelRequestParams
         params_dict = {
-            "bmId": biomodel_id, 
+            "bmId": biomodel_id,
             "bmName": "",
-            "category": "all", 
+            "category": "all",
             "owner": "",
-            "savedLow": None, 
-            "savedHigh": None, 
-            "startRow": 1, 
+            "savedLow": None,
+            "savedHigh": None,
+            "startRow": 1,
             "maxRows": 1,
-            "orderBy": "date_desc"
+            "orderBy": "date_desc",
         }
         # Fetch biomodel details
         biomodel_params = BiomodelRequestParams(**params_dict)
@@ -150,23 +151,26 @@ async def analyse_biomodel(biomodel_id: str, user_prompt: str):
         user_analysis_response = await get_llm_response(system_prompt, user_prompt)
         final_response["ai_analysis"] = user_analysis_response
 
-
         # Fetch Diagram URL
         diagram_url = await get_diagram_url(biomodel_id)
         # Diagram Analysis
-        diagram_analysis_prompt = "You are a VCell BioModel Assistant, designed to help users understand and interact with biological models in VCell. " + \
-            biomodel_info + \
-            "Your task is to analyze the diagram of the biomodel and provide a detailed description of its components, interactions, and any other relevant information. "
+        diagram_analysis_prompt = (
+            "You are a VCell BioModel Assistant, designed to help users understand and interact with biological models in VCell. "
+            + biomodel_info
+            + "Your task is to analyze the diagram of the biomodel and provide a detailed description of its components, interactions, and any other relevant information. "
+        )
         diagram_analysis_prompt = [
             {"type": "text", "text": diagram_analysis_prompt},
             {"type": "image_url", "image_url": {"url": diagram_url}},
         ]
         response = client.chat.completions.create(
             model=settings.AZURE_DEPLOYMENT_NAME,
-            messages=[{
-                "role": "user",
-                "content": diagram_analysis_prompt,
-            }],
+            messages=[
+                {
+                    "role": "user",
+                    "content": diagram_analysis_prompt,
+                }
+            ],
         )
         diagram_analysis = response.choices[0].message.content
         final_response["diagram_analysis"] = diagram_analysis

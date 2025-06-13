@@ -1,5 +1,8 @@
 from fastapi import APIRouter
-from app.controllers.llms_controller import get_llm_response, analyse_biomodel_controller
+from app.controllers.llms_controller import (
+    get_llm_response,
+    analyse_biomodel_controller,
+)
 
 router = APIRouter()
 

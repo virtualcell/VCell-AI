@@ -18,7 +18,7 @@ async def get_llm_response(user_prompt: str) -> str:
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
-    
+
 
 async def analyse_biomodel_controller(biomodel_id: str, user_prompt: str) -> dict:
     """
@@ -33,4 +33,6 @@ async def analyse_biomodel_controller(biomodel_id: str, user_prompt: str) -> dic
         result = await analyse_biomodel(biomodel_id, user_prompt)
         return result
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error analyzing biomodel {biomodel_id}: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Error analyzing biomodel {biomodel_id}: {str(e)}"
+        )
