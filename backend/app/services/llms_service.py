@@ -66,12 +66,12 @@ async def get_response_with_tools(user_prompt: str):
                 {"role": "tool", "tool_call_id": tool_call.id, "content": str(result)}
             )
 
+    logger.info(str(messages))
+
     # Send back the final response incorporating the tool result
     completion = client.chat.completions.create(
         model=settings.AZURE_DEPLOYMENT_NAME,
         messages=messages,
-        tools=tools,
-        max_tokens=10000,
     )
 
     final_response = completion.choices[0].message.content
