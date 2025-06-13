@@ -260,10 +260,10 @@ Feel free to ask anything! 🚀`,
                               variant="outline"
                               size="sm"
                               className="w-full justify-start text-xs h-8"
-                              onClick={() => handleQuickAction("List all models by ModelBricks")}
+                              onClick={() => handleQuickAction("List all models by ModelBrick")}
                             >
                               <User className="h-3 w-3 mr-2" />
-                              List all models by ModelBricks
+                              List all models by ModelBrick
                             </Button>
                             <Button
                               variant="outline"
