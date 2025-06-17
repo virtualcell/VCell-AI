@@ -1,17 +1,11 @@
 "use client"
 
 import React from "react"
-
-import { useState, useRef } from "react"
+import { useState } from "react"
 import {
   Search,
-  FileText,
-  BarChart3Icon as Diagram3,
-  Loader2,
   MessageSquare,
-  Send,
-  Bot,
-  User,
+  Loader2,
   Dna,
   Gauge,
   FlaskRoundIcon as Flask,
@@ -21,9 +15,9 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import XMLViewer from 'react-xml-viewer'
+import { DiagramSection } from "@/components/DiagramSection"
+import { VCMLSection } from "@/components/VCMLSection"
+import { ChatBox } from "@/components/ChatBox"
 
 interface AnalysisState {
   status: "input" | "loading" | "results"
@@ -37,14 +31,7 @@ interface AnalysisState {
     diagramAnalysis: string
     vcmlAnalysis: string
     aiAnalysis: string
-    followUpMessages: Message[]
   } | null
-}
-
-interface Message {
-  id: string
-  role: "user" | "assistant"
-  content: string
 }
 
 interface PromptTemplate {
@@ -62,12 +49,10 @@ export default function AnalyzePage() {
     results: null,
   })
 
-  const [followUpInput, setFollowUpInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [diagramInfo, setDiagramInfo] = useState<any>(null)
   const [vcmlContent, setVcmlContent] = useState("")
-  const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const promptTemplates: PromptTemplate[] = [
     {
@@ -199,15 +184,7 @@ export default function AnalyzePage() {
       const aiAnalysis = analyseData.response?.ai_analysis || "No AI analysis available."
       const diagramAnalysis = analyseData.response?.diagram_analysis || "No diagram analysis available."
       const vcmlAnalysis = analyseData.response?.vcml_analysis || "No VCML analysis available."
-      console.log("AI Analysis:", aiAnalysis)
-      console.log("Diagram Analysis:", diagramAnalysis)
-      console.log("VCML Analysis:", vcmlAnalysis)
-      // Add the result to the chatbox as the first message
-      const initialMessage: Message = {
-        id: Date.now().toString(),
-        role: "assistant",
-        content: `${aiAnalysis}`,
-      }
+
       setState({
         ...state,
         status: "results",
@@ -219,7 +196,6 @@ export default function AnalyzePage() {
           diagramAnalysis,
           vcmlAnalysis,
           aiAnalysis,
-          followUpMessages: [initialMessage],
         },
       })
     } catch (err) {
@@ -227,50 +203,6 @@ export default function AnalyzePage() {
     } finally {
       setIsLoading(false)
     }
-  }
-
-  const handleFollowUpSubmit = () => {
-    if (!followUpInput.trim() || !state.results) return
-
-    // Add user message
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content: followUpInput,
-    }
-
-    setState({
-      ...state,
-      results: {
-        ...state.results,
-        followUpMessages: [...state.results.followUpMessages, userMessage],
-      },
-    })
-
-    setFollowUpInput("")
-
-    // Simulate AI response delay
-    setTimeout(() => {
-      // Development mode response
-      const aiResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: "Still in development mode",
-      }
-
-      setState({
-        ...state,
-        results: {
-          ...state.results!,
-          followUpMessages: [...state.results!.followUpMessages, aiResponse],
-        },
-      })
-
-      // Scroll to bottom of messages
-      setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-      }, 100)
-    }, 1500)
   }
 
   const handleReset = () => {
@@ -281,6 +213,12 @@ export default function AnalyzePage() {
       results: null,
     })
   }
+
+  const quickActions = promptTemplates.map(template => ({
+    label: template.title,
+    icon: template.icon,
+    value: template.prompt
+  }))
 
   return (
     <div className="min-h-screen bg-white flex flex-col justify-center items-center text-slate-900">
@@ -383,136 +321,24 @@ export default function AnalyzePage() {
               </Button>
             </div>
 
-            {/* Diagram Section */}
-            <div className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
-              <div className="bg-slate-50 border-b border-slate-200 px-6 py-4">
-                <h3 className="text-xl font-semibold text-slate-900 flex items-center gap-2">
-                  <Diagram3 className="h-5 w-5" />
-                  Biomodel Diagram
-                </h3>
-              </div>
-              <div className="p-6">
-                <div className="flex flex-col items-center">
-                  <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 mb-4 w-full">
-                    <img
-                      src={state.results.diagram || "/placeholder.svg"}
-                      alt="Biomodel Diagram"
-                      className="max-w-full h-auto mx-auto"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* Diagram and Analysis Sections */}
+            <DiagramSection 
+              diagramUrl={state.results.diagram}
+              diagramAnalysis={state.results.diagramAnalysis}
+            />
 
-            {/* Diagram Analysis Section */}
-            <div className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
-              <div className="bg-slate-50 border-b border-slate-200 px-6 py-4">
-                <h3 className="text-xl font-semibold text-slate-900 flex items-center gap-2">
-                  <Search className="h-5 w-5" />
-                  Diagram Analysis
-                </h3>
-              </div>
-              <div className="p-6">
-                <div className="prose max-w-none">
-                  <div className="whitespace-pre-wrap text-slate-800 leading-relaxed">{state.results.diagramAnalysis}</div>
-                </div>
-              </div>
-            </div>
+            {/* VCML Sections */}
+            <VCMLSection 
+              vcml={state.results.vcml}
+              vcmlAnalysis={state.results.vcmlAnalysis}
+            />
 
-            {/* VCML File Section */}
-            <div className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
-              <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-                <h3 className="text-xl font-semibold text-slate-900 flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
-                  VCML File
-                </h3>
-              </div>
-              <div className="max-h-[400px] overflow-y-auto p-6">
-                <XMLViewer xml={state.results.vcml} />
-              </div>
-            </div>
-
-            {/* VCML Analysis Section */}
-            <div className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
-              <div className="bg-slate-50 border-b border-slate-200 px-6 py-4">
-                <h3 className="text-xl font-semibold text-slate-900 flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
-                  VCML Analysis
-                </h3>
-              </div>
-              <div className="p-6">
-                <div className="prose max-w-none">
-                  <div className="whitespace-pre-wrap text-slate-800 leading-relaxed">{state.results.vcmlAnalysis}</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Follow-up Questions */}
-            <Card className="shadow-sm border-slate-200">
-              <CardHeader className="bg-slate-50 border-b border-slate-200">
-                <CardTitle className="flex items-center gap-2 text-slate-900">
-                  <MessageSquare className="h-5 w-5" />
-                  Follow-up Questions
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <ScrollArea className="h-[400px] p-6">
-                  <div className="space-y-4">
-                    {state.results.followUpMessages.map((message) => (
-                      <div
-                        key={message.id}
-                        className={`flex gap-3 ${message.role === "user" ? "justify-end" : "justify-start"}`}
-                      >
-                        <div
-                          className={`flex gap-3 max-w-[80%] ${
-                            message.role === "user" ? "flex-row-reverse" : "flex-row"
-                          }`}
-                        >
-                          <div
-                            className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                              message.role === "user" ? "bg-blue-600 text-white" : "bg-slate-200 text-slate-700"
-                            }`}
-                          >
-                            {message.role === "user" ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
-                          </div>
-                          <div
-                            className={`rounded-lg p-3 ${
-                              message.role === "user" ? "bg-blue-600 text-white" : "bg-white border border-slate-200"
-                            }`}
-                          >
-                            <div className="whitespace-pre-wrap text-sm leading-relaxed">{message.content}</div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                    <div ref={messagesEndRef} />
-                  </div>
-                </ScrollArea>
-                <div className="border-t border-slate-200 p-4">
-                  <div className="flex w-full gap-2">
-                    <Input
-                      value={followUpInput}
-                      onChange={(e) => setFollowUpInput(e.target.value)}
-                      placeholder="Ask a follow-up question about this biomodel..."
-                      className="flex-1 border-slate-300 focus:border-blue-500"
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey) {
-                          e.preventDefault()
-                          handleFollowUpSubmit()
-                        }
-                      }}
-                    />
-                    <Button
-                      onClick={handleFollowUpSubmit}
-                      disabled={!followUpInput.trim()}
-                      className="bg-blue-600 hover:bg-blue-700 text-white"
-                    >
-                      <Send className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Chat Box */}
+            <ChatBox
+              startMessage={state.results.aiAnalysis}
+              quickActions={quickActions}
+              cardTitle="Follow-up Questions"
+            />
           </div>
         )}
       </div>
