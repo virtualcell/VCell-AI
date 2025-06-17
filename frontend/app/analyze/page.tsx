@@ -338,6 +338,7 @@ export default function AnalyzePage() {
               startMessage={state.results.aiAnalysis}
               quickActions={quickActions}
               cardTitle="Follow-up Questions"
+              promptPrefix={`Analyze the biomodel with the bmId ${state.biomodelId} for the following question: ${state.prompt}`}
             />
           </div>
         )}

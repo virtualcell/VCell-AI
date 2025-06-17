@@ -23,9 +23,10 @@ interface ChatBoxProps {
   startMessage: string
   quickActions: QuickAction[]
   cardTitle: string
+  promptPrefix?: string
 }
 
-export const ChatBox: React.FC<ChatBoxProps> = ({ startMessage, quickActions, cardTitle }) => {
+export const ChatBox: React.FC<ChatBoxProps> = ({ startMessage, quickActions, cardTitle, promptPrefix }) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -65,8 +66,9 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ startMessage, quickActions, ca
     setInputMessage("")
     setIsLoading(true)
     try {
+      const finalPrompt = promptPrefix ? `${promptPrefix} ${msg}` : msg
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/query?user_prompt=${encodeURIComponent(msg)}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/query?user_prompt=${encodeURIComponent(finalPrompt)}`,
         {
           method: "POST",
           headers: { accept: "application/json" },
