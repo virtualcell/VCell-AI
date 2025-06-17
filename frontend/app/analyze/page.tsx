@@ -51,8 +51,6 @@ export default function AnalyzePage() {
 
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
-  const [diagramInfo, setDiagramInfo] = useState<any>(null)
-  const [vcmlContent, setVcmlContent] = useState("")
 
   const promptTemplates: PromptTemplate[] = [
     {
@@ -97,70 +95,7 @@ export default function AnalyzePage() {
     setState({ ...state, prompt })
   }
 
-  // Fetch VCML file from backend
-  const handleRetrieveVcml = async (biomodelId: string) => {
-    setIsLoading(true)
-    setError("")
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL
-      const res = await fetch(`${apiUrl}/biomodel/${biomodelId}/biomodel.vcml`)
-      if (!res.ok) {
-        setError("Failed to fetch VCML from backend.")
-        setVcmlContent("")
-        return ""
-      } else {
-        let text = await res.text()
-        if (text.startsWith('"') && text.endsWith('"')) {
-          text = text.slice(1, -1)
-        }
-        setVcmlContent(text)
-        return text
-      }
-    } catch (err) {
-      setError("Failed to fetch VCML from backend.")
-      setVcmlContent("")
-      return ""
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  // Fetch diagram image from backend
-  const handleRetrieveDiagram = async (biomodelId: string) => {
-    setIsLoading(true)
-    setError("")
-    setDiagramInfo(null)
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL
-      const res = await fetch(`${apiUrl}/biomodel/${biomodelId}/diagram/image`)
-      const contentType = res.headers.get("content-type")
-      if (res.ok && contentType && contentType.startsWith("image")) {
-        const blob = await res.blob()
-        const imageUrl = URL.createObjectURL(blob)
-        const info = {
-          url: imageUrl,
-          title: `Diagram for Biomodel ${biomodelId}`,
-          format: contentType.split("/")[1].toUpperCase(),
-        }
-        setDiagramInfo(info)
-        return info
-      } else if (contentType && contentType.includes("application/json")) {
-        const data = await res.json()
-        setError(data.detail || "Diagram not found.")
-        return null
-      } else {
-        setError("Unexpected response from server.")
-        return null
-      }
-    } catch (err) {
-      setError("Failed to fetch diagram.")
-      return null
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  // Updated handleAnalyze to fetch VCML and diagram
+  // Updated handleAnalyze to only handle the analysis endpoint
   const handleAnalyze = async () => {
     if (!state.biomodelId.trim() || !state.prompt.trim()) return
     setState({ ...state, status: "loading" })
@@ -175,11 +110,7 @@ export default function AnalyzePage() {
       })
       if (!analyseRes.ok) throw new Error("Failed to analyze biomodel.")
       const analyseData = await analyseRes.json()
-      // Fetch VCML and diagram in parallel
-      const [vcml, diagram] = await Promise.all([
-        handleRetrieveVcml(state.biomodelId),
-        handleRetrieveDiagram(state.biomodelId),
-      ])
+
       // Use the response fields for analysis
       const aiAnalysis = analyseData.response?.ai_analysis || "No AI analysis available."
       const diagramAnalysis = analyseData.response?.diagram_analysis || "No diagram analysis available."
@@ -191,8 +122,8 @@ export default function AnalyzePage() {
         results: {
           title: `Analysis for Biomodel ${state.biomodelId}`,
           description: `Results for biomodel ID ${state.biomodelId}.`,
-          diagram: diagram?.url || "",
-          vcml: vcml || "",
+          diagram: "",
+          vcml: "",
           diagramAnalysis,
           vcmlAnalysis,
           aiAnalysis,
@@ -323,13 +254,13 @@ export default function AnalyzePage() {
 
             {/* Diagram and Analysis Sections */}
             <DiagramSection 
-              diagramUrl={state.results.diagram}
+              biomodelId={state.biomodelId}
               diagramAnalysis={state.results.diagramAnalysis}
             />
 
             {/* VCML Sections */}
             <VCMLSection 
-              vcml={state.results.vcml}
+              biomodelId={state.biomodelId}
               vcmlAnalysis={state.results.vcmlAnalysis}
             />
 
