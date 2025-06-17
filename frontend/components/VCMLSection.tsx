@@ -1,6 +1,7 @@
 import React from "react"
 import { FileText } from "lucide-react"
 import XMLViewer from 'react-xml-viewer'
+import { MarkdownRenderer } from "./markdown-renderer"
 
 interface VCMLSectionProps {
   vcml: string
@@ -33,7 +34,7 @@ export const VCMLSection: React.FC<VCMLSectionProps> = ({ vcml, vcmlAnalysis }) 
         </div>
         <div className="p-6">
           <div className="prose max-w-none">
-            <div className="whitespace-pre-wrap text-slate-800 leading-relaxed">{vcmlAnalysis}</div>
+            <MarkdownRenderer content={vcmlAnalysis} />
           </div>
         </div>
       </div>

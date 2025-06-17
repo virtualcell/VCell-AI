@@ -1,5 +1,6 @@
 import React from "react"
 import { BarChart3Icon as Diagram3, Search } from "lucide-react"
+import { MarkdownRenderer } from "./markdown-renderer"
 
 interface DiagramSectionProps {
   diagramUrl: string
@@ -40,7 +41,7 @@ export const DiagramSection: React.FC<DiagramSectionProps> = ({ diagramUrl, diag
         </div>
         <div className="p-6">
           <div className="prose max-w-none">
-            <div className="whitespace-pre-wrap text-slate-800 leading-relaxed">{diagramAnalysis}</div>
+            <MarkdownRenderer content={diagramAnalysis} />
           </div>
         </div>
       </div>
