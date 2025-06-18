@@ -48,6 +48,23 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ startMessage, quickActions, ca
     scrollToBottom()
   }, [messages])
 
+  // Helper function to format biomodel IDs as hyperlinks
+  const formatBiomodelIds = (content: string, bmkeys: string[]): string => {
+    if (!bmkeys || bmkeys.length === 0) return content
+    
+    let formattedContent = content
+    
+    // Replace biomodel IDs with hyperlinks
+    bmkeys.forEach(bmId => {
+      const regex = new RegExp(`\\b${bmId}\\b`, 'g')
+      const encodedPrompt = encodeURIComponent(`Describe model`)
+      const link = `[${bmId}](/analyze/${bmId}?prompt=${encodedPrompt})`
+      formattedContent = formattedContent.replace(regex, link)
+    })
+    
+    return formattedContent
+  }
+
   const handleQuickAction = (message: string) => {
     setInputMessage("")
     handleSendMessage(message)
@@ -77,11 +94,16 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ startMessage, quickActions, ca
       )
       const data = await res.json()
       const aiResponse = data.response || "Sorry, I didn't get a response from the server."
-      console.log(aiResponse)
+      const bmkeys = data.bmkeys || []
+      
+      // Format the response to include hyperlinks for biomodel IDs
+      const formattedResponse = formatBiomodelIds(aiResponse, bmkeys)
+      
+      console.log(formattedResponse)
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: aiResponse,
+        content: formattedResponse,
         timestamp: new Date(),
       }
       setMessages((prev) => [...prev, assistantMessage])
