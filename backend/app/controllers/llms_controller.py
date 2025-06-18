@@ -14,8 +14,8 @@ async def get_llm_response(user_prompt: str) -> str:
         str: The final response after processing the user's query.
     """
     try:
-        result = await get_response_with_tools(user_prompt)
-        return result
+        result, bmkeys = await get_response_with_tools(user_prompt)
+        return result, bmkeys
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 

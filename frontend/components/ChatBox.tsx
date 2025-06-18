@@ -77,6 +77,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ startMessage, quickActions, ca
       )
       const data = await res.json()
       const aiResponse = data.response || "Sorry, I didn't get a response from the server."
+      console.log(aiResponse)
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
