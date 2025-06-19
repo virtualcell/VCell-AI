@@ -5,9 +5,10 @@ import { MarkdownRenderer } from "./markdown-renderer"
 interface DiagramSectionProps {
   biomodelId: string
   diagramAnalysis: string
+  isAnalysisLoading: boolean
 }
 
-export const DiagramSection: React.FC<DiagramSectionProps> = ({ biomodelId, diagramAnalysis }) => {
+export const DiagramSection: React.FC<DiagramSectionProps> = ({ biomodelId, diagramAnalysis, isAnalysisLoading }) => {
   const [diagramUrl, setDiagramUrl] = useState<string>("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
@@ -82,9 +83,16 @@ export const DiagramSection: React.FC<DiagramSectionProps> = ({ biomodelId, diag
           </h3>
         </div>
         <div className="p-6">
-          <div className="prose max-w-none">
-            <MarkdownRenderer content={diagramAnalysis} />
-          </div>
+          {isAnalysisLoading ? (
+            <div className="flex justify-center items-center h-32">
+              <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+              <span className="ml-2 text-slate-600">Analyzing diagram...</span>
+            </div>
+          ) : (
+            <div className="prose max-w-none">
+              <MarkdownRenderer content={diagramAnalysis} />
+            </div>
+          )}
         </div>
       </div>
     </>
