@@ -78,6 +78,8 @@ async def get_response_with_tools(user_prompt: str):
 
     messages.append(response.choices[0].message)
 
+    bmkeys = []
+
     if tool_calls:
         for tool_call in tool_calls:
             # Extract the function name and arguments
@@ -90,6 +92,8 @@ async def get_response_with_tools(user_prompt: str):
             result = await execute_tool(name, args)
 
             logger.info(f"Tool Result: {str(result)[:500]}")
+
+            bmkeys = result.get('unique_model_keys (bmkey)', [])
 
             # Send the result back to the model
             messages.append(
@@ -108,8 +112,7 @@ async def get_response_with_tools(user_prompt: str):
 
     logger.info(f"LLM Response: {final_response}")
 
-    return final_response
-
+    return final_response, bmkeys
 
 async def analyse_biomodel(biomodel_id: str, user_prompt: str):
     # Initialize final response structure

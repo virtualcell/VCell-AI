@@ -1,33 +1,20 @@
 "use client"
 
 import type React from "react"
-
-import { useState, useRef, useEffect } from "react"
+import { useState, useEffect } from "react"
 import {
   MessageSquare,
-  Send,
   Bot,
   User,
   Search,
   FileText,
   BarChart3Icon as Diagram3,
-  Loader2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { ToolParameters } from "@/components/ToolParameters"
 import { OnboardingModal } from "@/components/onboarding-modal"
-import { MarkdownRenderer } from "@/components/markdown-renderer"
-
-interface Message {
-  id: string
-  role: "user" | "assistant"
-  content: string
-  timestamp: Date
-}
+import { ChatBox } from "@/components/ChatBox"
 
 interface ChatParameters {
   biomodelId: string,
@@ -42,20 +29,6 @@ interface ChatParameters {
 }
 
 export default function ChatPage() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      role: "assistant",
-      content: `# Welcome to VCell AI Assistant! 🤖
-
-I'm here to help you with **biomodel analysis** and research support.
-Feel free to ask anything! 🚀`,
-      timestamp: new Date(),
-    },
-  ])
-
-  const [inputMessage, setInputMessage] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
   const [showOnboarding, setShowOnboarding] = useState(false)
 
   const [parameters, setParameters] = useState<ChatParameters>({
@@ -70,17 +43,6 @@ Feel free to ask anything! 🚀`,
     llmMode: "tool_calling",
   })
 
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
-
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages])
-
   useEffect(() => {
     // Check if user has seen onboarding before
     const hasSeenOnboarding = localStorage.getItem("vcell-ai-onboarding-seen")
@@ -94,64 +56,35 @@ Feel free to ask anything! 🚀`,
     setShowOnboarding(false)
   }
 
-  const handleQuickAction = (message: string) => {
-    setInputMessage(message)
-    handleSendMessage()
-  }
-
-  const handleSendMessage = async () => {
-    if (!inputMessage.trim()) return
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content: inputMessage,
-      timestamp: new Date(),
-    }
-
-    setMessages((prev) => [...prev, userMessage])
-    setInputMessage("")
-    setIsLoading(true)
-
-    try {
-      // Send user message to backend
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/query?user_prompt=${encodeURIComponent(inputMessage)}`,
-        {
-          method: "POST",
-          headers: { accept: "application/json" },
-          body: "",
-        },
-      )
-      const data = await res.json()
-      const aiResponse = data.response || "Sorry, I didn't get a response from the server."
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: aiResponse,
-        timestamp: new Date(),
-      }
-      setMessages((prev) => [...prev, assistantMessage])
-    } catch (error) {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: (Date.now() + 2).toString(),
-          role: "assistant",
-          content: "There was an error connecting to the backend. Please try again.",
-          timestamp: new Date(),
-        },
-      ])
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault()
-      handleSendMessage()
-    }
-  }
+  // Prepare props for ChatBox
+  const startMessage = `# Welcome to VCell AI Assistant! 🤖\n\nI'm here to help you with **biomodel analysis** and research support.\nFeel free to ask anything! 🚀`
+  const quickActions = [
+    {
+      label: "List all tutorial models.",
+      icon: <Search className="h-3 w-3 mr-2" />, value: "List all tutorial models"
+    },
+    {
+      label: "List all models mentioning Calcium",
+      icon: <FileText className="h-3 w-3 mr-2" />, value: "List all models mentioning Calcium"
+    },
+    {
+      label: "List all models by ModelBrick",
+      icon: <User className="h-3 w-3 mr-2" />, value: "List all models by ModelBrick"
+    },
+    {
+      label: "What solvers are used in VCell tutorial models?",
+      icon: <Diagram3 className="h-3 w-3 mr-2" />, value: "What solvers are used in VCell tutorial models?"
+    },
+    {
+      label: "What are different types of VCell applications used in Tutorial models",
+      icon: <MessageSquare className="h-3 w-3 mr-2" />, value: "What are different types of VCell applications used in Tutorial models"
+    },
+    {
+      label: "What Tutorial models use Spatial Stochastic applications?",
+      icon: <Bot className="h-3 w-3 mr-2" />, value: "What Tutorial models use Spatial Stochastic applications?"
+    },
+  ]
+  const cardTitle = "VCell AI Assistant"
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -187,153 +120,11 @@ Feel free to ask anything! 🚀`,
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Chat Interface */}
           <div className="lg:col-span-3">
-            <Card className="h-[600px] flex flex-col shadow-sm border-slate-200">
-              <CardHeader className="bg-slate-50 border-b border-slate-200 flex-shrink-0">
-                <CardTitle className="flex items-center gap-2 text-slate-900">
-                  <MessageSquare className="h-5 w-5" />
-                  VCell AI Assistant
-                </CardTitle>
-              </CardHeader>
-
-              {/* Messages Area */}
-              <CardContent className="flex-1 p-0 overflow-hidden">
-                <ScrollArea className="h-full p-4">
-                  <div className="space-y-4">
-                    {messages.map((message) => (
-                      <div
-                        key={message.id}
-                        className={`flex gap-3 ${message.role === "user" ? "justify-end" : "justify-start"}`}
-                      >
-                        <div
-                          className={`flex gap-3 max-w-[80%] ${
-                            message.role === "user" ? "flex-row-reverse" : "flex-row"
-                          }`}
-                        >
-                          <div
-                            className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                              message.role === "user" ? "bg-blue-600 text-white" : "bg-slate-200 text-slate-700"
-                            }`}
-                          >
-                            {message.role === "user" ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
-                          </div>
-                          <div
-                            className={`rounded-lg p-3 ${
-                              message.role === "user" ? "bg-blue-600 text-white" : "bg-white border border-slate-200"
-                            }`}
-                          >
-                            {message.role === "user" ? (
-                              <div className="whitespace-pre-wrap text-sm leading-relaxed">{message.content}</div>
-                            ) : (
-                              <MarkdownRenderer content={message.content} />
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                      <div className="flex gap-3 justify-start">
-                        <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center flex-shrink-0">
-                          <Bot className="h-4 w-4" />
-                        </div>
-                        <div className="bg-white border border-slate-200 rounded-lg p-3 max-w-[80%]">
-                          <div className="text-sm text-slate-600 mb-3">Try these quick actions:</div>
-                          <div className="space-y-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="w-full justify-start text-xs h-8"
-                              onClick={() => handleQuickAction("List all tutorial models")}
-                            >
-                              <Search className="h-3 w-3 mr-2" />
-                              List all tutorial models.
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="w-full justify-start text-xs h-8"
-                              onClick={() => handleQuickAction("List all models mentioning Calcium")}
-                            >
-                              <FileText className="h-3 w-3 mr-2" />
-                              List all models mentioning Calcium
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="w-full justify-start text-xs h-8"
-                              onClick={() => handleQuickAction("List all models by ModelBrick")}
-                            >
-                              <User className="h-3 w-3 mr-2" />
-                              List all models by ModelBrick
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="w-full justify-start text-xs h-8"
-                              onClick={() => handleQuickAction("What solvers are used in VCell tutorial models?")}
-                            >
-                              <Diagram3 className="h-3 w-3 mr-2" />
-                              What solvers are used in VCell tutorial models?
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="w-full justify-start text-xs h-8"
-                              onClick={() => handleQuickAction("What are different types of VCell applications used in Tutorial models")}
-                            >
-                              <MessageSquare className="h-3 w-3 mr-2" />
-                              What are different types of VCell applications used in Tutorial models
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="w-full justify-start text-xs h-8"
-                              onClick={() => handleQuickAction("What Tutorial models use Spatial Stochastic applications?")}
-                            >
-                              <Bot className="h-3 w-3 mr-2" />
-                              What Tutorial models use Spatial Stochastic applications?
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    {isLoading && (
-                      <div className="flex gap-3 justify-start">
-                        <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center flex-shrink-0">
-                          <Bot className="h-4 w-4" />
-                        </div>
-                        <div className="bg-white border border-slate-200 rounded-lg p-3">
-                          <div className="flex items-center gap-2 text-slate-600">
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            <span className="text-sm">AI is thinking...</span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  <div ref={messagesEndRef} />
-                </ScrollArea>
-              </CardContent>
-
-              {/* Input Area */}
-              <div className="border-t border-slate-200 p-4 flex-shrink-0">
-                <div className="flex gap-2">
-                  <Input
-                    ref={inputRef}
-                    value={inputMessage}
-                    onChange={(e) => setInputMessage(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder="Ask any questions about VCell biomodels..."
-                    className="flex-1 border-slate-300 focus:border-blue-500"
-                    disabled={isLoading}
-                  />
-                  <Button
-                    onClick={handleSendMessage}
-                    disabled={isLoading || !inputMessage.trim()}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4"
-                  >
-                    <Send className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </Card>
+            <ChatBox
+              startMessage={startMessage}
+              quickActions={quickActions}
+              cardTitle={cardTitle}
+            />
           </div>
 
           {/* Tool Parameters Panel */}

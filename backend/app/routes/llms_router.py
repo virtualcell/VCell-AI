@@ -16,8 +16,8 @@ async def query_llm(user_prompt: str):
     Returns:
         dict: The final response after processing the prompt with the tools.
     """
-    result = await get_llm_response(user_prompt)
-    return {"response": result}
+    result, bmkeys = await get_llm_response(user_prompt)
+    return {"response": result, "bmkeys": bmkeys}
 
 
 @router.post("/analyse/{biomodel_id}")
