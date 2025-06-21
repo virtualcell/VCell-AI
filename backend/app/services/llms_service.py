@@ -23,7 +23,7 @@ SYSTEM_PROMPT = """
 You are a VCell BioModel Assistant, designed to help users understand and interact with biological models in VCell. Your task is to provide human-readable, accurate, detailed, and contextually appropriate responses based on the tools available. The following are specific instructions and guidelines you must follow to perform your role effectively:
 
 ### Guidelines
-* Stick strictly to the user’s query.
+* Stick strictly to the user's query.
 * Do not make assumptions or inferences about missing or incomplete information in the user's input.
 * Provide elaborate, fact-based responses based solely on the available tool results.
 * Include as many relevant details as possible, such as biomodel ID, names, descriptions, parameters, and any other relevant metadata that can aid in the user's understanding.
@@ -114,14 +114,15 @@ async def get_response_with_tools(user_prompt: str):
 
     return final_response, bmkeys
 
-async def analyse_biomodel(biomodel_id: str, user_prompt: str):
-    # Initialize final response structure
-    final_response = {
-        "diagram_analysis": "",
-        "vcml_analysis": "",
-        "ai_analysis": "",
-    }
-
+async def analyse_vcml(biomodel_id: str):
+    """
+    Analyze VCML content for a given biomodel.
+    
+    args:
+        biomodel_id (str): The ID of the biomodel to analyze.
+    returns:
+        str: The VCML analysis response.
+    """
     try:
         # Fetch VCML details
         vcml = await get_vcml_file(biomodel_id)
@@ -129,8 +130,23 @@ async def analyse_biomodel(biomodel_id: str, user_prompt: str):
         vcml_system_prompt = "You are a VCell BioModel Assistant, designed to help users understand and interact with biological models in VCell. Your task is to provide human-readable, accurate, detailed, and contextually appropriate responses based on the given VCML. Analyze the VCML file contents and give an elaborate and detailed response."
         vcml_prompt = f"Analyze the following VCML content for Biomodel {biomodel_id}: {str(vcml)}"
         vcml_analysis = await get_llm_response(vcml_system_prompt, vcml_prompt)
-        final_response["vcml_analysis"] = vcml_analysis
+        return vcml_analysis
+    except Exception as e:
+        logger.error(f"Error analyzing VCML for biomodel {biomodel_id}: {str(e)}")
+        return f"An error occurred during VCML analysis: {str(e)}"
 
+
+async def analyse_biomodel(biomodel_id: str, user_prompt: str):
+    """
+    Analyze user query with biomodel context.
+    
+    args:
+        biomodel_id (str): The ID of the biomodel to analyze.
+        user_prompt (str): The user's query or request.
+    returns:
+        str: The AI analysis response.
+    """
+    try:
         # Fetch Biomodel Information using BiomodelRequestParams
         params_dict = {
             "bmId": biomodel_id,
@@ -148,12 +164,42 @@ async def analyse_biomodel(biomodel_id: str, user_prompt: str):
         biomodels_info = await fetch_biomodels(biomodel_params)
         # Include relevant biomodel details in the user prompt
         biomodel_info = f"Here is some information about Biomodel {biomodel_id}: {str(biomodels_info)}"
-        user_prompt = f"{biomodel_info}\n\n{user_prompt}"
+        enhanced_user_prompt = f"{biomodel_info}\n\n{user_prompt}"
         # Analyze the user prompt with added biomodel context
         system_prompt = "You are a VCell BioModel Assistant, designed to help users understand and interact with biological models in VCell. Your task is to provide human-readable, accurate, detailed, and contextually appropriate responses based on the given data. Give an elaborate and detailed response to the user's query, considering the provided biomodel information."
-        user_analysis_response = await get_llm_response(system_prompt, user_prompt)
-        final_response["ai_analysis"] = user_analysis_response
+        user_analysis_response = await get_llm_response(system_prompt, enhanced_user_prompt)
+        return user_analysis_response
+    except Exception as e:
+        logger.error(f"Error analyzing AI for biomodel {biomodel_id}: {str(e)}")
+        return f"An error occurred during AI analysis: {str(e)}"
+        
 
+async def analyse_diagram(biomodel_id: str):
+    """
+    Analyze diagram for a given biomodel.
+    
+    args:
+        biomodel_id (str): The ID of the biomodel to analyze.
+    returns:
+        str: The diagram analysis response.
+    """
+    try:
+        # Fetch Biomodel Information for context
+        params_dict = {
+            "bmId": biomodel_id,
+            "bmName": "",
+            "category": "all",
+            "owner": "",
+            "savedLow": None,
+            "savedHigh": None,
+            "startRow": 1,
+            "maxRows": 1,
+            "orderBy": "date_desc",
+        }
+        biomodel_params = BiomodelRequestParams(**params_dict)
+        biomodels_info = await fetch_biomodels(biomodel_params)
+        biomodel_info = f"Here is some information about Biomodel {biomodel_id}: {str(biomodels_info)}"
+        
         # Fetch Diagram URL
         diagram_url = await get_diagram_url(biomodel_id)
         # Diagram Analysis
@@ -176,10 +222,7 @@ async def analyse_biomodel(biomodel_id: str, user_prompt: str):
             ],
         )
         diagram_analysis = response.choices[0].message.content
-        final_response["diagram_analysis"] = diagram_analysis
-
+        return diagram_analysis
     except Exception as e:
-        logger.error(f"Error analyzing biomodel {biomodel_id}: {str(e)}")
-        final_response["error"] = f"An error occurred: {str(e)}"
-
-    return final_response
+        logger.error(f"Error analyzing diagram for biomodel {biomodel_id}: {str(e)}")
+        return f"An error occurred during diagram analysis: {str(e)}"
