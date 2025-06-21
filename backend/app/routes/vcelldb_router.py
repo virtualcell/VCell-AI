@@ -39,12 +39,12 @@ async def get_simulations(
 
 
 @router.get("/biomodel/{biomodel_id}/biomodel.vcml", response_model=str)
-async def get_vcml(biomodel_id: str):
+async def get_vcml(biomodel_id: str, truncate: bool = False):
     """
     Endpoint to get VCML file contents for a given biomodel.
     """
     try:
-        return await get_vcml_controller(biomodel_id)
+        return await get_vcml_controller(biomodel_id, truncate)
     except HTTPException as e:
         raise e
 

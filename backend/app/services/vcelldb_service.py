@@ -70,13 +70,13 @@ async def fetch_simulation_details(params: SimulationRequestParams) -> dict:
         return response.json()
 
 
-async def get_vcml_file(biomodel_id: str) -> str:
+async def get_vcml_file(biomodel_id: str, truncate: bool = False) -> str:
     """
     Fetches the VCML file content for a given biomodel.
 
     Args:
         biomodel_id (str): ID of the biomodel.
-
+        truncate (bool): Whether to truncate the VCML file.
     Returns:
         str: VCML content of the biomodel.
     """
@@ -85,7 +85,10 @@ async def get_vcml_file(biomodel_id: str) -> str:
             f"{VCELL_API_BASE_URL}/biomodel/{biomodel_id}/biomodel.vcml"
         )
         response.raise_for_status()
-        return response.text
+        if truncate:
+            return response.text[:500]
+        else:
+            return response.text
 
 
 async def get_sbml_file(biomodel_id: str) -> str:
