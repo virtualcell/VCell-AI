@@ -12,8 +12,6 @@ import { ChatBox } from "@/components/ChatBox"
 interface AnalysisResults {
   title: string
   description: string
-  diagramAnalysis: string
-  vcmlAnalysis: string
   aiAnalysis: string
 }
 
@@ -30,9 +28,13 @@ export default function AnalysisResultsPage({ params }: { params: { id: string }
     const fetchAnalysis = async () => {
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL
-        const analyseRes = await fetch(`${apiUrl}/analyse/${params.id}?user_prompt=${encodeURIComponent(prompt)}`, {
+        const analyseRes = await fetch(`${apiUrl}/analyse/${params.id}`, {
           method: 'POST',
-          headers: { 'accept': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'accept': 'application/json' 
+          },
+          body: JSON.stringify({ user_prompt: prompt })
         })
         
         if (!analyseRes.ok) throw new Error("Failed to analyze biomodel.")
@@ -41,9 +43,7 @@ export default function AnalysisResultsPage({ params }: { params: { id: string }
         setResults({
           title: `Analysis for Biomodel ${params.id}`,
           description: `Results for biomodel ID ${params.id}.`,
-          diagramAnalysis: analyseData.response?.diagram_analysis || "No diagram analysis available.",
-          vcmlAnalysis: analyseData.response?.vcml_analysis || "No VCML analysis available.",
-          aiAnalysis: analyseData.response?.ai_analysis || "No AI analysis available.",
+          aiAnalysis: analyseData.response || "No AI analysis available.",
         })
       } catch (err) {
         setError("Failed to analyze biomodel.")
@@ -104,18 +104,10 @@ export default function AnalysisResultsPage({ params }: { params: { id: string }
           </div>
 
           {/* Diagram and Analysis Sections */}
-          <DiagramSection 
-            biomodelId={params.id}
-            diagramAnalysis={results?.diagramAnalysis || ""}
-            isAnalysisLoading={isAnalysisLoading}
-          />
+          <DiagramSection biomodelId={params.id} />
 
           {/* VCML Sections */}
-          <VCMLSection 
-            biomodelId={params.id}
-            vcmlAnalysis={results?.vcmlAnalysis || ""}
-            isAnalysisLoading={isAnalysisLoading}
-          />
+          <VCMLSection biomodelId={params.id} />
 
           {/* Chat Box */}
           <ChatBox

@@ -6,15 +6,16 @@ import { Button } from "@/components/ui/button"
 
 interface VCMLSectionProps {
   biomodelId: string
-  vcmlAnalysis: string
-  isAnalysisLoading: boolean
 }
 
-export const VCMLSection: React.FC<VCMLSectionProps> = ({ biomodelId, vcmlAnalysis, isAnalysisLoading }) => {
+export const VCMLSection: React.FC<VCMLSectionProps> = ({ biomodelId }) => {
   const [vcml, setVcml] = useState<string>("")
   const [fullVcml, setFullVcml] = useState<string>("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const [vcmlAnalysis, setVcmlAnalysis] = useState<string>("")
+  const [isAnalysisLoading, setIsAnalysisLoading] = useState(false)
+  const [analysisError, setAnalysisError] = useState("")
 
   useEffect(() => {
     const fetchVcml = async () => {
@@ -52,8 +53,35 @@ export const VCMLSection: React.FC<VCMLSectionProps> = ({ biomodelId, vcmlAnalys
       }
     }
 
+    const fetchVcmlAnalysis = async () => {
+      setIsAnalysisLoading(true)
+      setAnalysisError("")
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL
+        const res = await fetch(`${apiUrl}/analyse/${biomodelId}/vcml`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+        
+        if (res.ok) {
+          const data = await res.json()
+          setVcmlAnalysis(data.response || "")
+        } else {
+          const errorData = await res.json()
+          setAnalysisError(errorData.detail || "Failed to analyze VCML.")
+        }
+      } catch (err) {
+        setAnalysisError("Failed to fetch VCML analysis.")
+      } finally {
+        setIsAnalysisLoading(false)
+      }
+    }
+
     if (biomodelId) {
       fetchVcml()
+      fetchVcmlAnalysis()
     }
   }, [biomodelId])
 
@@ -130,6 +158,8 @@ export const VCMLSection: React.FC<VCMLSectionProps> = ({ biomodelId, vcmlAnalys
               <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
               <span className="ml-2 text-slate-600">Analyzing VCML...</span>
             </div>
+          ) : analysisError ? (
+            <div className="text-red-500 text-center p-4">{analysisError}</div>
           ) : (
             <div className="prose max-w-none">
               <MarkdownRenderer content={vcmlAnalysis} />
