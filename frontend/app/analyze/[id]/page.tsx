@@ -15,10 +15,13 @@ interface AnalysisResults {
   aiAnalysis: string
 }
 
-export default function AnalysisResultsPage({ params }: { params: { id: string } }) {
+export default function AnalysisResultsPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const prompt = searchParams.get('prompt') || ''
+  
+  // Unwrap the params Promise
+  const { id } = React.use(params)
   
   const [error, setError] = useState("")
   const [results, setResults] = useState<AnalysisResults | null>(null)
@@ -28,7 +31,7 @@ export default function AnalysisResultsPage({ params }: { params: { id: string }
     const fetchAnalysis = async () => {
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL
-        const url = new URL(`${apiUrl}/analyse/${params.id}`)
+        const url = new URL(`${apiUrl}/analyse/${id}`)
         if (prompt) {
           url.searchParams.set('user_prompt', prompt)
         }
@@ -44,8 +47,8 @@ export default function AnalysisResultsPage({ params }: { params: { id: string }
         const analyseData = await analyseRes.json()
 
         setResults({
-          title: `Analysis for Biomodel ${params.id}`,
-          description: `Results for biomodel ID ${params.id}.`,
+          title: `Analysis for Biomodel ${id}`,
+          description: `Results for biomodel ID ${id}.`,
           aiAnalysis: analyseData.response || "No AI analysis available.",
         })
       } catch (err) {
@@ -56,7 +59,7 @@ export default function AnalysisResultsPage({ params }: { params: { id: string }
     }
 
     fetchAnalysis()
-  }, [params.id, prompt])
+  }, [id, prompt])
 
   const handleReset = () => {
     router.push('/analyze')
@@ -94,10 +97,10 @@ export default function AnalysisResultsPage({ params }: { params: { id: string }
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-3xl font-bold text-slate-900 mb-1">
-                {results?.title || `Analysis for Biomodel ${params.id}`}
+                {results?.title || `Analysis for Biomodel ${id}`}
               </h2>
               <p className="text-slate-600">
-                {results?.description || `Results for biomodel ID ${params.id}.`}
+                {results?.description || `Results for biomodel ID ${id}.`}
               </p>
             </div>
             <Button variant="outline" onClick={handleReset} className="flex items-center gap-2">
@@ -107,17 +110,17 @@ export default function AnalysisResultsPage({ params }: { params: { id: string }
           </div>
 
           {/* Diagram and Analysis Sections */}
-          <DiagramSection biomodelId={params.id} />
+          <DiagramSection biomodelId={id} />
 
           {/* VCML Sections */}
-          <VCMLSection biomodelId={params.id} />
+          <VCMLSection biomodelId={id} />
 
           {/* Chat Box */}
           <ChatBox
             startMessage={results?.aiAnalysis || ""}
             quickActions={quickActions}
             cardTitle="Follow-up Questions"
-            promptPrefix={`Analyze the biomodel with the bmId ${params.id} for the following question: ${prompt}`}
+            promptPrefix={`Analyze the biomodel with the bmId ${id} for the following question: ${prompt}`}
             isLoading={isAnalysisLoading}
           />
         </div>
