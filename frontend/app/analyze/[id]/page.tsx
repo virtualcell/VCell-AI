@@ -28,13 +28,16 @@ export default function AnalysisResultsPage({ params }: { params: { id: string }
     const fetchAnalysis = async () => {
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL
-        const analyseRes = await fetch(`${apiUrl}/analyse/${params.id}`, {
+        const url = new URL(`${apiUrl}/analyse/${params.id}`)
+        if (prompt) {
+          url.searchParams.set('user_prompt', prompt)
+        }
+        
+        const analyseRes = await fetch(url.toString(), {
           method: 'POST',
           headers: { 
-            'Content-Type': 'application/json',
             'accept': 'application/json' 
-          },
-          body: JSON.stringify({ user_prompt: prompt })
+          }
         })
         
         if (!analyseRes.ok) throw new Error("Failed to analyze biomodel.")
