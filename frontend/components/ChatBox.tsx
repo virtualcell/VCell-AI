@@ -24,9 +24,10 @@ interface ChatBoxProps {
   quickActions: QuickAction[]
   cardTitle: string
   promptPrefix?: string
+  isLoading?: boolean
 }
 
-export const ChatBox: React.FC<ChatBoxProps> = ({ startMessage, quickActions, cardTitle, promptPrefix }) => {
+export const ChatBox: React.FC<ChatBoxProps> = ({ startMessage, quickActions, cardTitle, promptPrefix, isLoading: isInitialLoading = false }) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -47,6 +48,20 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ startMessage, quickActions, ca
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  // Update messages when startMessage changes (when analysis completes)
+  useEffect(() => {
+    if (startMessage && !isInitialLoading) {
+      setMessages([
+        {
+          id: "1",
+          role: "assistant",
+          content: startMessage,
+          timestamp: new Date(),
+        },
+      ])
+    }
+  }, [startMessage, isInitialLoading])
 
   // Helper function to format biomodel IDs as hyperlinks
   const formatBiomodelIds = (content: string, bmkeys: string[]): string => {
@@ -171,28 +186,42 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ startMessage, quickActions, ca
                 </div>
               </div>
             ))}
-            <div className="flex gap-3 justify-start">
-              <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center flex-shrink-0">
-                <Bot className="h-4 w-4" />
-              </div>
-              <div className="bg-white border border-slate-200 rounded-lg p-3 max-w-[80%]">
-                <div className="text-sm text-slate-600 mb-3">Try these quick actions:</div>
-                <div className="space-y-2">
-                  {quickActions.map((action, idx) => (
-                    <Button
-                      key={idx}
-                      variant="outline"
-                      size="sm"
-                      className="w-full justify-start text-xs h-8"
-                      onClick={() => handleQuickAction(action.value)}
-                    >
-                      {action.icon}
-                      {action.label}
-                    </Button>
-                  ))}
+            {isInitialLoading ? (
+              <div className="flex gap-3 justify-start">
+                <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center flex-shrink-0">
+                  <Bot className="h-4 w-4" />
+                </div>
+                <div className="bg-white border border-slate-200 rounded-lg p-3">
+                  <div className="flex items-center gap-2 text-slate-600">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span className="text-sm">Analyzing biomodel...</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="flex gap-3 justify-start">
+                <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center flex-shrink-0">
+                  <Bot className="h-4 w-4" />
+                </div>
+                <div className="bg-white border border-slate-200 rounded-lg p-3 max-w-[80%]">
+                  <div className="text-sm text-slate-600 mb-3">Try these quick actions:</div>
+                  <div className="space-y-2">
+                    {quickActions.map((action, idx) => (
+                      <Button
+                        key={idx}
+                        variant="outline"
+                        size="sm"
+                        className="w-full justify-start text-xs h-8"
+                        onClick={() => handleQuickAction(action.value)}
+                      >
+                        {action.icon}
+                        {action.label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
             {isLoading && (
               <div className="flex gap-3 justify-start">
                 <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center flex-shrink-0">
@@ -219,11 +248,11 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ startMessage, quickActions, ca
             onKeyPress={handleKeyPress}
             placeholder="Ask any questions about VCell biomodels..."
             className="flex-1 border-slate-300 focus:border-blue-500"
-            disabled={isLoading}
+            disabled={isLoading || isInitialLoading}
           />
           <Button
             onClick={() => handleSendMessage()}
-            disabled={isLoading || !inputMessage.trim()}
+            disabled={isLoading || isInitialLoading || !inputMessage.trim()}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4"
           >
             <Send className="h-4 w-4" />

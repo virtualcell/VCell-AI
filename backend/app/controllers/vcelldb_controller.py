@@ -55,14 +55,14 @@ async def get_simulation_details_controller(params: SimulationRequestParams) -> 
         raise HTTPException(status_code=500, detail=str(e))
 
 
-async def get_vcml_controller(biomodel_id: str) -> str:
+async def get_vcml_controller(biomodel_id: str, truncate: bool = False) -> str:
     """
     Controller function to fetch the contents of the VCML file for a biomodel.
     Raises:
         HTTPException: If the URL cannot be generated.
     """
     try:
-        return await get_vcml_file(biomodel_id)
+        return await get_vcml_file(biomodel_id, truncate)
     except Exception as e:
         raise HTTPException(status_code=500, detail="Error fetching VCML URL.")
 

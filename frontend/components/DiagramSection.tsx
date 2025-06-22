@@ -4,13 +4,15 @@ import { MarkdownRenderer } from "./markdown-renderer"
 
 interface DiagramSectionProps {
   biomodelId: string
-  diagramAnalysis: string
 }
 
-export const DiagramSection: React.FC<DiagramSectionProps> = ({ biomodelId, diagramAnalysis }) => {
+export const DiagramSection: React.FC<DiagramSectionProps> = ({ biomodelId }) => {
   const [diagramUrl, setDiagramUrl] = useState<string>("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const [diagramAnalysis, setDiagramAnalysis] = useState<string>("")
+  const [isAnalysisLoading, setIsAnalysisLoading] = useState(false)
+  const [analysisError, setAnalysisError] = useState("")
 
   useEffect(() => {
     const fetchDiagram = async () => {
@@ -37,8 +39,35 @@ export const DiagramSection: React.FC<DiagramSectionProps> = ({ biomodelId, diag
       }
     }
 
+    const fetchDiagramAnalysis = async () => {
+      setIsAnalysisLoading(true)
+      setAnalysisError("")
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL
+        const res = await fetch(`${apiUrl}/analyse/${biomodelId}/diagram`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+        
+        if (res.ok) {
+          const data = await res.json()
+          setDiagramAnalysis(data.response || "")
+        } else {
+          const errorData = await res.json()
+          setAnalysisError(errorData.detail || "Failed to analyze diagram.")
+        }
+      } catch (err) {
+        setAnalysisError("Failed to fetch diagram analysis.")
+      } finally {
+        setIsAnalysisLoading(false)
+      }
+    }
+
     if (biomodelId) {
       fetchDiagram()
+      fetchDiagramAnalysis()
     }
   }, [biomodelId])
 
@@ -82,9 +111,18 @@ export const DiagramSection: React.FC<DiagramSectionProps> = ({ biomodelId, diag
           </h3>
         </div>
         <div className="p-6">
-          <div className="prose max-w-none">
-            <MarkdownRenderer content={diagramAnalysis} />
-          </div>
+          {isAnalysisLoading ? (
+            <div className="flex justify-center items-center h-32">
+              <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+              <span className="ml-2 text-slate-600">Analyzing diagram...</span>
+            </div>
+          ) : analysisError ? (
+            <div className="text-red-500 text-center p-4">{analysisError}</div>
+          ) : (
+            <div className="prose max-w-none">
+              <MarkdownRenderer content={diagramAnalysis} />
+            </div>
+          )}
         </div>
       </div>
     </>

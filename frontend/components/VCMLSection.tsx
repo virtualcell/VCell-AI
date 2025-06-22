@@ -1,85 +1,86 @@
 import React, { useEffect, useState } from "react"
-import { FileText, Loader2 } from "lucide-react"
+import { FileText, Loader2, Download } from "lucide-react"
 import XMLViewer from 'react-xml-viewer'
 import { MarkdownRenderer } from "./markdown-renderer"
+import { Button } from "@/components/ui/button"
 
 interface VCMLSectionProps {
   biomodelId: string
-  vcmlAnalysis: string
 }
 
-export const VCMLSection: React.FC<VCMLSectionProps> = ({ biomodelId, vcmlAnalysis }) => {
-  const [vcml, setVcml] = useState<string>("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
+export const VCMLSection: React.FC<VCMLSectionProps> = ({ biomodelId }) => {
+  const [vcmlAnalysis, setVcmlAnalysis] = useState<string>("")
+  const [isAnalysisLoading, setIsAnalysisLoading] = useState(false)
+  const [analysisError, setAnalysisError] = useState("")
 
   useEffect(() => {
-    const fetchVcml = async () => {
-      setIsLoading(true)
-      setError("")
+    const fetchVcmlAnalysis = async () => {
+      setIsAnalysisLoading(true)
+      setAnalysisError("")
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL
-        const res = await fetch(`${apiUrl}/biomodel/${biomodelId}/biomodel.vcml`)
-        if (!res.ok) {
-          setError("Failed to fetch VCML from backend.")
-          setVcml("")
+        const res = await fetch(`${apiUrl}/analyse/${biomodelId}/vcml`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+        
+        if (res.ok) {
+          const data = await res.json()
+          setVcmlAnalysis(data.response || "")
         } else {
-          let text = await res.text()
-          if (text.startsWith('"') && text.endsWith('"')) {
-            text = text.slice(1, -1)
-          }
-          setVcml(text)
+          const errorData = await res.json()
+          setAnalysisError(errorData.detail || "Failed to analyze VCML.")
         }
       } catch (err) {
-        setError("Failed to fetch VCML from backend.")
-        setVcml("")
+        setAnalysisError("Failed to fetch VCML analysis.")
       } finally {
-        setIsLoading(false)
+        setIsAnalysisLoading(false)
       }
     }
 
     if (biomodelId) {
-      fetchVcml()
+      fetchVcmlAnalysis()
     }
   }, [biomodelId])
 
-  return (
-    <>
-      {/* VCML File Section */}
-      <div className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
-        <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-          <h3 className="text-xl font-semibold text-slate-900 flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            VCML File
-          </h3>
-        </div>
-        <div className="max-h-[400px] overflow-y-auto p-6">
-          {isLoading ? (
-            <div className="flex justify-center items-center h-48">
-              <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-            </div>
-          ) : error ? (
-            <div className="text-red-500 text-center p-4">{error}</div>
-          ) : (
-            <XMLViewer xml={vcml} />
-          )}
-        </div>
-      </div>
+  const handleDownload = () => {
+    const vcellUrl = `https://vcell.cam.uchc.edu/api/v0/biomodel/${biomodelId}/biomodel.vcml`
+    window.open(vcellUrl, '_blank')
+  }
 
-      {/* VCML Analysis Section */}
-      <div className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
-        <div className="bg-slate-50 border-b border-slate-200 px-6 py-4">
-          <h3 className="text-xl font-semibold text-slate-900 flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            VCML Analysis
-          </h3>
-        </div>
-        <div className="p-6">
+  return (
+    <div className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
+      <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+        <h3 className="text-xl font-semibold text-slate-900 flex items-center gap-2">
+          <FileText className="h-5 w-5" />
+          VCML Analysis
+        </h3>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={handleDownload}
+          className="flex items-center gap-2"
+        >
+          <Download className="h-4 w-4" />
+          Download Full File
+        </Button>
+      </div>
+      <div className="p-6">
+        {isAnalysisLoading ? (
+          <div className="flex justify-center items-center h-32">
+            <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+            <span className="ml-2 text-slate-600">Analyzing VCML...</span>
+          </div>
+        ) : analysisError ? (
+          <div className="text-red-500 text-center p-4">{analysisError}</div>
+        ) : (
           <div className="prose max-w-none">
             <MarkdownRenderer content={vcmlAnalysis} />
           </div>
-        </div>
+        )}
       </div>
-    </>
+    </div>
   )
 } 
