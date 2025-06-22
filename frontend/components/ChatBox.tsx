@@ -145,7 +145,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ startMessage, quickActions, ca
   }
 
   return (
-    <Card className="h-[600px] flex flex-col shadow-sm border-slate-200">
+    <Card className="h-[700px] flex flex-col shadow-sm border-slate-200">
       <CardHeader className="bg-slate-50 border-b border-slate-200 flex-shrink-0">
         <CardTitle className="flex items-center gap-2 text-slate-900">
           <MessageSquare className="h-5 w-5" />
@@ -186,7 +186,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ startMessage, quickActions, ca
                 </div>
               </div>
             ))}
-            {isInitialLoading ? (
+            {isInitialLoading && (
               <div className="flex gap-3 justify-start">
                 <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center flex-shrink-0">
                   <Bot className="h-4 w-4" />
@@ -195,29 +195,6 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ startMessage, quickActions, ca
                   <div className="flex items-center gap-2 text-slate-600">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     <span className="text-sm">Analyzing biomodel...</span>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="flex gap-3 justify-start">
-                <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center flex-shrink-0">
-                  <Bot className="h-4 w-4" />
-                </div>
-                <div className="bg-white border border-slate-200 rounded-lg p-3 max-w-[80%]">
-                  <div className="text-sm text-slate-600 mb-3">Try these quick actions:</div>
-                  <div className="space-y-2">
-                    {quickActions.map((action, idx) => (
-                      <Button
-                        key={idx}
-                        variant="outline"
-                        size="sm"
-                        className="w-full justify-start text-xs h-8"
-                        onClick={() => handleQuickAction(action.value)}
-                      >
-                        {action.icon}
-                        {action.label}
-                      </Button>
-                    ))}
                   </div>
                 </div>
               </div>
@@ -258,6 +235,26 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ startMessage, quickActions, ca
             <Send className="h-4 w-4" />
           </Button>
         </div>
+        
+        {/* Quick Actions - positioned directly under search bar */}
+        {!isInitialLoading && (
+          <div className="mt-3 pt-3 border-t border-slate-100">
+            <div className="flex flex-wrap gap-1.5">
+              {quickActions.map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 px-2 text-xs text-slate-500 hover:text-slate-700 hover:bg-slate-100"
+                  onClick={() => handleQuickAction(action.value)}
+                >
+                  {action.icon}
+                  <span className="ml-1">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </Card>
   )
