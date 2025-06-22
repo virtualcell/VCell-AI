@@ -127,7 +127,7 @@ async def analyse_vcml(biomodel_id: str):
         # Fetch VCML details
         vcml = await get_vcml_file(biomodel_id)
         # Analyze VCML with LLM
-        vcml_system_prompt = "You are a VCell BioModel Assistant, designed to help users understand and interact with biological models in VCell. Your task is to provide human-readable, accurate, detailed, and contextually appropriate responses based on the given VCML. Analyze the VCML file contents and give an elaborate and detailed response."
+        vcml_system_prompt = "You are a VCell BioModel Assistant, designed to help users understand and interact with biological models in VCell. Your task is to provide human-readable, accurate responses based on the given VCML."
         vcml_prompt = f"Analyze the following VCML content for Biomodel {biomodel_id}: {str(vcml)}"
         vcml_analysis = await get_llm_response(vcml_system_prompt, vcml_prompt)
         return vcml_analysis
@@ -166,7 +166,7 @@ async def analyse_biomodel(biomodel_id: str, user_prompt: str):
         biomodel_info = f"Here is some information about Biomodel {biomodel_id}: {str(biomodels_info)}"
         enhanced_user_prompt = f"{biomodel_info}\n\n{user_prompt}"
         # Analyze the user prompt with added biomodel context
-        system_prompt = "You are a VCell BioModel Assistant, designed to help users understand and interact with biological models in VCell. Your task is to provide human-readable, accurate, detailed, and contextually appropriate responses based on the given data. Give an elaborate and detailed response to the user's query, considering the provided biomodel information."
+        system_prompt = "You are a VCell BioModel Assistant, designed to help users understand and interact with biological models in VCell. Your task is to provide human-readable, accurate responses based on the given data. Give a response to the user's query, considering the provided biomodel information."
         user_analysis_response = await get_llm_response(system_prompt, enhanced_user_prompt)
         return user_analysis_response
     except Exception as e:
@@ -206,7 +206,7 @@ async def analyse_diagram(biomodel_id: str):
         diagram_analysis_prompt = (
             "You are a VCell BioModel Assistant, designed to help users understand and interact with biological models in VCell. "
             + biomodel_info
-            + "Your task is to analyze the diagram of the biomodel and provide a detailed description of its components, interactions, and any other relevant information. "
+            + "Your task is to analyze the diagram of the biomodel and provide a description of its components, interactions, and any other relevant information. "
         )
         diagram_analysis_prompt = [
             {"type": "text", "text": diagram_analysis_prompt},

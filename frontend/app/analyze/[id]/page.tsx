@@ -109,12 +109,6 @@ export default function AnalysisResultsPage({ params }: { params: Promise<{ id: 
             </Button>
           </div>
 
-          {/* Diagram and Analysis Sections */}
-          <DiagramSection biomodelId={id} />
-
-          {/* VCML Sections */}
-          <VCMLSection biomodelId={id} />
-
           {/* Chat Box */}
           <ChatBox
             startMessage={results?.aiAnalysis || ""}
@@ -123,6 +117,12 @@ export default function AnalysisResultsPage({ params }: { params: Promise<{ id: 
             promptPrefix={`Analyze the biomodel with the bmId ${id} for the following question: ${prompt}`}
             isLoading={isAnalysisLoading}
           />
+
+          {/* Diagram and Analysis Sections */}
+          <DiagramSection biomodelId={id} />
+
+          {/* VCML Sections */}
+          <VCMLSection biomodelId={id} />
         </div>
       </div>
     </div>
