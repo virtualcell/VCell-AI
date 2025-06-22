@@ -60,20 +60,20 @@ export default function ChatPage() {
   const startMessage = `# Welcome to VCell AI Assistant! 🤖\n\nI'm here to help you with **biomodel analysis** and research support.\nFeel free to ask anything! 🚀`
   const quickActions = [
     {
-      label: "List all tutorial models.",
+      label: "List all tutorial models",
       icon: <Search className="h-3 w-3 mr-2" />, value: "List all tutorial models"
     },
     {
-      label: "List all models mentioning Calcium",
-      icon: <FileText className="h-3 w-3 mr-2" />, value: "List all models mentioning Calcium"
+      label: "List all Calcium models",
+      icon: <FileText className="h-3 w-3 mr-2" />, value: "List all Calcium models"
     },
     {
       label: "List all models by ModelBrick",
       icon: <User className="h-3 w-3 mr-2" />, value: "List all models by ModelBrick"
     },
     {
-      label: "What solvers are used in VCell tutorial models?",
-      icon: <Diagram3 className="h-3 w-3 mr-2" />, value: "What solvers are used in VCell tutorial models?"
+      label: "What solvers are used in tutorial models",
+      icon: <Diagram3 className="h-3 w-3 mr-2" />, value: "What solvers are used in tutorial models"
     },
     {
       label: "What are different types of VCell applications used in Tutorial models",
