@@ -113,7 +113,7 @@ export default function AnalysisResultsPage({ params }: { params: Promise<{ id: 
           <ChatBox
             startMessage={results?.aiAnalysis || ""}
             quickActions={quickActions}
-            cardTitle="Follow-up Questions"
+            cardTitle="VCell AI Assistant"
             promptPrefix={`Analyze the biomodel with the bmId ${id} for the following question: ${prompt}`}
             isLoading={isAnalysisLoading}
           />
