@@ -93,7 +93,9 @@ async def get_response_with_tools(user_prompt: str):
 
             logger.info(f"Tool Result: {str(result)[:500]}")
 
-            bmkeys = result.get('unique_model_keys (bmkey)', [])
+            # Extract bmkeys only if result is a dictionary and contains the expected key
+            if isinstance(result, dict):
+                bmkeys = result.get('unique_model_keys (bmkey)', [])
 
             # Send the result back to the model
             messages.append(
