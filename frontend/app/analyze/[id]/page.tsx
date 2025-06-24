@@ -76,10 +76,10 @@ export default function AnalysisResultsPage({ params }: { params: Promise<{ id: 
 
   if (error) {
     return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center py-16">
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center py-8">
         <div className="text-center">
           <h2 className="text-2xl font-semibold text-red-600 mb-2">Error</h2>
-          <p className="text-slate-600 mb-8">{error}</p>
+          <p className="text-slate-600 mb-4">{error}</p>
           <Button onClick={handleReset} className="flex items-center gap-2">
             <Search className="h-4 w-4" />
             Try Again
@@ -91,15 +91,15 @@ export default function AnalysisResultsPage({ params }: { params: Promise<{ id: 
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="container mx-auto p-8 max-w-5xl">
-        <div className="space-y-12">
+      <div className="container mx-auto p-4 max-w-5xl">
+        <div className="space-y-6">
           {/* Results Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-3xl font-bold text-slate-900 mb-1">
+              <h2 className="text-2xl font-bold text-slate-900 mb-1">
                 {results?.title || `Analysis for Biomodel ${id}`}
               </h2>
-              <p className="text-slate-600">
+              <p className="text-slate-600 text-sm">
                 {results?.description || `Results for biomodel ID ${id}.`}
               </p>
             </div>
