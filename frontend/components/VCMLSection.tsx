@@ -52,9 +52,9 @@ export const VCMLSection: React.FC<VCMLSectionProps> = ({ biomodelId }) => {
 
   return (
     <div className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
-      <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-        <h3 className="text-xl font-semibold text-slate-900 flex items-center gap-2">
-          <FileText className="h-5 w-5" />
+      <div className="bg-slate-50 border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+          <FileText className="h-4 w-4" />
           VCML Analysis
         </h3>
         <Button 
@@ -67,14 +67,14 @@ export const VCMLSection: React.FC<VCMLSectionProps> = ({ biomodelId }) => {
           Download Full File
         </Button>
       </div>
-      <div className="p-6">
+      <div className="p-4">
         {isAnalysisLoading ? (
-          <div className="flex justify-center items-center h-32">
-            <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+          <div className="flex justify-center items-center h-24">
+            <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
             <span className="ml-2 text-slate-600">Analyzing VCML...</span>
           </div>
         ) : analysisError ? (
-          <div className="text-red-500 text-center p-4">{analysisError}</div>
+          <div className="text-red-500 text-center p-3">{analysisError}</div>
         ) : (
           <div className="prose max-w-none">
             <MarkdownRenderer content={vcmlAnalysis} />

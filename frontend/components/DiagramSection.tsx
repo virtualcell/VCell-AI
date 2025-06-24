@@ -73,22 +73,22 @@ export const DiagramSection: React.FC<DiagramSectionProps> = ({ biomodelId }) =>
 
   return (
     <div className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
-      <div className="bg-slate-50 border-b border-slate-200 px-6 py-4">
-        <h3 className="text-xl font-semibold text-slate-900 flex items-center gap-2">
-          <Diagram3 className="h-5 w-5" />
+      <div className="bg-slate-50 border-b border-slate-200 px-4 py-3">
+        <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+          <Diagram3 className="h-4 w-4" />
           Biomodel Diagram
         </h3>
       </div>
-      <div className="p-6 space-y-6">
+      <div className="p-4 space-y-3">
         {/* Diagram Image */}
         <div className="flex flex-col items-center">
-          <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 w-full">
+          <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 w-full">
             {isLoading ? (
-              <div className="flex justify-center items-center h-48">
-                <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+              <div className="flex justify-center items-center h-32">
+                <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
               </div>
             ) : error ? (
-              <div className="text-red-500 text-center p-4">{error}</div>
+              <div className="text-red-500 text-center p-3">{error}</div>
             ) : (
               <img
                 src={diagramUrl || "/placeholder.svg"}
@@ -102,12 +102,12 @@ export const DiagramSection: React.FC<DiagramSectionProps> = ({ biomodelId }) =>
         {/* Diagram Analysis */}
         <div>
           {isAnalysisLoading ? (
-            <div className="flex justify-center items-center h-32">
-              <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+            <div className="flex justify-center items-center h-24">
+              <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
               <span className="ml-2 text-slate-600">Analyzing diagram...</span>
             </div>
           ) : analysisError ? (
-            <div className="text-red-500 text-center p-4">{analysisError}</div>
+            <div className="text-red-500 text-center p-3">{analysisError}</div>
           ) : (
             <div className="prose max-w-none">
               <MarkdownRenderer content={diagramAnalysis} />
