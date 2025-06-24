@@ -72,45 +72,35 @@ export const DiagramSection: React.FC<DiagramSectionProps> = ({ biomodelId }) =>
   }, [biomodelId])
 
   return (
-    <>
-      {/* Diagram Section */}
-      <div className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
-        <div className="bg-slate-50 border-b border-slate-200 px-6 py-4">
-          <h3 className="text-xl font-semibold text-slate-900 flex items-center gap-2">
-            <Diagram3 className="h-5 w-5" />
-            Biomodel Diagram
-          </h3>
-        </div>
-        <div className="p-6">
-          <div className="flex flex-col items-center">
-            <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 mb-4 w-full">
-              {isLoading ? (
-                <div className="flex justify-center items-center h-48">
-                  <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-                </div>
-              ) : error ? (
-                <div className="text-red-500 text-center p-4">{error}</div>
-              ) : (
-                <img
-                  src={diagramUrl || "/placeholder.svg"}
-                  alt="Biomodel Diagram"
-                  className="max-w-full h-auto mx-auto"
-                />
-              )}
-            </div>
+    <div className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
+      <div className="bg-slate-50 border-b border-slate-200 px-6 py-4">
+        <h3 className="text-xl font-semibold text-slate-900 flex items-center gap-2">
+          <Diagram3 className="h-5 w-5" />
+          Biomodel Diagram
+        </h3>
+      </div>
+      <div className="p-6 space-y-6">
+        {/* Diagram Image */}
+        <div className="flex flex-col items-center">
+          <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 w-full">
+            {isLoading ? (
+              <div className="flex justify-center items-center h-48">
+                <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+              </div>
+            ) : error ? (
+              <div className="text-red-500 text-center p-4">{error}</div>
+            ) : (
+              <img
+                src={diagramUrl || "/placeholder.svg"}
+                alt="Biomodel Diagram"
+                className="max-w-full h-auto mx-auto"
+              />
+            )}
           </div>
         </div>
-      </div>
 
-      {/* Diagram Analysis Section */}
-      <div className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
-        <div className="bg-slate-50 border-b border-slate-200 px-6 py-4">
-          <h3 className="text-xl font-semibold text-slate-900 flex items-center gap-2">
-            <Search className="h-5 w-5" />
-            Diagram Analysis
-          </h3>
-        </div>
-        <div className="p-6">
+        {/* Diagram Analysis */}
+        <div>
           {isAnalysisLoading ? (
             <div className="flex justify-center items-center h-32">
               <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
@@ -125,6 +115,6 @@ export const DiagramSection: React.FC<DiagramSectionProps> = ({ biomodelId }) =>
           )}
         </div>
       </div>
-    </>
+    </div>
   )
 } 
