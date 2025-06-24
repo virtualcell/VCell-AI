@@ -7,13 +7,13 @@ from app.services.llms_service import (
 )
 
 
-async def get_llm_response(user_prompt: str) -> str:
+async def get_llm_response(user_prompt: str) -> tuple[str, list]:
     """
     Controller function to interact with the LLM service.
     Args:
         user_prompt (str): The query or input provided by the user.
     Returns:
-        str: The final response after processing the user's query.
+        tuple[str, list]: A tuple containing the final response and bmkeys list.
     """
     try:
         result, bmkeys = await get_response_with_tools(user_prompt)
