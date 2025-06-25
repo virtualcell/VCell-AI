@@ -271,7 +271,7 @@ export function ToolParameters({ parameters, onParametersChange }: ToolParameter
       </Card>
 
       {/* Action Buttons */}
-      <div className="flex justify-end gap-2">
+      <div className="flex justify-between">
         <Button
           size="sm"
           variant="outline"
@@ -294,8 +294,10 @@ export function ToolParameters({ parameters, onParametersChange }: ToolParameter
 
       {/* Confirmation Message */}
       {confirmationMessage && (
-        <div className="flex justify-center text-sm text-slate-500 mt-2">
-          {confirmationMessage}
+        <div className="flex justify-center mt-2">
+          <div className="bg-green-50 border border-green-200 text-green-700 px-3 py-1.5 rounded-md text-xs font-medium">
+            {confirmationMessage}
+          </div>
         </div>
       )}
     </div>
