@@ -35,7 +35,8 @@ async def analyse_vcml_controller(biomodel_id: str) -> str:
         return result
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail=f"Error analyzing VCML for biomodel {biomodel_id}: {str(e)}"
+            status_code=500,
+            detail=f"Error analyzing VCML for biomodel {biomodel_id}: {str(e)}",
         )
 
 
@@ -52,7 +53,8 @@ async def analyse_diagram_controller(biomodel_id: str) -> str:
         return result
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail=f"Error analyzing diagram for biomodel {biomodel_id}: {str(e)}"
+            status_code=500,
+            detail=f"Error analyzing diagram for biomodel {biomodel_id}: {str(e)}",
         )
 
 

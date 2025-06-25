@@ -95,7 +95,7 @@ async def get_response_with_tools(user_prompt: str):
 
             # Extract bmkeys only if result is a dictionary and contains the expected key
             if isinstance(result, dict):
-                bmkeys = result.get('unique_model_keys (bmkey)', [])
+                bmkeys = result.get("unique_model_keys (bmkey)", [])
 
             # Send the result back to the model
             messages.append(
@@ -116,10 +116,11 @@ async def get_response_with_tools(user_prompt: str):
 
     return final_response, bmkeys
 
+
 async def analyse_vcml(biomodel_id: str):
     """
     Analyze VCML content for a given biomodel.
-    
+
     args:
         biomodel_id (str): The ID of the biomodel to analyze.
     returns:
@@ -141,7 +142,7 @@ async def analyse_vcml(biomodel_id: str):
 async def analyse_biomodel(biomodel_id: str, user_prompt: str):
     """
     Analyze user query with biomodel context.
-    
+
     args:
         biomodel_id (str): The ID of the biomodel to analyze.
         user_prompt (str): The user's query or request.
@@ -169,17 +170,19 @@ async def analyse_biomodel(biomodel_id: str, user_prompt: str):
         enhanced_user_prompt = f"{biomodel_info}\n\n{user_prompt}"
         # Analyze the user prompt with added biomodel context
         system_prompt = "You are a VCell BioModel Assistant, designed to help users understand and interact with biological models in VCell. Your task is to provide human-readable, accurate responses based on the given data. Give a response to the user's query, considering the provided biomodel information."
-        user_analysis_response = await get_llm_response(system_prompt, enhanced_user_prompt)
+        user_analysis_response = await get_llm_response(
+            system_prompt, enhanced_user_prompt
+        )
         return user_analysis_response
     except Exception as e:
         logger.error(f"Error analyzing AI for biomodel {biomodel_id}: {str(e)}")
         return f"An error occurred during AI analysis: {str(e)}"
-        
+
 
 async def analyse_diagram(biomodel_id: str):
     """
     Analyze diagram for a given biomodel.
-    
+
     args:
         biomodel_id (str): The ID of the biomodel to analyze.
     returns:
@@ -201,7 +204,7 @@ async def analyse_diagram(biomodel_id: str):
         biomodel_params = BiomodelRequestParams(**params_dict)
         biomodels_info = await fetch_biomodels(biomodel_params)
         biomodel_info = f"Here is some information about Biomodel {biomodel_id}: {str(biomodels_info)}"
-        
+
         # Fetch Diagram URL
         diagram_url = await get_diagram_url(biomodel_id)
         # Diagram Analysis

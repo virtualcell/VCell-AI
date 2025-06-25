@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Settings, RotateCcw } from 'lucide-react'
+import { Settings, RotateCcw, Save } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -31,6 +31,7 @@ export function ToolParameters({ parameters, onParametersChange }: ToolParameter
   const [showLLMParams, setShowLLMParams] = useState(true)
   const [showSearchParams, setShowSearchParams] = useState(true)
   const [showAdvancedParams, setShowAdvancedParams] = useState(false)
+  const [confirmationMessage, setConfirmationMessage] = useState("")
 
   const updateParameter = (key: keyof ChatParameters, value: any) => {
     onParametersChange({ ...parameters, [key]: value })
@@ -48,6 +49,13 @@ export function ToolParameters({ parameters, onParametersChange }: ToolParameter
       orderBy: "date_desc",
       llmMode: "tool_calling",
     })
+    setConfirmationMessage("Parameters have been cleared")
+    setTimeout(() => setConfirmationMessage(""), 3000)
+  }
+
+  const saveParameters = () => {
+    setConfirmationMessage("Parameters have been saved")
+    setTimeout(() => setConfirmationMessage(""), 3000)
   }
 
   return (
@@ -262,8 +270,17 @@ export function ToolParameters({ parameters, onParametersChange }: ToolParameter
         </Collapsible>
       </Card>
 
-      {/* Clear All Button */}
-      <div className="flex justify-end">
+      {/* Action Buttons */}
+      <div className="flex justify-between">
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={saveParameters}
+          className="text-slate-600 hover:text-slate-900 h-7 px-3 text-sm"
+        >
+          <Save className="h-4 w-4 mr-1" />
+          Save
+        </Button>
         <Button
           size="sm"
           variant="outline"
@@ -274,6 +291,15 @@ export function ToolParameters({ parameters, onParametersChange }: ToolParameter
           Clear All
         </Button>
       </div>
+
+      {/* Confirmation Message */}
+      {confirmationMessage && (
+        <div className="flex justify-center mt-2">
+          <div className="bg-green-50 border border-green-200 text-green-700 px-3 py-1.5 rounded-md text-xs font-medium">
+            {confirmationMessage}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -112,7 +112,7 @@ export default function ChatPage() {
         <div className="mb-6">
           <Alert className="border-amber-200 bg-amber-50">
             <AlertDescription className="text-amber-800">
-              <strong>⚠️ Important:</strong> Responses are AI generated and may contain errors, or hallucinations. Please use the option “Let AI analyze the JSON” if you suspect hallucination.
+              <strong>⚠️ Important:</strong> Responses are AI generated and may contain errors, or hallucinations. Please use the option "Let AI analyze the JSON" if you suspect hallucination.
             </AlertDescription>
           </Alert>
         </div>
@@ -124,6 +124,7 @@ export default function ChatPage() {
               startMessage={startMessage}
               quickActions={quickActions}
               cardTitle={cardTitle}
+              parameters={parameters}
             />
           </div>
 

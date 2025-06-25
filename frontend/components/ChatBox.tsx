@@ -19,15 +19,28 @@ interface QuickAction {
   value: string
 }
 
+interface ChatParameters {
+  biomodelId: string
+  bmName: string
+  category: string
+  owner: string
+  savedLow: string
+  savedHigh: string
+  maxRows: number
+  orderBy: string
+  llmMode: string
+}
+
 interface ChatBoxProps {
   startMessage: string
   quickActions: QuickAction[]
   cardTitle: string
   promptPrefix?: string
   isLoading?: boolean
+  parameters?: ChatParameters
 }
 
-export const ChatBox: React.FC<ChatBoxProps> = ({ startMessage, quickActions, cardTitle, promptPrefix, isLoading: isInitialLoading = false }) => {
+export const ChatBox: React.FC<ChatBoxProps> = ({ startMessage, quickActions, cardTitle, promptPrefix, isLoading: isInitialLoading = false, parameters }) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -88,6 +101,42 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ startMessage, quickActions, ca
   const handleSendMessage = async (overrideMessage?: string) => {
     const msg = overrideMessage ?? inputMessage
     if (!msg.trim()) return
+    console.log(parameters)
+    // Build parameter context string
+    let parameterContext = ""
+    if (parameters) {
+      const contextParts = []
+      
+      if (parameters.biomodelId) {
+        contextParts.push(`biomodel ID: ${parameters.biomodelId}`)
+      }
+      if (parameters.bmName) {
+        contextParts.push(`model name: ${parameters.bmName}`)
+      }
+      if (parameters.owner) {
+        contextParts.push(`authored by: ${parameters.owner}`)
+      }
+      if (parameters.category && parameters.category !== "all") {
+        contextParts.push(`category: ${parameters.category}`)
+      }
+      if (parameters.savedLow) {
+        contextParts.push(`saved after: ${parameters.savedLow}`)
+      }
+      if (parameters.savedHigh) {
+        contextParts.push(`saved before: ${parameters.savedHigh}`)
+      }
+      if (parameters.maxRows && parameters.maxRows !== 1000) {
+        contextParts.push(`max results: ${parameters.maxRows}`)
+      }
+      if (parameters.orderBy && parameters.orderBy !== "date_desc") {
+        contextParts.push(`sort by: ${parameters.orderBy}`)
+      }
+      
+      if (contextParts.length > 0) {
+        parameterContext = `\n\nHere are some specifics that I want: ${contextParts.join(", ")}`
+      }
+    }
+    
     const userMessage: Message = {
       id: Date.now().toString(),
       role: "user",
@@ -98,7 +147,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ startMessage, quickActions, ca
     setInputMessage("")
     setIsLoading(true)
     try {
-      const finalPrompt = promptPrefix ? `${promptPrefix} ${msg}` : msg
+      const finalPrompt = promptPrefix ? `${promptPrefix} ${msg}${parameterContext}` : `${msg}${parameterContext}`
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/query?user_prompt=${encodeURIComponent(finalPrompt)}`,
         {
