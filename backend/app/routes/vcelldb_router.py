@@ -7,7 +7,8 @@ from app.controllers.vcelldb_controller import (
     get_vcml_controller,
     get_sbml_controller,
     get_diagram_url_controller,
-    get_diagram_image_controller,  # import the new controller
+    get_diagram_image_controller,  
+    get_biomodel_applications_files_controller,  
 )
 
 router = APIRouter()
@@ -77,3 +78,14 @@ async def get_diagram_image(biomodel_id: str):
     Endpoint to get the diagram image (PNG) for a given biomodel.
     """
     return await get_diagram_image_controller(biomodel_id)
+
+
+@router.get("/biomodel/{biomodel_id}/applications/files", response_model=dict)
+async def get_biomodel_applications_files(biomodel_id: str):
+    """
+    Endpoint to get applications data along with SBML and BNGL file URLs for a given biomodel.
+    """
+    try:
+        return await get_biomodel_applications_files_controller(biomodel_id)
+    except HTTPException as e:
+        raise e

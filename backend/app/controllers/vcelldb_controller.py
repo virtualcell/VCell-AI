@@ -8,7 +8,8 @@ from app.services.vcelldb_service import (
     get_vcml_file,
     get_sbml_file,
     get_diagram_url,
-    get_diagram_image,  # import the new function
+    get_diagram_image,
+    fetch_biomodel_applications_files,
 )
 
 
@@ -108,3 +109,25 @@ async def get_diagram_image_controller(biomodel_id: str) -> Response:
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail="Error fetching diagram image.")
+
+
+async def get_biomodel_applications_files_controller(biomodel_id: str) -> dict:
+    """
+    Controller function to fetch applications data along with SBML and BNGL file URLs for a biomodel.
+    Raises:
+        HTTPException: If the VCell API request fails.
+    """
+    try:
+        return await fetch_biomodel_applications_files(biomodel_id)
+    except httpx.HTTPStatusError as e:
+        if e.response.status_code == 404:
+            raise HTTPException(status_code=404, detail="Biomodel not found.")
+        raise HTTPException(
+            status_code=e.response.status_code, detail="Error fetching biomodel applications."
+        )
+    except httpx.RequestError as e:
+        raise HTTPException(
+            status_code=500, detail="Error communicating with VCell API. " + str(e)
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

@@ -25,14 +25,14 @@ const navigationItems = [
     icon: Search,
   },
   {
+    title: "SBML & BNGL Files",
+    url: "/sbml",
+    icon: Code,
+  },
+  {
     title: "VCML Files",
     url: "/vcml",
     icon: FileText,
-  },
-  {
-    title: "SBML Files",
-    url: "/sbml",
-    icon: Code,
   },
   {
     title: "Diagrams",
@@ -58,7 +58,7 @@ export function AppSidebar() {
   const pathname = usePathname()
 
   if (pathname == "/") {
-    return null; // Hide sidebar on the landing page
+    return null;
   }
 
   return (
