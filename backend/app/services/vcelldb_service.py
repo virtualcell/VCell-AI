@@ -1,7 +1,7 @@
 from app.core.logger import get_logger
 import httpx
 from app.schemas.vcelldb_schema import BiomodelRequestParams, SimulationRequestParams
-from urllib.parse import urlencode
+from urllib.parse import urlencode, quote
 
 VCELL_API_BASE_URL = "https://vcell.cam.uchc.edu/api/v0"
 
@@ -138,3 +138,49 @@ async def get_diagram_image(biomodel_id: str) -> bytes:
         )
         response.raise_for_status()
         return response.content
+
+
+async def fetch_biomodel_applications_files(biomodel_id: str) -> dict:
+    """
+    Fetch applications data along with SBML and BNGL file URLs for a given biomodel.
+
+    Args:
+        biomodel_id (str): ID of the biomodel.
+
+    Returns:
+        dict: A dictionary containing applications data and file URLs for each application.
+    """
+    params = BiomodelRequestParams(bmId=biomodel_id)
+    logger.info(f"Fetching biomodel applications files for biomodel: {biomodel_id}")
+    biomodel_data = await fetch_biomodels(params)
+    logger.info(f"Biomodel data: {biomodel_data}")
+    applications = []
+    if biomodel_data.get("data") and len(biomodel_data["data"]) > 0:
+        biomodel = biomodel_data["data"][0]
+        applications = biomodel.get("applications", [])
+    logger.info(f"Applications: {applications}")
+    # Generate file URLs for each application
+    applications_with_files = []
+    for app in applications:
+        app_name = app.get("name", "")
+        # URL encode the app name for use in query parameters
+        encoded_app_name = quote(app_name)
+        
+        # Create file URLs
+        bngl_url = f"{VCELL_API_BASE_URL}/biomodel/{biomodel_id}/biomodel.bngl?appname={encoded_app_name}"
+        sbml_url = f"{VCELL_API_BASE_URL}/biomodel/{biomodel_id}/biomodel.sbml?appname={encoded_app_name}"
+        
+        # Add file URLs to the application data
+        app_with_files = {
+            **app,
+            "bngl_url": bngl_url,
+            "sbml_url": sbml_url
+        }
+        logger.info(f"Application with files: {app_with_files}")
+        applications_with_files.append(app_with_files)
+    logger.info(f"Applications with files: {applications_with_files}")
+    return {
+        "biomodel_id": biomodel_id,
+        "applications": applications_with_files,
+        "total_applications": len(applications_with_files)
+    }
