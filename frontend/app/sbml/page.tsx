@@ -57,25 +57,8 @@ export default function SBMLPage() {
     }
   }
 
-  const handleDownload = async (url: string, filename: string) => {
-    try {
-      const response = await fetch(url)
-      if (!response.ok) {
-        throw new Error('Download failed')
-      }
-      const blob = await response.blob()
-      const downloadUrl = URL.createObjectURL(blob)
-      const a = document.createElement("a")
-      a.href = downloadUrl
-      a.download = filename
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(downloadUrl)
-    } catch (err) {
-      console.error("Download failed:", err)
-      alert("Download failed. Please try again.")
-    }
+  const handleOpenInNewTab = (url: string) => {
+    window.open(url, '_blank')
   }
 
   return (
@@ -215,7 +198,7 @@ export default function SBMLPage() {
                       {/* Download Buttons */}
                       <div className="flex gap-3 pt-2">
                         <Button
-                          onClick={() => handleDownload(app.sbml_url, `${app.name.replace(/[^a-zA-Z0-9]/g, '_')}_${app.key}.sbml`)}
+                          onClick={() => handleOpenInNewTab(app.sbml_url)}
                           className="flex-1 bg-green-600 hover:bg-green-700 text-white"
                           size="sm"
                         >
@@ -223,7 +206,7 @@ export default function SBMLPage() {
                           Download SBML
                         </Button>
                         <Button
-                          onClick={() => handleDownload(app.bngl_url, `${app.name.replace(/[^a-zA-Z0-9]/g, '_')}_${app.key}.bngl`)}
+                          onClick={() => handleOpenInNewTab(app.bngl_url)}
                           className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
                           size="sm"
                         >
