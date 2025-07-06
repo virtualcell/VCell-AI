@@ -1,8 +1,9 @@
 "use client"
 
-import { Search, FileText, Code, BarChart3Icon as Diagram3, MessageSquare, History, Database, Sparkles, FlaskConical } from "lucide-react"
+import { Search, FileText, Code, BarChart3Icon as Diagram3, MessageSquare, History, Database, Sparkles, FlaskConical, UserPlus, LogIn } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { Button } from "@/components/ui/button"
 
 import {
   Sidebar,
@@ -91,7 +92,7 @@ export function AppSidebar() {
                     <span className="relative flex items-center">
                       <Sparkles className="h-4 w-4 text-yellow-400" />
                     </span>
-                    <span>Chatbot</span>
+                    <span>Database Explorer</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -117,7 +118,7 @@ export function AppSidebar() {
 
         {/* Analysis Tools Section */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-slate-700 font-medium">Analysis Tools</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-slate-700 font-medium">API Tools</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {navigationItems.filter(item => item.url !== "/chat").map((item) => (
@@ -160,8 +161,20 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-slate-200 p-4">
-        <div className="text-xs text-slate-500">
-          <p>VCell Model Explorer Platform</p>
+        <div className="space-y-3">
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" className="flex-1 flex items-center gap-2">
+              <UserPlus className="h-3 w-3" />
+              Sign Up
+            </Button>
+            <Button variant="default" size="sm" className="flex-1 flex items-center gap-2">
+              <LogIn className="h-3 w-3" />
+              Sign In
+            </Button>
+          </div>
+          <div className="text-xs text-slate-500 text-center">
+            <p>VCell Model Explorer Platform</p>
+          </div>
         </div>
       </SidebarFooter>
     </Sidebar>
