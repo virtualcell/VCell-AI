@@ -7,7 +7,6 @@ interface DiagramSectionProps {
 }
 
 export const DiagramSection: React.FC<DiagramSectionProps> = ({ biomodelId }) => {
-  const [diagramUrl, setDiagramUrl] = useState<string>("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [diagramAnalysis, setDiagramAnalysis] = useState<string>("")
@@ -15,30 +14,6 @@ export const DiagramSection: React.FC<DiagramSectionProps> = ({ biomodelId }) =>
   const [analysisError, setAnalysisError] = useState("")
 
   useEffect(() => {
-    const fetchDiagram = async () => {
-      setIsLoading(true)
-      setError("")
-      try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL
-        const res = await fetch(`${apiUrl}/biomodel/${biomodelId}/diagram/image`)
-        const contentType = res.headers.get("content-type")
-        if (res.ok && contentType && contentType.startsWith("image")) {
-          const blob = await res.blob()
-          const imageUrl = URL.createObjectURL(blob)
-          setDiagramUrl(imageUrl)
-        } else if (contentType && contentType.includes("application/json")) {
-          const data = await res.json()
-          setError(data.detail || "Diagram not found.")
-        } else {
-          setError("Unexpected response from server.")
-        }
-      } catch (err) {
-        setError("Failed to fetch diagram.")
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
     const fetchDiagramAnalysis = async () => {
       setIsAnalysisLoading(true)
       setAnalysisError("")
@@ -66,7 +41,6 @@ export const DiagramSection: React.FC<DiagramSectionProps> = ({ biomodelId }) =>
     }
 
     if (biomodelId) {
-      fetchDiagram()
       fetchDiagramAnalysis()
     }
   }, [biomodelId])
@@ -91,9 +65,11 @@ export const DiagramSection: React.FC<DiagramSectionProps> = ({ biomodelId }) =>
               <div className="text-red-500 text-center p-3">{error}</div>
             ) : (
               <img
-                src={diagramUrl || "/placeholder.svg"}
+                src={`https://vcell.cam.uchc.edu/api/v0/biomodel/${biomodelId}/diagram` || "/placeholder.svg"}
                 alt="Biomodel Diagram"
                 className="max-w-full h-auto mx-auto"
+                onError={() => setError("Failed to load diagram image.")}
+                onLoad={() => setError("")}
               />
             )}
           </div>
