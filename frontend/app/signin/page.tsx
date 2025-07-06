@@ -61,6 +61,21 @@ export default function SignInPage() {
               </Alert>
             )}
             
+            <Alert className="bg-blue-50 border-blue-200">
+              <AlertDescription className="text-blue-800">
+                <strong>VCell Account Integration:</strong> This will be the same as your VCell account at{" "}
+                <a 
+                  href="https://vcell.cam.uchc.edu/api/v0/loginform" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="underline hover:text-blue-600"
+                >
+                  vcell.cam.uchc.edu/api/v0
+                </a>
+                . It will be used to query your private models and save your conversation history.
+              </AlertDescription>
+            </Alert>
+            
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <div className="relative">
