@@ -58,7 +58,7 @@ const historyItems = [
 export function AppSidebar() {
   const pathname = usePathname()
 
-  if (pathname == "/") {
+  if ((pathname == "/") || (pathname == "/signin") || (pathname == "/signup")) {
     return null;
   }
 
