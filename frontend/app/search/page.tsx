@@ -56,61 +56,42 @@ export default function BiomodelSearchPage() {
 
   const handleSearch = async () => {
     setIsLoading(true)
-
-    // Mock API response for demonstration
-    const mockResponse = {
-      bioModelInfos: [
-        {
-          bmId: 123456789,
-          name: "Cardiac Myocyte Calcium Dynamics",
-          ownerName: "Dr. Smith",
-          ownerKey: 987654321,
-          savedDate: "2024-01-15T10:30:00Z",
-          annot:
-            "A comprehensive model of calcium handling in cardiac myocytes including L-type calcium channels, ryanodine receptors, and SERCA pumps.",
-          branchId: 1,
-          modelKey: 456789123,
-          simulations: 15,
-          privacy: 1,
-          groupUsers: ["researcher1", "researcher2"],
-        },
-        {
-          bmId: 987654321,
-          name: "Neural Network Synaptic Transmission",
-          ownerName: "Prof. Johnson",
-          ownerKey: 123456789,
-          savedDate: "2024-01-10T14:20:00Z",
-          annot:
-            "Mathematical model describing neurotransmitter release and postsynaptic receptor dynamics in central nervous system synapses.",
-          branchId: 2,
-          modelKey: 789123456,
-          simulations: 8,
-          privacy: 0,
-          groupUsers: [],
-        },
-        {
-          bmId: 456789123,
-          name: "Metabolic Pathway Regulation",
-          ownerName: "Dr. Williams",
-          ownerKey: 654321987,
-          savedDate: "2024-01-05T09:15:00Z",
-          annot:
-            "Detailed kinetic model of glycolysis and gluconeogenesis pathways with allosteric regulation mechanisms.",
-          branchId: 1,
-          modelKey: 321987654,
-          simulations: 22,
-          privacy: 1,
-          groupUsers: ["student1", "postdoc1", "collaborator1"],
-        },
-      ],
-      totalCount: 3,
-    }
-
-    // Simulate API delay
-    setTimeout(() => {
-      setResults(mockResponse.bioModelInfos)
+    try {
+      // Build query params from filters, omitting empty bmName
+      const params = new URLSearchParams()
+      if (filters.bmName) params.append("bmName", filters.bmName)
+      if (filters.bmId) params.append("bmId", filters.bmId)
+      params.append("category", filters.category)
+      if (filters.owner) params.append("owner", filters.owner)
+      if (filters.savedLow) params.append("savedLow", filters.savedLow)
+      if (filters.savedHigh) params.append("savedHigh", filters.savedHigh)
+      params.append("startRow", filters.startRow.toString())
+      params.append("maxRows", filters.maxRows.toString())
+      params.append("orderBy", filters.orderBy)
+      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/biomodel?${params.toString()}`
+      const res = await fetch(apiUrl)
+      if (!res.ok) throw new Error("Failed to fetch biomodels")
+      const data = await res.json()
+      // Map API response to BiomodelResult[]
+      const mappedResults: BiomodelResult[] = (data.data || []).map((model: any) => ({
+        bmId: Number(model.bmKey),
+        name: model.name,
+        ownerName: model.ownerName,
+        ownerKey: Number(model.ownerKey),
+        savedDate: new Date(model.savedDate).toISOString(),
+        annot: model.annot || "", // fallback if missing
+        branchId: Number(model.branchID),
+        modelKey: Number(model.modelKey),
+        simulations: Array.isArray(model.simulations) ? model.simulations.length : 0,
+        privacy: model.privacy ?? 0,
+        groupUsers: model.groupUsers || [],
+      }))
+      setResults(mappedResults)
+    } catch (err) {
+      setResults([])
+    } finally {
       setIsLoading(false)
-    }, 1000)
+    }
   }
 
   const formatDate = (dateString: string) => {
@@ -363,20 +344,6 @@ export default function BiomodelSearchPage() {
                             ))}
                           </div>
                         )}
-                      </div>
-
-                      <div className="flex flex-col gap-2 ml-4">
-                        <Badge variant={model.privacy === 1 ? "default" : "secondary"}>
-                          {model.privacy === 1 ? "Private" : "Public"}
-                        </Badge>
-                        <div className="flex gap-1">
-                          <Button size="sm" variant="outline" className="h-8 w-8 p-0">
-                            <Eye className="h-3 w-3" />
-                          </Button>
-                          <Button size="sm" variant="outline" className="h-8 w-8 p-0">
-                            <Download className="h-3 w-3" />
-                          </Button>
-                        </div>
                       </div>
                     </div>
                   </CardContent>
