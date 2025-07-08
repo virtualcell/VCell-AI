@@ -146,7 +146,7 @@ export default function BiomodelSearchPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
               <div className="space-y-1">
                 <Label htmlFor="bmName" className="text-slate-700 font-medium text-sm">
                   Model Name
@@ -200,12 +200,12 @@ export default function BiomodelSearchPage() {
                 />
               </div>
 
-              <div className="space-y-1 col-span-1 md:col-span-2 lg:col-span-4">
+              <div className="space-y-1">
                 <Label className="text-slate-700 font-medium text-sm">Category</Label>
-                <RadioGroup 
+                <RadioGroup
                   value={filters.category}
                   onValueChange={(value) => setFilters({ ...filters, category: value })}
-                  className="flex flex-wrap gap-x-4 gap-y-1 pt-1 flex items-center"
+                  className="flex flex-wrap gap-x-4 gap-y-1 pt-1"
                 >
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="all" id="cat-all" />
