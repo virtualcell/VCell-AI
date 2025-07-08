@@ -78,20 +78,23 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ startMessage, quickActions, ca
 
   // Helper function to format biomodel IDs as hyperlinks
   const formatBiomodelIds = (content: string, bmkeys: string[]): string => {
-    if (!bmkeys || bmkeys.length === 0) return content
-    
-    let formattedContent = content
-    
+    if (!bmkeys || bmkeys.length === 0) return content;
+
+    let formattedContent = content;
+
+    console.log("bmkeys:", bmkeys);
+
     // Replace biomodel IDs with hyperlinks
     bmkeys.forEach(bmId => {
-      const regex = new RegExp(`\\b${bmId}\\b`, 'g')
-      const encodedPrompt = encodeURIComponent(`Describe model`)
-      const link = `[${bmId}](/analyze/${bmId}?prompt=${encodedPrompt})`
-      formattedContent = formattedContent.replace(regex, link)
-    })
-    
-    return formattedContent
-  }
+      const searchString = `${bmId}`;
+      const encodedPrompt = encodeURIComponent(`Describe model`);
+      const link = `[${bmId}](/analyze/${bmId}?prompt=${encodedPrompt})`;
+      const replacementString = `${link}`;
+      formattedContent = formattedContent.replaceAll(searchString, replacementString);
+    });
+
+    return formattedContent;
+  };
 
   const handleQuickAction = (message: string) => {
     setInputMessage("")
@@ -307,4 +310,4 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ startMessage, quickActions, ca
       </div>
     </Card>
   )
-} 
+}
