@@ -139,17 +139,16 @@ export default function BiomodelSearchPage() {
 
         {/* Search Form */}
         <Card className="mb-8 shadow-sm border-slate-200">
-          <CardHeader className="bg-slate-50 border-b border-slate-200">
-            <CardTitle className="flex items-center gap-2 text-slate-900">
-              <Filter className="h-5 w-5" />
+          <CardHeader className="bg-slate-50 border-b border-slate-200 px-4 py-3">
+            <CardTitle className="flex items-center gap-2 text-slate-900 text-base">
+              <Filter className="h-4 w-4" />
               Search Filters
             </CardTitle>
-            <CardDescription>Configure your search parameters to find specific biomodels</CardDescription>
           </CardHeader>
-          <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="bmName" className="text-slate-700 font-medium">
+          <CardContent className="p-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="space-y-1">
+                <Label htmlFor="bmName" className="text-slate-700 font-medium text-sm">
                   Model Name
                 </Label>
                 <Input
@@ -157,12 +156,12 @@ export default function BiomodelSearchPage() {
                   placeholder="Enter biomodel name..."
                   value={filters.bmName}
                   onChange={(e) => setFilters({ ...filters, bmName: e.target.value })}
-                  className="border-slate-300 focus:border-blue-500"
+                  className="border-slate-300 focus:border-blue-500 h-9"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="owner" className="text-slate-700 font-medium">
+              <div className="space-y-1">
+                <Label htmlFor="owner" className="text-slate-700 font-medium text-sm">
                   Owner
                 </Label>
                 <Input
@@ -170,12 +169,12 @@ export default function BiomodelSearchPage() {
                   placeholder="Enter owner name..."
                   value={filters.owner}
                   onChange={(e) => setFilters({ ...filters, owner: e.target.value })}
-                  className="border-slate-300 focus:border-blue-500"
+                  className="border-slate-300 focus:border-blue-500 h-9"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="bmId" className="text-slate-700 font-medium">
+              <div className="space-y-1">
+                <Label htmlFor="bmId" className="text-slate-700 font-medium text-sm">
                   Biomodel ID
                 </Label>
                 <Input
@@ -183,42 +182,11 @@ export default function BiomodelSearchPage() {
                   placeholder="Enter biomodel ID..."
                   value={filters.bmId}
                   onChange={(e) => setFilters({ ...filters, bmId: e.target.value })}
-                  className="border-slate-300 focus:border-blue-500"
+                  className="border-slate-300 focus:border-blue-500 h-9"
                 />
               </div>
-
-              <div className="space-y-2 col-span-1 md:col-span-2 lg:col-span-3">
-                <Label className="text-slate-700 font-medium">Category</Label>
-                <RadioGroup
-                  value={filters.category}
-                  onValueChange={(value) => setFilters({ ...filters, category: value })}
-                  className="flex flex-wrap gap-x-6 gap-y-2 pt-2"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="all" id="cat-all" />
-                    <Label htmlFor="cat-all">All</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="public" id="cat-public" />
-                    <Label htmlFor="cat-public">Public</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="shared" id="cat-shared" />
-                    <Label htmlFor="cat-shared">Shared</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="tutorial" id="cat-tutorial" />
-                    <Label htmlFor="cat-tutorial">Tutorial</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="educational" id="cat-educational" />
-                    <Label htmlFor="cat-educational">Educational</Label>
-                  </div>
-                </RadioGroup>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="maxRows" className="text-slate-700 font-medium">
+              <div className="space-y-1">
+                <Label htmlFor="maxRows" className="text-slate-700 font-medium text-sm">
                   Max Results
                 </Label>
                 <Input
@@ -228,21 +196,61 @@ export default function BiomodelSearchPage() {
                   max="100"
                   value={filters.maxRows}
                   onChange={(e) => setFilters({ ...filters, maxRows: Number.parseInt(e.target.value) || 10 })}
-                  className="border-slate-300 focus:border-blue-500"
+                  className="border-slate-300 focus:border-blue-500 h-9"
                 />
               </div>
+
+              <div className="space-y-1 col-span-1 md:col-span-2 lg:col-span-4">
+                <Label className="text-slate-700 font-medium text-sm">Category</Label>
+                <RadioGroup 
+                  value={filters.category}
+                  onValueChange={(value) => setFilters({ ...filters, category: value })}
+                  className="flex flex-wrap gap-x-4 gap-y-1 pt-1 flex items-center"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="all" id="cat-all" />
+                    <Label htmlFor="cat-all" className="font-normal">
+                      All
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="public" id="cat-public" />
+                    <Label htmlFor="cat-public" className="font-normal">
+                      Public
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="shared" id="cat-shared" />
+                    <Label htmlFor="cat-shared" className="font-normal">
+                      Shared
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="tutorial" id="cat-tutorial" />
+                    <Label htmlFor="cat-tutorial" className="font-normal">
+                      Tutorial
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="educational" id="cat-educational" />
+                    <Label htmlFor="cat-educational" className="font-normal">
+                      Educational
+                    </Label>
+                  </div>
+                </RadioGroup>
+              </div>
             </div>
-            <Collapsible open={isAdvancedSearchOpen} onOpenChange={setIsAdvancedSearchOpen} className="mt-4">
+            <Collapsible open={isAdvancedSearchOpen} onOpenChange={setIsAdvancedSearchOpen} className="mt-3">
               <CollapsibleTrigger asChild>
-                <Button variant="link" className="p-0 text-blue-600 hover:text-blue-700">
-                  <ChevronsUpDown className="h-4 w-4 mr-2" />
-                  Advanced Search Filters
+                <Button variant="link" className="p-0 text-blue-600 hover:text-blue-700 text-sm">
+                  <ChevronsUpDown className="h-4 w-4 mr-1" />
+                  Advanced Search
                 </Button>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="savedLow" className="text-slate-700 font-medium">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-2">
+                  <div className="space-y-1">
+                    <Label htmlFor="savedLow" className="text-slate-700 font-medium text-sm">
                       Saved After
                     </Label>
                     <Input
@@ -250,12 +258,12 @@ export default function BiomodelSearchPage() {
                       type="date"
                       value={filters.savedLow}
                       onChange={(e) => setFilters({ ...filters, savedLow: e.target.value })}
-                      className="border-slate-300 focus:border-blue-500"
+                      className="border-slate-300 focus:border-blue-500 h-9"
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="savedHigh" className="text-slate-700 font-medium">
+                  <div className="space-y-1">
+                    <Label htmlFor="savedHigh" className="text-slate-700 font-medium text-sm">
                       Saved Before
                     </Label>
                     <Input
@@ -263,16 +271,16 @@ export default function BiomodelSearchPage() {
                       type="date"
                       value={filters.savedHigh}
                       onChange={(e) => setFilters({ ...filters, savedHigh: e.target.value })}
-                      className="border-slate-300 focus:border-blue-500"
+                      className="border-slate-300 focus:border-blue-500 h-9"
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="orderBy" className="text-slate-700 font-medium">
+                  <div className="space-y-1">
+                    <Label htmlFor="orderBy" className="text-slate-700 font-medium text-sm">
                       Sort By
                     </Label>
                     <Select value={filters.orderBy} onValueChange={(value) => setFilters({ ...filters, orderBy: value })}>
-                      <SelectTrigger className="border-slate-300 focus:border-blue-500">
+                      <SelectTrigger className="border-slate-300 focus:border-blue-500 h-9">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -284,8 +292,8 @@ export default function BiomodelSearchPage() {
                     </Select>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="startRow" className="text-slate-700 font-medium">
+                  <div className="space-y-1">
+                    <Label htmlFor="startRow" className="text-slate-700 font-medium text-sm">
                       Start Row
                     </Label>
                     <Input
@@ -294,21 +302,21 @@ export default function BiomodelSearchPage() {
                       min="1"
                       value={filters.startRow}
                       onChange={(e) => setFilters({ ...filters, startRow: Number.parseInt(e.target.value) || 1 })}
-                      className="border-slate-300 focus:border-blue-500"
+                      className="border-slate-300 focus:border-blue-500 h-9"
                     />
                   </div>
                 </div>
               </CollapsibleContent>
             </Collapsible>
 
-            <div className="mt-6 pt-4 border-t border-slate-200">
+            <div className="mt-4 pt-4 border-t border-slate-200">
               <Button
                 onClick={handleSearch}
                 disabled={isLoading}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 h-9"
               >
                 <Search className="h-4 w-4 mr-2" />
-                {isLoading ? "Searching..." : "Search Biomodels"}
+                {isLoading ? "Searching..." : "Search"}
               </Button>
             </div>
           </CardContent>
