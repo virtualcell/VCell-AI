@@ -14,7 +14,7 @@ from app.controllers.vcelldb_controller import (
 router = APIRouter()
 
 
-@router.get("/biomodel", response_model=List[dict])
+@router.get("/biomodel", response_model=dict)
 async def get_biomodels(params: BiomodelRequestParams = Depends()):
     """
     Endpoint to retrieve biomodels based on provided filters and sorting.

@@ -13,7 +13,7 @@ from app.services.vcelldb_service import (
 )
 
 
-async def get_biomodels_controller(params: BiomodelRequestParams) -> List[dict]:
+async def get_biomodels_controller(params: BiomodelRequestParams) -> dict:
     """
     Controller function to retrieve biomodels based on filters and sorting.
     Raises:
