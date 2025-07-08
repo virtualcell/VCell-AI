@@ -7,9 +7,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { JsonViewer } from "@/components/json-viewer"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 
 interface SearchFilters {
@@ -52,7 +51,6 @@ export default function BiomodelSearchPage() {
   })
 
   const [results, setResults] = useState<BiomodelResult[]>([])
-  const [apiResponse, setApiResponse] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isAdvancedSearchOpen, setIsAdvancedSearchOpen] = useState(false)
 
@@ -111,7 +109,6 @@ export default function BiomodelSearchPage() {
     // Simulate API delay
     setTimeout(() => {
       setResults(mockResponse.bioModelInfos)
-      setApiResponse(mockResponse)
       setIsLoading(false)
     }, 1000)
   }
@@ -387,19 +384,6 @@ export default function BiomodelSearchPage() {
               ))}
             </div>
           </div>
-        )}
-
-        {/* API Response */}
-        {apiResponse && (
-          <Card className="shadow-sm border-slate-200">
-            <CardHeader className="bg-slate-50 border-b border-slate-200">
-              <CardTitle className="text-slate-900">API Response</CardTitle>
-              <CardDescription>Raw JSON response from the biomodel search API</CardDescription>
-            </CardHeader>
-            <CardContent className="p-0">
-              <JsonViewer data={apiResponse} />
-            </CardContent>
-          </Card>
         )}
       </div>
     </div>
