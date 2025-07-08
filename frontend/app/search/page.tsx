@@ -5,6 +5,7 @@ import { Search, Filter, Download, Eye, ChevronsUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -186,22 +187,34 @@ export default function BiomodelSearchPage() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="category" className="text-slate-700 font-medium">
-                  Category
-                </Label>
-                <Select value={filters.category} onValueChange={(value) => setFilters({ ...filters, category: value })}>
-                  <SelectTrigger className="border-slate-300 focus:border-blue-500">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
-                    <SelectItem value="public">Public</SelectItem>
-                    <SelectItem value="shared">Shared</SelectItem>
-                    <SelectItem value="tutorial">Tutorial</SelectItem>
-                    <SelectItem value="educational">Educational</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="space-y-2 col-span-1 md:col-span-2 lg:col-span-3">
+                <Label className="text-slate-700 font-medium">Category</Label>
+                <RadioGroup
+                  value={filters.category}
+                  onValueChange={(value) => setFilters({ ...filters, category: value })}
+                  className="flex flex-wrap gap-x-6 gap-y-2 pt-2"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="all" id="cat-all" />
+                    <Label htmlFor="cat-all">All</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="public" id="cat-public" />
+                    <Label htmlFor="cat-public">Public</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="shared" id="cat-shared" />
+                    <Label htmlFor="cat-shared">Shared</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="tutorial" id="cat-tutorial" />
+                    <Label htmlFor="cat-tutorial">Tutorial</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="educational" id="cat-educational" />
+                    <Label htmlFor="cat-educational">Educational</Label>
+                  </div>
+                </RadioGroup>
               </div>
 
               <div className="space-y-2">
