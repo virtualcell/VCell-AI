@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import Link from "next/link"
 
 interface SearchFilters {
   bmId: string
@@ -312,42 +313,44 @@ export default function BiomodelSearchPage() {
 
             <div className="grid gap-4">
               {results.map((model) => (
-                <Card key={model.bmId} className="shadow-sm border-slate-200 hover:shadow-md transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-slate-900 mb-2">{model.name}</h3>
-                        <p className="text-slate-600 text-sm mb-3 leading-relaxed">{model.annot}</p>
+                <Link key={model.bmId} href={`/search/${model.bmId}`} className="block">
+                  <Card className="shadow-sm border-slate-200 hover:shadow-md transition-shadow cursor-pointer">
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex-1">
+                          <h3 className="text-lg font-semibold text-slate-900 mb-2">{model.name}</h3>
+                          <p className="text-slate-600 text-sm mb-3 leading-relaxed">{model.annot}</p>
 
-                        <div className="flex flex-wrap gap-4 text-sm text-slate-500">
-                          <span>
-                            <strong>Owner:</strong> {model.ownerName}
-                          </span>
-                          <span>
-                            <strong>Saved:</strong> {formatDate(model.savedDate)}
-                          </span>
-                          <span>
-                            <strong>Simulations:</strong> {model.simulations}
-                          </span>
-                          <span>
-                            <strong>Model ID:</strong> {model.bmId}
-                          </span>
-                        </div>
-
-                        {model.groupUsers.length > 0 && (
-                          <div className="mt-3">
-                            <span className="text-sm text-slate-500 mr-2">Shared with:</span>
-                            {model.groupUsers.map((user, index) => (
-                              <Badge key={index} variant="outline" className="mr-1 text-xs">
-                                {user}
-                              </Badge>
-                            ))}
+                          <div className="flex flex-wrap gap-4 text-sm text-slate-500">
+                            <span>
+                              <strong>Owner:</strong> {model.ownerName}
+                            </span>
+                            <span>
+                              <strong>Saved:</strong> {formatDate(model.savedDate)}
+                            </span>
+                            <span>
+                              <strong>Simulations:</strong> {model.simulations}
+                            </span>
+                            <span>
+                              <strong>Model ID:</strong> {model.bmId}
+                            </span>
                           </div>
-                        )}
+
+                          {model.groupUsers.length > 0 && (
+                            <div className="mt-3">
+                              <span className="text-sm text-slate-500 mr-2">Shared with:</span>
+                              {model.groupUsers.map((user, index) => (
+                                <Badge key={index} variant="outline" className="mr-1 text-xs">
+                                  {user}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                </Link>
               ))}
             </div>
           </div>
