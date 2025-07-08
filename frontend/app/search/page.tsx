@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Search, Filter, Download, Eye } from "lucide-react"
+import { Search, Filter, Download, Eye, ChevronsUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -9,8 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { JsonViewer } from "@/components/json-viewer"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 
 interface SearchFilters {
+  bmId: string
   bmName: string
   category: string
   owner: string
@@ -37,19 +39,21 @@ interface BiomodelResult {
 
 export default function BiomodelSearchPage() {
   const [filters, setFilters] = useState<SearchFilters>({
+    bmId: "",
     bmName: "",
     category: "all",
     owner: "",
     savedLow: "",
     savedHigh: "",
     startRow: 1,
-    maxRows: 10,
+    maxRows: 1000,
     orderBy: "date_desc",
   })
 
   const [results, setResults] = useState<BiomodelResult[]>([])
   const [apiResponse, setApiResponse] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [isAdvancedSearchOpen, setIsAdvancedSearchOpen] = useState(false)
 
   const handleSearch = async () => {
     setIsLoading(true)
@@ -157,6 +161,32 @@ export default function BiomodelSearchPage() {
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="owner" className="text-slate-700 font-medium">
+                  Owner
+                </Label>
+                <Input
+                  id="owner"
+                  placeholder="Enter owner name..."
+                  value={filters.owner}
+                  onChange={(e) => setFilters({ ...filters, owner: e.target.value })}
+                  className="border-slate-300 focus:border-blue-500"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="bmId" className="text-slate-700 font-medium">
+                  Biomodel ID
+                </Label>
+                <Input
+                  id="bmId"
+                  placeholder="Enter biomodel ID..."
+                  value={filters.bmId}
+                  onChange={(e) => setFilters({ ...filters, bmId: e.target.value })}
+                  className="border-slate-300 focus:border-blue-500"
+                />
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="category" className="text-slate-700 font-medium">
                   Category
                 </Label>
@@ -175,76 +205,6 @@ export default function BiomodelSearchPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="owner" className="text-slate-700 font-medium">
-                  Owner
-                </Label>
-                <Input
-                  id="owner"
-                  placeholder="Enter owner name..."
-                  value={filters.owner}
-                  onChange={(e) => setFilters({ ...filters, owner: e.target.value })}
-                  className="border-slate-300 focus:border-blue-500"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="savedLow" className="text-slate-700 font-medium">
-                  Saved After
-                </Label>
-                <Input
-                  id="savedLow"
-                  type="date"
-                  value={filters.savedLow}
-                  onChange={(e) => setFilters({ ...filters, savedLow: e.target.value })}
-                  className="border-slate-300 focus:border-blue-500"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="savedHigh" className="text-slate-700 font-medium">
-                  Saved Before
-                </Label>
-                <Input
-                  id="savedHigh"
-                  type="date"
-                  value={filters.savedHigh}
-                  onChange={(e) => setFilters({ ...filters, savedHigh: e.target.value })}
-                  className="border-slate-300 focus:border-blue-500"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="orderBy" className="text-slate-700 font-medium">
-                  Sort By
-                </Label>
-                <Select value={filters.orderBy} onValueChange={(value) => setFilters({ ...filters, orderBy: value })}>
-                  <SelectTrigger className="border-slate-300 focus:border-blue-500">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="date_desc">Date (Newest First)</SelectItem>
-                    <SelectItem value="date_asc">Date (Oldest First)</SelectItem>
-                    <SelectItem value="name_desc">Name (Z-A)</SelectItem>
-                    <SelectItem value="name_asc">Name (A-Z)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="startRow" className="text-slate-700 font-medium">
-                  Start Row
-                </Label>
-                <Input
-                  id="startRow"
-                  type="number"
-                  min="1"
-                  value={filters.startRow}
-                  onChange={(e) => setFilters({ ...filters, startRow: Number.parseInt(e.target.value) || 1 })}
-                  className="border-slate-300 focus:border-blue-500"
-                />
-              </div>
-
-              <div className="space-y-2">
                 <Label htmlFor="maxRows" className="text-slate-700 font-medium">
                   Max Results
                 </Label>
@@ -259,6 +219,74 @@ export default function BiomodelSearchPage() {
                 />
               </div>
             </div>
+            <Collapsible open={isAdvancedSearchOpen} onOpenChange={setIsAdvancedSearchOpen} className="mt-4">
+              <CollapsibleTrigger asChild>
+                <Button variant="link" className="p-0 text-blue-600 hover:text-blue-700">
+                  <ChevronsUpDown className="h-4 w-4 mr-2" />
+                  Advanced Search Filters
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="savedLow" className="text-slate-700 font-medium">
+                      Saved After
+                    </Label>
+                    <Input
+                      id="savedLow"
+                      type="date"
+                      value={filters.savedLow}
+                      onChange={(e) => setFilters({ ...filters, savedLow: e.target.value })}
+                      className="border-slate-300 focus:border-blue-500"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="savedHigh" className="text-slate-700 font-medium">
+                      Saved Before
+                    </Label>
+                    <Input
+                      id="savedHigh"
+                      type="date"
+                      value={filters.savedHigh}
+                      onChange={(e) => setFilters({ ...filters, savedHigh: e.target.value })}
+                      className="border-slate-300 focus:border-blue-500"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="orderBy" className="text-slate-700 font-medium">
+                      Sort By
+                    </Label>
+                    <Select value={filters.orderBy} onValueChange={(value) => setFilters({ ...filters, orderBy: value })}>
+                      <SelectTrigger className="border-slate-300 focus:border-blue-500">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="date_desc">Date (Newest First)</SelectItem>
+                        <SelectItem value="date_asc">Date (Oldest First)</SelectItem>
+                        <SelectItem value="name_desc">Name (Z-A)</SelectItem>
+                        <SelectItem value="name_asc">Name (A-Z)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="startRow" className="text-slate-700 font-medium">
+                      Start Row
+                    </Label>
+                    <Input
+                      id="startRow"
+                      type="number"
+                      min="1"
+                      value={filters.startRow}
+                      onChange={(e) => setFilters({ ...filters, startRow: Number.parseInt(e.target.value) || 1 })}
+                      className="border-slate-300 focus:border-blue-500"
+                    />
+                  </div>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
 
             <div className="mt-6 pt-4 border-t border-slate-200">
               <Button
