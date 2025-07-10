@@ -1,6 +1,6 @@
 "use client"
 
-import { Search, FileText, Code, BarChart3Icon as Diagram3, MessageSquare, History, Database, Sparkles, FlaskConical, UserPlus, LogIn } from "lucide-react"
+import { Search, Code, MessageSquare, History, Database, Sparkles, FlaskConical, UserPlus, LogIn } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -29,16 +29,6 @@ const navigationItems = [
     title: "SBML & BNGL Files",
     url: "/sbml",
     icon: Code,
-  },
-  {
-    title: "VCML Files",
-    url: "/vcml",
-    icon: FileText,
-  },
-  {
-    title: "Diagrams",
-    url: "/diagrams",
-    icon: Diagram3,
   },
   {
     title: "AI Chat",
@@ -160,27 +150,27 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-                <SidebarFooter className="border-t border-slate-200 p-4">
-            <div className="space-y-3">
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" className="flex-1 flex items-center gap-2" asChild>
-                  <Link href="/signup">
-                    <UserPlus className="h-3 w-3" />
-                    Sign Up
-                  </Link>
-                </Button>
-                <Button variant="default" size="sm" className="flex-1 flex items-center gap-2" asChild>
-                  <Link href="/signin">
-                    <LogIn className="h-3 w-3" />
-                    Sign In
-                  </Link>
-                </Button>
-              </div>
-              <div className="text-xs text-slate-500 text-center">
-                <p>VCell Model Explorer Platform</p>
-              </div>
-            </div>
-          </SidebarFooter>
+      <SidebarFooter className="border-t border-slate-200 p-4">
+        <div className="space-y-3">
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" className="flex-1 flex items-center gap-2" asChild>
+              <Link href="/signup">
+                <UserPlus className="h-3 w-3" />
+                Sign Up
+              </Link>
+            </Button>
+            <Button variant="default" size="sm" className="flex-1 flex items-center gap-2" asChild>
+              <Link href="/signin">
+                <LogIn className="h-3 w-3" />
+                Sign In
+              </Link>
+            </Button>
+          </div>
+          <div className="text-xs text-slate-500 text-center">
+            <p>VCell Model Explorer Platform</p>
+          </div>
+        </div>
+      </SidebarFooter>
     </Sidebar>
   )
 }
