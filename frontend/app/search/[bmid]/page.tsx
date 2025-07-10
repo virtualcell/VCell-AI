@@ -153,7 +153,7 @@ export default function BiomodelDetailPage() {
                 <span className="font-semibold text-slate-800">Description</span>
               </div>
               <div className="whitespace-pre-line text-slate-700 bg-blue-50 rounded p-4 border border-blue-100 shadow-sm">
-                {data.annot}
+                {data.annot && data.annot.trim() !== "" ? data.annot : "No description is available for this biomodel"}
               </div>
             </div>
             <div className="mb-8">
