@@ -1,6 +1,6 @@
 "use client"
 
-import { Search, Code, MessageSquare, History, Database, Sparkles, FlaskConical, UserPlus, LogIn } from "lucide-react"
+import { Search, MessageSquare, History, Database, Sparkles, FlaskConical, UserPlus, LogIn } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -26,12 +26,7 @@ const navigationItems = [
     icon: Search,
   },
   {
-    title: "SBML & BNGL Files",
-    url: "/sbml",
-    icon: Code,
-  },
-  {
-    title: "AI Chat",
+    title: "Database Explorer",
     url: "/chat",
     icon: MessageSquare,
   },
