@@ -85,6 +85,8 @@ export default function BiomodelDetailPage() {
   if (error) return <div className="p-8 text-center text-red-600">{error}</div>
   if (!data) return null
 
+  const biomodelDiagramUrl = `https://vcell.cam.uchc.edu/api/v0/biomodel/${data.bmKey}/diagram`
+
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="container mx-auto p-8 max-w-6xl">
@@ -131,6 +133,20 @@ export default function BiomodelDetailPage() {
             </div>
           </CardHeader>
           <CardContent className="p-8 bg-white">
+            {/* Biomodel Diagram block */}
+            <div className="mb-8">
+              <div className="flex items-center gap-2 mb-2">
+                <FlaskConical className="h-5 w-5 text-blue-400" />
+                <span className="font-semibold text-slate-800">Biomodel Diagram</span>
+              </div>
+              <img
+                src={biomodelDiagramUrl || "/placeholder.svg"}
+                alt="Biomodel Diagram"
+                className="max-w-full h-auto mx-auto border border-slate-200 rounded shadow"
+                onError={() => setError("Failed to load diagram image.")}
+                onLoad={() => setError("")}
+              />
+            </div>
             <div className="mb-8">
               <div className="flex items-center gap-2 mb-2">
                 <FileText className="h-5 w-5 text-blue-400" />
