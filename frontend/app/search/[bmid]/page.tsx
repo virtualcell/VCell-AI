@@ -162,13 +162,32 @@ export default function BiomodelDetailPage() {
                 <span className="font-semibold text-slate-800">Applications</span>
               </div>
               <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-1">
-                {data.applications?.map((app) => (
-                  <li key={app.key} className="bg-slate-50 border border-slate-200 rounded p-3 flex flex-col gap-1 shadow-sm">
-                    <span className="font-medium text-blue-900 flex items-center gap-2"><Hash className="h-4 w-4 text-blue-300" />{app.name}</span>
-                    <span className="text-xs text-slate-500">App Key: <span className="font-mono text-blue-700">{app.key}</span></span>
-                    <span className="text-xs text-slate-500">MathKey: <span className="font-mono text-blue-700">{app.mathKey}</span></span>
-                  </li>
-                ))}
+                {data.applications?.map((app) => {
+                  const encodedAppName = encodeURIComponent(app.name || "")
+                  const bnglUrl = `https://vcell.cam.uchc.edu/api/v0/biomodel/${data.bmKey}/biomodel.bngl?appname=${encodedAppName}`
+                  const sbmlUrl = `https://vcell.cam.uchc.edu/api/v0/biomodel/${data.bmKey}/biomodel.sbml?appname=${encodedAppName}`
+                  return (
+                    <li key={app.key} className="bg-slate-50 border border-slate-200 rounded p-3 flex flex-col gap-1 shadow-sm">
+                      <span className="font-medium text-blue-900 flex items-center gap-2"><Hash className="h-4 w-4 text-blue-300" />{app.name}</span>
+                      <span className="text-xs text-slate-500">App Key: <span className="font-mono text-blue-700">{app.key}</span></span>
+                      <span className="text-xs text-slate-500">MathKey: <span className="font-mono text-blue-700">{app.mathKey}</span></span>
+                      <div className="flex gap-2 mt-2">
+                        <button
+                          onClick={() => window.open(bnglUrl, '_blank')}
+                          className="inline-flex items-center gap-2 px-3 py-1 rounded border border-green-600 text-green-700 bg-white font-semibold shadow-sm transition-colors hover:bg-green-50 text-xs"
+                        >
+                          Download BNGL
+                        </button>
+                        <button
+                          onClick={() => window.open(sbmlUrl, '_blank')}
+                          className="inline-flex items-center gap-2 px-3 py-1 rounded border border-blue-600 text-blue-700 bg-white font-semibold shadow-sm transition-colors hover:bg-blue-50 text-xs"
+                        >
+                          Download SBML
+                        </button>
+                      </div>
+                    </li>
+                  )
+                })}
               </ul>
             </div>
             <div>
