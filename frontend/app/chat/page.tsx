@@ -12,36 +12,12 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { ToolParameters } from "@/components/ToolParameters"
 import { OnboardingModal } from "@/components/onboarding-modal"
 import { ChatBox } from "@/components/ChatBox"
 
-interface ChatParameters {
-  biomodelId: string,
-  bmName: string
-  category: string
-  owner: string
-  savedLow: string
-  savedHigh: string
-  maxRows: number
-  orderBy: string
-  llmMode: string
-}
 
 export default function ChatPage() {
   const [showOnboarding, setShowOnboarding] = useState(false)
-
-  const [parameters, setParameters] = useState<ChatParameters>({
-    biomodelId: "",
-    bmName: "",
-    category: "all",
-    owner: "",
-    savedLow: "",
-    savedHigh: "",
-    maxRows: 1000,
-    orderBy: "date_desc",
-    llmMode: "tool_calling",
-  })
 
   useEffect(() => {
     // Check if user has seen onboarding before
@@ -117,21 +93,13 @@ export default function ChatPage() {
           </Alert>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Chat Interface */}
-          <div className="lg:col-span-3">
-            <ChatBox
-              startMessage={startMessage}
-              quickActions={quickActions}
-              cardTitle={cardTitle}
-              parameters={parameters}
-            />
-          </div>
-
-          {/* Tool Parameters Panel */}
-          <div className="lg:col-span-1">
-            <ToolParameters parameters={parameters} onParametersChange={setParameters} />
-          </div>
+        {/* Chat Interface */}
+        <div className="mb-8 w-full">
+          <ChatBox
+            startMessage={startMessage}
+            quickActions={quickActions}
+            cardTitle={cardTitle}
+          />
         </div>
       </div>
       {/* Onboarding Modal */}
