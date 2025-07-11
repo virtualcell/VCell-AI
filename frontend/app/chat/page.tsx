@@ -93,15 +93,13 @@ export default function ChatPage() {
           </Alert>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Chat Interface */}
-          <div className="lg:col-span-3">
-            <ChatBox
-              startMessage={startMessage}
-              quickActions={quickActions}
-              cardTitle={cardTitle}
-            />
-          </div>
+        {/* Chat Interface */}
+        <div className="mb-8 w-full">
+          <ChatBox
+            startMessage={startMessage}
+            quickActions={quickActions}
+            cardTitle={cardTitle}
+          />
         </div>
       </div>
       {/* Onboarding Modal */}
