@@ -24,9 +24,6 @@ export default function SignInPage() {
     setError("")
 
     try {
-      // TODO: Implement actual sign in logic here
-      console.log("Signing in with:", { email, password })
-      
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000))
       
