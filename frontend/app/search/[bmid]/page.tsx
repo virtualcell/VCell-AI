@@ -169,8 +169,10 @@ export default function BiomodelDetailPage() {
                   return (
                     <li key={app.key} className="bg-slate-50 border border-slate-200 rounded p-3 flex flex-col gap-1 shadow-sm">
                       <span className="font-medium text-blue-900 flex items-center gap-2"><Hash className="h-4 w-4 text-blue-300" />{app.name}</span>
-                      <span className="text-xs text-slate-500">App Key: <span className="font-mono text-blue-700">{app.key}</span></span>
-                      <span className="text-xs text-slate-500">MathKey: <span className="font-mono text-blue-700">{app.mathKey}</span></span>
+                      <span className="text-xs text-slate-500 flex gap-4">
+                        App Key: <span className="font-mono text-blue-700">{app.key}</span>
+                        MathKey: <span className="font-mono text-blue-700">{app.mathKey}</span>
+                      </span>
                       <div className="flex gap-2 mt-2">
                         <button
                           onClick={() => window.open(bnglUrl, '_blank')}
