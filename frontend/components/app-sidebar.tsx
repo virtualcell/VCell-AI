@@ -1,6 +1,6 @@
 "use client"
 
-import { Search, MessageSquare, History, Database, Sparkles, FlaskConical, UserPlus, LogIn } from "lucide-react"
+import { Search, History, Database, Sparkles, FlaskConical, UserPlus, LogIn } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -18,19 +18,6 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
 } from "@/components/ui/sidebar"
-
-const navigationItems = [
-  {
-    title: "Biomodel Search",
-    url: "/search",
-    icon: Search,
-  },
-  {
-    title: "Database Explorer",
-    url: "/chat",
-    icon: MessageSquare,
-  },
-]
 
 const historyItems = [
   "Calcium Biomodel Comparison",
@@ -60,10 +47,10 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        {/* AI Explorer Section */}
+        {/* AI Tools Section */}
         <SidebarGroup>
           <SidebarGroupLabel className="text-slate-700 font-medium flex items-center gap-2">
-            AI Explorer
+            AI tools
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -91,7 +78,7 @@ export function AppSidebar() {
                     <span className="relative flex items-center">
                       <FlaskConical className="h-4 w-4 text-yellow-400" />
                     </span>
-                    <span>Biomodel Analysis</span>
+                    <span>Biomodel Explorer</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -101,25 +88,23 @@ export function AppSidebar() {
 
         <SidebarSeparator />
 
-        {/* Analysis Tools Section */}
+        {/* Database Tools Section */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-slate-700 font-medium">API Tools</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-slate-700 font-medium">Database tools</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navigationItems.filter(item => item.url !== "/chat").map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname === item.url}
-                    className="data-[active=true]:bg-blue-50 data-[active=true]:text-blue-700 data-[active=true]:border-r-2 data-[active=true]:border-blue-600"
-                  >
-                    <Link href={item.url} className="flex items-center gap-3">
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              <SidebarMenuItem key="BiomodelSearch">
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === "/search"}
+                  className="data-[active=true]:bg-blue-50 data-[active=true]:text-blue-700 data-[active=true]:border-r-2 data-[active=true]:border-blue-600"
+                >
+                  <Link href="/search" className="flex items-center gap-3">
+                    <Search className="h-4 w-4" />
+                    <span>Biomodel Search</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

@@ -82,14 +82,12 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ startMessage, quickActions, ca
 
     let formattedContent = content;
 
-    console.log("bmkeys:", bmkeys);
-
     // Replace biomodel IDs with hyperlinks
     bmkeys.forEach(bmId => {
       const searchString = `${bmId}`;
       const encodedPrompt = encodeURIComponent(`Describe model`);
-      const ai_link = `[🧠 AI Analysis](/analyze/${bmId}?prompt=${encodedPrompt})`;
-      const db_link = `[🗄️ Database Explorer](/search/${bmId})`;
+      const ai_link = `[AI Analysis](/analyze/${bmId}?prompt=${encodedPrompt})`;
+      const db_link = `[Database](/search/${bmId})`;
       const replacementString = `**${bmId}** -- ${ai_link} &nbsp;|&nbsp; ${db_link}`;
       formattedContent = formattedContent.replaceAll(searchString, replacementString);
     });
@@ -105,7 +103,6 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ startMessage, quickActions, ca
   const handleSendMessage = async (overrideMessage?: string) => {
     const msg = overrideMessage ?? inputMessage
     if (!msg.trim()) return
-    console.log(parameters)
     // Build parameter context string
     let parameterContext = ""
     if (parameters) {
@@ -167,7 +164,6 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ startMessage, quickActions, ca
       // Format the response to include hyperlinks for biomodel IDs
       const formattedResponse = formatBiomodelIds(aiResponse, bmkeys)
       
-      console.log(formattedResponse)
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",

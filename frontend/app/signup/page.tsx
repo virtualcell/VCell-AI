@@ -66,10 +66,7 @@ export default function SignUpPage() {
 
     setIsLoading(true)
 
-    try {
-      // TODO: Implement actual sign up logic here
-      console.log("Signing up with:", formData)
-      
+    try {      
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000))
       
