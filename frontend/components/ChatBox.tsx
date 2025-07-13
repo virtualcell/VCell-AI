@@ -88,8 +88,8 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ startMessage, quickActions, ca
     bmkeys.forEach(bmId => {
       const searchString = `${bmId}`;
       const encodedPrompt = encodeURIComponent(`Describe model`);
-      const ai_link = `[🧠 AI Analysis](/analyze/${bmId}?prompt=${encodedPrompt})`;
-      const db_link = `[🗄️ Database Explorer](/search/${bmId})`;
+      const ai_link = `[AI Analysis](/analyze/${bmId}?prompt=${encodedPrompt})`;
+      const db_link = `[Database](/search/${bmId})`;
       const replacementString = `**${bmId}** -- ${ai_link} &nbsp;|&nbsp; ${db_link}`;
       formattedContent = formattedContent.replaceAll(searchString, replacementString);
     });
