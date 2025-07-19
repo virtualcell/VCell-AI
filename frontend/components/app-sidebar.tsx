@@ -156,7 +156,7 @@ export function AppSidebar() {
 
       <SidebarFooter className="border-t border-slate-200 p-4">
         <div className="space-y-3">
-          {/* Usage Progress Bar - Show minimal version when collapsed */}
+          {/* Usage Progress Bar */}
           <div className="space-y-2">
             {!isCollapsed && (
               <div className="flex justify-between items-center text-xs text-slate-600">
@@ -174,11 +174,11 @@ export function AppSidebar() {
             )}
           </div>
 
-          <div className={`flex ${isCollapsed ? "flex-col" : ""} gap-2`}>
+          <div className={`flex ${isCollapsed ? "flex-col space-y-1" : ""} gap-2`}>
             <Button
               variant="outline"
               size={isCollapsed ? "icon" : "sm"}
-              className={`${isCollapsed ? "w-full" : "flex-1"} flex items-center gap-2`}
+              className={`${isCollapsed ? "h-8 w-8 rounded-md" : "flex-1"} flex items-center gap-2`}
               asChild
               title={isCollapsed ? "Sign Up" : undefined}
             >
@@ -190,7 +190,7 @@ export function AppSidebar() {
             <Button
               variant="default"
               size={isCollapsed ? "icon" : "sm"}
-              className={`${isCollapsed ? "w-full" : "flex-1"} flex items-center gap-2`}
+              className={`${isCollapsed ? "h-8 w-8 rounded-md" : "flex-1"} flex items-center gap-2`}
               asChild
               title={isCollapsed ? "Sign In" : undefined}
             >
