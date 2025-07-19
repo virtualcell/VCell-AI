@@ -5,7 +5,6 @@ import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Search, Dna, Gauge, FlaskConical, Atom, Briefcase, Cog, Download, FileText } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { DiagramSection } from "@/components/DiagramSection"
 import { ChatBox } from "@/components/ChatBox"
 
 interface AnalysisResults {
@@ -25,8 +24,37 @@ export default function AnalysisResultsPage({ params }: { params: Promise<{ id: 
   const [error, setError] = useState("")
   const [results, setResults] = useState<AnalysisResults | null>(null)
   const [isAnalysisLoading, setIsAnalysisLoading] = useState(true)
+  const [diagramAnalysis, setDiagramAnalysis] = useState("")
+  const [analysisError, setAnalysisError] = useState("")
+  const [combinedMessage, setCombinedMessage] = useState("")
 
   useEffect(() => {
+    const fetchDiagramAnalysis = async () => {
+      setIsAnalysisLoading(true)
+      setAnalysisError("")
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL
+        const res = await fetch(`${apiUrl}/analyse/${id}/diagram`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+        
+        if (res.ok) {
+          const data = await res.json()
+          setDiagramAnalysis(data.response || "")
+        } else {
+          const errorData = await res.json()
+          setAnalysisError(errorData.detail || "Failed to analyze diagram.")
+        }
+      } catch (err) {
+        setAnalysisError("Failed to fetch diagram analysis.")
+      } finally {
+        setIsAnalysisLoading(false)
+      }
+    }
+
     const fetchAnalysis = async () => {
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL
@@ -57,8 +85,31 @@ export default function AnalysisResultsPage({ params }: { params: Promise<{ id: 
       }
     }
 
-    fetchAnalysis()
+    // Fetch both analyses
+    const fetchBothAnalyses = async () => {
+      await Promise.all([fetchDiagramAnalysis(), fetchAnalysis()])
+    }
+
+    fetchBothAnalyses()
   }, [id, prompt])
+
+  // Create combined message when analyses are ready
+  useEffect(() => {
+    if (diagramAnalysis || results?.aiAnalysis) {
+      const messageParts: string[] = []
+      
+      if (diagramAnalysis) {
+        const diagramMessage = `# Diagram Analysis \n ![Diagram](https://vcell.cam.uchc.edu/api/v0/biomodel/${id}/diagram)\n\n${diagramAnalysis}`
+        messageParts.push(diagramMessage)
+      }
+      
+      if (results?.aiAnalysis) {
+        messageParts.push(results.aiAnalysis)
+      }
+      
+      setCombinedMessage(messageParts.join('\n\n---\n\n'))
+    }
+  }, [diagramAnalysis, results?.aiAnalysis, id])
 
   const handleReset = () => {
     router.push('/analyze')
@@ -124,12 +175,9 @@ export default function AnalysisResultsPage({ params }: { params: Promise<{ id: 
             </div>
           </div>
 
-          {/* Diagram and Analysis Sections */}
-          <DiagramSection biomodelId={id} />
-
           {/* Chat Box */}
           <ChatBox
-            startMessage={results?.aiAnalysis || ""}
+            startMessage={combinedMessage || ""}
             quickActions={quickActions}
             cardTitle="VCell AI Assistant"
             promptPrefix={`Analyze the biomodel with the bmId ${id} for the following question: ${prompt}`}
