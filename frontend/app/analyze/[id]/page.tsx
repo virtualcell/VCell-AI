@@ -26,7 +26,7 @@ export default function AnalysisResultsPage({ params }: { params: Promise<{ id: 
   const [isAnalysisLoading, setIsAnalysisLoading] = useState(true)
   const [diagramAnalysis, setDiagramAnalysis] = useState("")
   const [analysisError, setAnalysisError] = useState("")
-  const [combinedMessage, setCombinedMessage] = useState("")
+  const [combinedMessages, setCombinedMessages] = useState<string[]>([])
 
   useEffect(() => {
     const fetchDiagramAnalysis = async () => {
@@ -93,7 +93,7 @@ export default function AnalysisResultsPage({ params }: { params: Promise<{ id: 
     fetchBothAnalyses()
   }, [id, prompt])
 
-  // Create combined message when analyses are ready
+  // Create combined messages when analyses are ready
   useEffect(() => {
     if (diagramAnalysis || results?.aiAnalysis) {
       const messageParts: string[] = []
@@ -104,10 +104,11 @@ export default function AnalysisResultsPage({ params }: { params: Promise<{ id: 
       }
       
       if (results?.aiAnalysis) {
-        messageParts.push(results.aiAnalysis)
+        const aiMessage = `# Biomodel Analysis \n\n${results.aiAnalysis}`
+        messageParts.push(aiMessage)
       }
       
-      setCombinedMessage(messageParts.join('\n\n---\n\n'))
+      setCombinedMessages(messageParts)
     }
   }, [diagramAnalysis, results?.aiAnalysis, id])
 
@@ -175,10 +176,10 @@ export default function AnalysisResultsPage({ params }: { params: Promise<{ id: 
             </div>
           </div>
 
-          {/* Chat Box - takes remaining space */}
+          {/* Chat Box */}
           <div className="flex-1 min-h-0">
             <ChatBox
-              startMessage={combinedMessage || ""}
+              startMessage={combinedMessages}
               quickActions={quickActions}
               cardTitle="VCell AI Assistant"
               promptPrefix={`Analyze the biomodel with the bmId ${id} for the following question: ${prompt}`}
