@@ -94,8 +94,8 @@ export default function LandingPage() {
             {/* All-in-One Tools Feature */}
             <Card className="border-slate-200 shadow-lg hover:shadow-xl transition-shadow duration-200">
               <CardHeader className="text-center pb-2"> 
-                <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2"> 
-                  <Wrench className="h-8 w-8 text-green-600" />
+                <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2"> 
+                  <Wrench className="h-8 w-8 text-blue-600" />
                 </div>
                 <CardTitle className="text-xl font-semibold text-slate-900">Everything in One Place</CardTitle>
               </CardHeader>
@@ -106,15 +106,15 @@ export default function LandingPage() {
                   </p>
                   <div className="space-y-1 text-sm"> 
                     <div className="flex items-center justify-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                       <span className="text-slate-700">Biomodel Database Search</span>
                     </div>
                     <div className="flex items-center justify-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                       <span className="text-slate-700">VCML and SBML File Retrieval</span>
                     </div>
                     <div className="flex items-center justify-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                       <span className="text-slate-700">Biomodels Diagrams</span>
                     </div>
                   </div>
@@ -125,8 +125,8 @@ export default function LandingPage() {
             {/* Private Access Feature */}
             <Card className="border-slate-200 shadow-lg hover:shadow-xl transition-shadow duration-200">
               <CardHeader className="text-center pb-2"> 
-                <div className="w-14 h-14 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-2"> 
-                  <Shield className="h-8 w-8 text-purple-600" />
+                <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2"> 
+                  <Shield className="h-8 w-8 text-blue-600" />
                 </div>
                 <CardTitle className="text-xl font-semibold text-slate-900">Private Model Access</CardTitle>
               </CardHeader>
