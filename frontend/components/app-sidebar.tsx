@@ -133,6 +133,23 @@ export function AppSidebar() {
 
       <SidebarFooter className="border-t border-slate-200 p-4">
         <div className="space-y-3">
+          {/* Usage Progress Bar */}
+          <div className="space-y-2">
+            <div className="flex justify-between items-center text-xs text-slate-600">
+              <span>Daily Usage</span>
+              <span>20 remaining</span>
+            </div>
+            <div className="w-full bg-slate-200 rounded-full h-2">
+              <div 
+                className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                style={{ width: '20%' }}
+              ></div>
+            </div>
+            <div className="text-xs text-slate-500 text-center">
+              4 of 24 requests used today
+            </div>
+          </div>
+          
           <div className="flex gap-2">
             <Button variant="outline" size="sm" className="flex-1 flex items-center gap-2" asChild>
               <Link href="/signup">
