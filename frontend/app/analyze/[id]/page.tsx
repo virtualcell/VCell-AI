@@ -5,7 +5,6 @@ import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Search, Dna, Gauge, FlaskConical, Atom, Briefcase, Cog, Download, FileText } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { DiagramSection } from "@/components/DiagramSection"
 import { ChatBox } from "@/components/ChatBox"
 
 interface AnalysisResults {
@@ -25,8 +24,37 @@ export default function AnalysisResultsPage({ params }: { params: Promise<{ id: 
   const [error, setError] = useState("")
   const [results, setResults] = useState<AnalysisResults | null>(null)
   const [isAnalysisLoading, setIsAnalysisLoading] = useState(true)
+  const [diagramAnalysis, setDiagramAnalysis] = useState("")
+  const [analysisError, setAnalysisError] = useState("")
+  const [combinedMessages, setCombinedMessages] = useState<string[]>([])
 
   useEffect(() => {
+    const fetchDiagramAnalysis = async () => {
+      setIsAnalysisLoading(true)
+      setAnalysisError("")
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL
+        const res = await fetch(`${apiUrl}/analyse/${id}/diagram`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+        
+        if (res.ok) {
+          const data = await res.json()
+          setDiagramAnalysis(data.response || "")
+        } else {
+          const errorData = await res.json()
+          setAnalysisError(errorData.detail || "Failed to analyze diagram.")
+        }
+      } catch (err) {
+        setAnalysisError("Failed to fetch diagram analysis.")
+      } finally {
+        setIsAnalysisLoading(false)
+      }
+    }
+
     const fetchAnalysis = async () => {
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL
@@ -57,8 +85,32 @@ export default function AnalysisResultsPage({ params }: { params: Promise<{ id: 
       }
     }
 
-    fetchAnalysis()
+    // Fetch both analyses
+    const fetchBothAnalyses = async () => {
+      await Promise.all([fetchDiagramAnalysis(), fetchAnalysis()])
+    }
+
+    fetchBothAnalyses()
   }, [id, prompt])
+
+  // Create combined messages when analyses are ready
+  useEffect(() => {
+    if (diagramAnalysis || results?.aiAnalysis) {
+      const messageParts: string[] = []
+      
+      if (diagramAnalysis) {
+        const diagramMessage = `# Diagram Analysis \n ![Diagram](https://vcell.cam.uchc.edu/api/v0/biomodel/${id}/diagram)\n\n${diagramAnalysis}`;
+        messageParts.push(diagramMessage)
+      }
+      
+      if (results?.aiAnalysis) {
+        const aiMessage = `# Biomodel Analysis \n\n${results.aiAnalysis}`
+        messageParts.push(aiMessage)
+      }
+      
+      setCombinedMessages(messageParts)
+    }
+  }, [diagramAnalysis, results?.aiAnalysis, id])
 
   const handleReset = () => {
     router.push('/analyze')
@@ -95,11 +147,11 @@ export default function AnalysisResultsPage({ params }: { params: Promise<{ id: 
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="container mx-auto p-3 max-w-5xl">
-        <div className="space-y-3">
+    <div className="h-screen bg-white flex flex-col">
+      <div className="container mx-auto p-3 max-w-5xl flex-1 flex flex-col min-h-0">
+        <div className="space-y-3 flex-1 flex flex-col min-h-0">
           {/* Results Header */}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-shrink-0">
             <div>
               <h2 className="text-xl font-bold text-slate-900 mb-0.5">
                 {results?.title || `Analysis for Biomodel ${id}`}
@@ -124,17 +176,16 @@ export default function AnalysisResultsPage({ params }: { params: Promise<{ id: 
             </div>
           </div>
 
-          {/* Diagram and Analysis Sections */}
-          <DiagramSection biomodelId={id} />
-
           {/* Chat Box */}
-          <ChatBox
-            startMessage={results?.aiAnalysis || ""}
-            quickActions={quickActions}
-            cardTitle="VCell AI Assistant"
-            promptPrefix={`Analyze the biomodel with the bmId ${id} for the following question: ${prompt}`}
-            isLoading={isAnalysisLoading}
-          />
+          <div className="flex-1 min-h-0">
+            <ChatBox
+              startMessage={combinedMessages}
+              quickActions={quickActions}
+              cardTitle="VCell AI Assistant"
+              promptPrefix={`Analyze the biomodel with the bmId ${id} for the following question: ${prompt}`}
+              isLoading={isAnalysisLoading}
+            />
+          </div>
         </div>
       </div>
     </div>

@@ -32,7 +32,7 @@ interface ChatParameters {
 }
 
 interface ChatBoxProps {
-  startMessage: string
+  startMessage: string | string[]
   quickActions: QuickAction[]
   cardTitle: string
   promptPrefix?: string
@@ -41,14 +41,27 @@ interface ChatBoxProps {
 }
 
 export const ChatBox: React.FC<ChatBoxProps> = ({ startMessage, quickActions, cardTitle, promptPrefix, isLoading: isInitialLoading = false, parameters }) => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      role: "assistant",
-      content: startMessage,
-      timestamp: new Date(),
-    },
-  ])
+  // Helper function to create initial messages from startMessage
+  const createInitialMessages = (startMsg: string | string[]): Message[] => {
+    if (Array.isArray(startMsg)) {
+      return startMsg.map((content, index) => ({
+        id: (index + 1).toString(),
+        role: "assistant" as const,
+        content,
+        timestamp: new Date(),
+      }))
+    } else if (startMsg) {
+      return [{
+        id: "1",
+        role: "assistant" as const,
+        content: startMsg,
+        timestamp: new Date(),
+      }]
+    }
+    return []
+  }
+
+  const [messages, setMessages] = useState<Message[]>(createInitialMessages(startMessage))
   const [inputMessage, setInputMessage] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -65,14 +78,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ startMessage, quickActions, ca
   // Update messages when startMessage changes (when analysis completes)
   useEffect(() => {
     if (startMessage && !isInitialLoading) {
-      setMessages([
-        {
-          id: "1",
-          role: "assistant",
-          content: startMessage,
-          timestamp: new Date(),
-        },
-      ])
+      setMessages(createInitialMessages(startMessage))
     }
   }, [startMessage, isInitialLoading])
 
@@ -194,7 +200,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ startMessage, quickActions, ca
   }
 
   return (
-    <Card className="h-[700px] flex flex-col shadow-sm border-slate-200">
+    <Card className="h-full flex flex-col shadow-sm border-slate-200">
       <CardHeader className="bg-slate-50 border-b border-slate-200 flex-shrink-0">
         <CardTitle className="flex items-center gap-2 text-slate-900">
           <MessageSquare className="h-5 w-5" />
