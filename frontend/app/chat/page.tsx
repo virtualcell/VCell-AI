@@ -96,7 +96,7 @@ export default function ChatPage() {
         {/* Chat Interface - takes remaining space */}
         <div className="flex-1 w-full min-h-0">
           <ChatBox
-            startMessage={startMessage}
+            startMessage={[startMessage]}
             quickActions={quickActions}
             cardTitle={cardTitle}
           />
