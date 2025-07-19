@@ -1,8 +1,9 @@
 "use client"
 
-import { Search, History, Database, Sparkles, FlaskConical, UserPlus, LogIn } from "lucide-react"
+import { Search, History, Sparkles, FlaskConical, UserPlus, LogIn } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 
 import {
@@ -38,10 +39,10 @@ export function AppSidebar() {
     <Sidebar className="border-r border-slate-200">
       <SidebarHeader className="border-b border-slate-200 p-4">
         <div className="flex items-center gap-2">
-          <Database className="h-6 w-6 text-blue-600" />
+          <Image src="/VCellLogo.png" alt="VCell Logo" width={80} height={80} className="rounded" />
           <div>
-            <h2 className="text-lg font-semibold text-slate-900">VCell Platform</h2>
-            <p className="text-sm text-slate-600">Model Explorer Platform</p>
+            <h2 className="text-lg font-semibold text-slate-900">AI Platform</h2>
+            <p className="text-sm text-slate-600">The Model Explorer</p>
           </div>
         </div>
       </SidebarHeader>
