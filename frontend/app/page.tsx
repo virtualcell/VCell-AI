@@ -4,6 +4,7 @@ import { ArrowRight, MessageSquare, Wrench, Shield, LogIn, UserPlus } from "luci
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
+import Image from "next/image"
 
 export default function LandingPage() {
   return (
@@ -13,10 +14,14 @@ export default function LandingPage() {
         <div className="container mx-auto px-4 py-4 max-w-6xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-16 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">VCell</span>
-              </div>
-              <span className="text-xl font-semibold text-slate-900">Models AI Explorer</span>
+              <Image 
+                src="/VCellLogo.png" 
+                alt="VCell Logo" 
+                width={100} 
+                height={100} 
+                className="rounded-lg"
+              />
+              <span className="text-xl font-semibold text-slate-900">AI Explorer</span>
             </div>
             <div className="flex items-center gap-3">
               <Button variant="outline" size="sm" asChild>
@@ -40,11 +45,20 @@ export default function LandingPage() {
         <div className="container mx-auto px-4 max-w-6xl flex flex-col items-center justify-center">
           {/* Hero Section */}
           <div className="text-center mb-16"> 
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-slate-900 mb-6 leading-tight"> 
-              VCell Models
-              <br />
-              <span className="text-blue-600">AI Explorer</span>
-            </h1>
+            <div className="flex items-center justify-center gap-4 mb-6">
+              <Image 
+                src="/VCellLogo.png" 
+                alt="VCell Logo" 
+                width={318} 
+                height={120} 
+                className="rounded-lg"
+              />
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-slate-900 leading-tight"> 
+                VCell Models
+                <br />
+                <span className="text-blue-600">AI Explorer</span>
+              </h1>
+            </div>
 
             <p className="text-lg md:text-xl text-slate-600 mb-8 max-w-3xl mx-auto leading-relaxed"> 
               Discover, analyze, and explore biomodels with the power of AI. Comprehensive platform for scientific
