@@ -2,8 +2,10 @@
 
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import remarkMath from 'remark-math'
+import rehypeKatex from 'rehype-katex'
 import { cn } from '@/lib/utils'
-
+  
 interface MarkdownRendererProps {
   content: string
   className?: string
@@ -11,45 +13,55 @@ interface MarkdownRendererProps {
 
 export function MarkdownRenderer({ content, className }: MarkdownRendererProps) {
   return (
-    <div className={cn("markdown-content", className)}>
+    <div className={cn("markdown-content prose prose-sm max-w-none", className)}>
       <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
+        remarkPlugins={[remarkGfm, remarkMath]}
+        rehypePlugins={[
+          [rehypeKatex, {
+            displayMode: false,
+            throwOnError: false,
+            errorColor: '#cc0000',
+            strict: false,
+            trust: false,
+            output: 'html'
+          }]
+        ]}
         components={{
           // Headings
           h1: ({ children }) => (
-            <h1 className="text-2xl font-bold mb-4 text-slate-900 border-b border-slate-200 pb-2">
+            <h1 className="text-xl font-bold mb-3 mt-4 first:mt-0 text-slate-900 border-b border-slate-200 pb-2">
               {children}
             </h1>
           ),
           h2: ({ children }) => (
-            <h2 className="text-xl font-semibold mb-3 text-slate-900 border-b border-slate-200 pb-1">
+            <h2 className="text-lg font-semibold mb-2 mt-3 first:mt-0 text-slate-900 border-b border-slate-200 pb-1">
               {children}
             </h2>
           ),
           h3: ({ children }) => (
-            <h3 className="text-lg font-semibold mb-2 text-slate-900">
+            <h3 className="text-base font-semibold mb-2 mt-2 first:mt-0 text-slate-900">
               {children}
             </h3>
           ),
           h4: ({ children }) => (
-            <h4 className="text-base font-semibold mb-2 text-slate-900">
+            <h4 className="text-sm font-semibold mb-1 mt-2 first:mt-0 text-slate-900">
               {children}
             </h4>
           ),
           h5: ({ children }) => (
-            <h5 className="text-sm font-semibold mb-2 text-slate-900">
+            <h5 className="text-sm font-semibold mb-1 mt-2 first:mt-0 text-slate-900">
               {children}
             </h5>
           ),
           h6: ({ children }) => (
-            <h6 className="text-xs font-semibold mb-2 text-slate-900">
+            <h6 className="text-xs font-semibold mb-1 mt-2 first:mt-0 text-slate-900">
               {children}
             </h6>
           ),
           
           // Paragraphs
           p: ({ children }) => (
-            <p className="mb-4 text-sm leading-relaxed text-slate-700">
+            <p className="mb-3 last:mb-0 text-sm leading-relaxed text-slate-700">
               {children}
             </p>
           ),
@@ -70,25 +82,25 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
           
           // Lists
           ul: ({ children }) => (
-            <ul className="mb-4 ml-6 space-y-1 text-sm text-slate-700 list-disc">
+            <ul className="mb-3 last:mb-0 ml-4 space-y-0.5 text-sm text-slate-700 list-disc">
               {children}
             </ul>
           ),
           ol: ({ children }) => (
-            <ol className="mb-4 ml-6 space-y-1 text-sm text-slate-700 list-decimal">
+            <ol className="mb-3 last:mb-0 ml-4 space-y-0.5 text-sm text-slate-700 list-decimal">
               {children}
             </ol>
           ),
           li: ({ children }) => (
-            <li className="text-slate-700">
+            <li className="text-slate-700 leading-relaxed">
               {children}
             </li>
           ),
           
           // Tables
           table: ({ children }) => (
-            <div className="mb-4 overflow-x-auto">
-              <table className="min-w-full border border-slate-300 rounded-lg overflow-hidden">
+            <div className="mb-3 last:mb-0 overflow-x-auto">
+              <table className="min-w-full border border-slate-300 rounded-lg overflow-hidden text-xs">
                 {children}
               </table>
             </div>
@@ -109,12 +121,12 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
             </tr>
           ),
           th: ({ children }) => (
-            <th className="px-4 py-2 text-left text-xs font-semibold text-slate-900 bg-slate-50">
+            <th className="px-3 py-1.5 text-left text-xs font-semibold text-slate-900 bg-slate-50">
               {children}
             </th>
           ),
           td: ({ children }) => (
-            <td className="px-4 py-2 text-sm text-slate-700 border-t border-slate-200">
+            <td className="px-3 py-1.5 text-xs text-slate-700 border-t border-slate-200">
               {children}
             </td>
           ),
@@ -124,14 +136,14 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
             const isInline = !className
             if (isInline) {
               return (
-                <code className="bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded text-xs font-mono">
+                <code className="bg-slate-100 text-slate-800 px-1 py-0.5 rounded text-xs font-mono break-words">
                   {children}
                 </code>
               )
             }
             return (
-              <div className="mb-4 bg-slate-50 border border-slate-200 rounded-lg overflow-hidden">
-                <pre className="p-4 overflow-x-auto text-xs font-mono text-slate-800">
+              <div className="mb-3 last:mb-0 bg-slate-50 border border-slate-200 rounded-lg overflow-hidden">
+                <pre className="p-3 overflow-x-auto text-xs font-mono text-slate-800 whitespace-pre-wrap">
                   <code>{children}</code>
                 </pre>
               </div>
@@ -140,8 +152,8 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
           
           // Pre blocks (for code blocks)
           pre: ({ children }) => (
-            <div className="mb-4 bg-slate-50 border border-slate-200 rounded-lg overflow-hidden">
-              <pre className="p-4 overflow-x-auto text-xs font-mono text-slate-800">
+            <div className="mb-3 last:mb-0 bg-slate-50 border border-slate-200 rounded-lg overflow-hidden">
+              <pre className="p-3 overflow-x-auto text-xs font-mono text-slate-800 whitespace-pre-wrap">
                 {children}
               </pre>
             </div>
@@ -149,14 +161,14 @@ export function MarkdownRenderer({ content, className }: MarkdownRendererProps) 
           
           // Blockquotes
           blockquote: ({ children }) => (
-            <blockquote className="mb-4 pl-4 border-l-4 border-blue-200 bg-blue-50 py-2 pr-4 text-sm text-slate-700 italic">
+            <blockquote className="mb-3 last:mb-0 pl-3 border-l-4 border-blue-200 bg-blue-50 py-2 pr-3 text-sm text-slate-700 italic">
               {children}
             </blockquote>
           ),
           
           // Horizontal rules
           hr: () => (
-            <hr className="my-6 border-t border-slate-300" />
+            <hr className="my-4 border-t border-slate-300" />
           ),
           
           // Links
