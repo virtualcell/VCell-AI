@@ -99,7 +99,7 @@ export default function AnalysisResultsPage({ params }: { params: Promise<{ id: 
       const messageParts: string[] = []
       
       if (diagramAnalysis) {
-        const diagramMessage = `# Diagram Analysis \n ![Diagram](https://vcell.cam.uchc.edu/api/v0/biomodel/${id}/diagram)\n\n${diagramAnalysis}`
+        const diagramMessage = `# Diagram Analysis \n ![Diagram](https://vcell.cam.uchc.edu/api/v0/biomodel/${id}/diagram)\n\n${diagramAnalysis}`;
         messageParts.push(diagramMessage)
       }
       
