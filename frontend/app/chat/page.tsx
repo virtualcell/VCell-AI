@@ -63,10 +63,10 @@ export default function ChatPage() {
   const cardTitle = "VCell AI Assistant"
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="container mx-auto p-6 max-w-7xl">
+    <div className="h-screen bg-slate-50 flex flex-col">
+      <div className="container mx-auto p-6 max-w-7xl flex-1 flex flex-col min-h-0">
         {/* Header */}
-        <div className="mb-6">
+        <div className="mb-6 flex-shrink-0">
           <div className="flex items-center justify-between mb-2">
             <h1 className="text-3xl font-bold text-slate-900">AI Assistant</h1>
             <Button
@@ -85,7 +85,7 @@ export default function ChatPage() {
         </div>
 
         {/* Persistent Warning */}
-        <div className="mb-6">
+        <div className="mb-6 flex-shrink-0">
           <Alert className="border-amber-200 bg-amber-50">
             <AlertDescription className="text-amber-800">
               <strong>⚠️ Important:</strong> Responses are AI generated and may contain errors, or hallucinations. Please use the option "Let AI analyze the JSON" if you suspect hallucination.
@@ -93,8 +93,8 @@ export default function ChatPage() {
           </Alert>
         </div>
 
-        {/* Chat Interface */}
-        <div className="mb-8 w-full">
+        {/* Chat Interface - takes remaining space */}
+        <div className="flex-1 w-full min-h-0">
           <ChatBox
             startMessage={startMessage}
             quickActions={quickActions}

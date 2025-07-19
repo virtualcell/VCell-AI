@@ -146,11 +146,11 @@ export default function AnalysisResultsPage({ params }: { params: Promise<{ id: 
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="container mx-auto p-3 max-w-5xl">
-        <div className="space-y-3">
+    <div className="h-screen bg-white flex flex-col">
+      <div className="container mx-auto p-3 max-w-5xl flex-1 flex flex-col min-h-0">
+        <div className="space-y-3 flex-1 flex flex-col min-h-0">
           {/* Results Header */}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-shrink-0">
             <div>
               <h2 className="text-xl font-bold text-slate-900 mb-0.5">
                 {results?.title || `Analysis for Biomodel ${id}`}
@@ -175,14 +175,16 @@ export default function AnalysisResultsPage({ params }: { params: Promise<{ id: 
             </div>
           </div>
 
-          {/* Chat Box */}
-          <ChatBox
-            startMessage={combinedMessage || ""}
-            quickActions={quickActions}
-            cardTitle="VCell AI Assistant"
-            promptPrefix={`Analyze the biomodel with the bmId ${id} for the following question: ${prompt}`}
-            isLoading={isAnalysisLoading}
-          />
+          {/* Chat Box - takes remaining space */}
+          <div className="flex-1 min-h-0">
+            <ChatBox
+              startMessage={combinedMessage || ""}
+              quickActions={quickActions}
+              cardTitle="VCell AI Assistant"
+              promptPrefix={`Analyze the biomodel with the bmId ${id} for the following question: ${prompt}`}
+              isLoading={isAnalysisLoading}
+            />
+          </div>
         </div>
       </div>
     </div>
