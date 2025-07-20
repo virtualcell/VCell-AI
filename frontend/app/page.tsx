@@ -4,6 +4,7 @@ import { ArrowRight, MessageSquare, Wrench, Shield, LogIn, UserPlus } from "luci
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
+import Image from "next/image"
 
 export default function LandingPage() {
   return (
@@ -13,10 +14,14 @@ export default function LandingPage() {
         <div className="container mx-auto px-4 py-4 max-w-6xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-16 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">VCell</span>
-              </div>
-              <span className="text-xl font-semibold text-slate-900">Models AI Explorer</span>
+              <Image 
+                src="/VCellLogo.png" 
+                alt="VCell Logo" 
+                width={100} 
+                height={100} 
+                className="rounded-lg"
+              />
+              <span className="text-xl font-semibold text-slate-900">AI Explorer</span>
             </div>
             <div className="flex items-center gap-3">
               <Button variant="outline" size="sm" asChild>
@@ -40,11 +45,20 @@ export default function LandingPage() {
         <div className="container mx-auto px-4 max-w-6xl flex flex-col items-center justify-center">
           {/* Hero Section */}
           <div className="text-center mb-16"> 
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-slate-900 mb-6 leading-tight"> 
-              VCell Models
-              <br />
-              <span className="text-blue-600">AI Explorer</span>
-            </h1>
+            <div className="flex items-center justify-center gap-4 mb-6">
+              <Image 
+                src="/VCellLogo.png" 
+                alt="VCell Logo" 
+                width={318} 
+                height={120} 
+                className="rounded-lg"
+              />
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-slate-900 leading-tight"> 
+                VCell Models
+                <br />
+                <span className="text-blue-600">AI Explorer</span>
+              </h1>
+            </div>
 
             <p className="text-lg md:text-xl text-slate-600 mb-8 max-w-3xl mx-auto leading-relaxed"> 
               Discover, analyze, and explore biomodels with the power of AI. Comprehensive platform for scientific
@@ -94,8 +108,8 @@ export default function LandingPage() {
             {/* All-in-One Tools Feature */}
             <Card className="border-slate-200 shadow-lg hover:shadow-xl transition-shadow duration-200">
               <CardHeader className="text-center pb-2"> 
-                <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2"> 
-                  <Wrench className="h-8 w-8 text-green-600" />
+                <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2"> 
+                  <Wrench className="h-8 w-8 text-blue-600" />
                 </div>
                 <CardTitle className="text-xl font-semibold text-slate-900">Everything in One Place</CardTitle>
               </CardHeader>
@@ -106,15 +120,15 @@ export default function LandingPage() {
                   </p>
                   <div className="space-y-1 text-sm"> 
                     <div className="flex items-center justify-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                       <span className="text-slate-700">Biomodel Database Search</span>
                     </div>
                     <div className="flex items-center justify-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                       <span className="text-slate-700">VCML and SBML File Retrieval</span>
                     </div>
                     <div className="flex items-center justify-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                       <span className="text-slate-700">Biomodels Diagrams</span>
                     </div>
                   </div>
@@ -125,8 +139,8 @@ export default function LandingPage() {
             {/* Private Access Feature */}
             <Card className="border-slate-200 shadow-lg hover:shadow-xl transition-shadow duration-200">
               <CardHeader className="text-center pb-2"> 
-                <div className="w-14 h-14 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-2"> 
-                  <Shield className="h-8 w-8 text-purple-600" />
+                <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2"> 
+                  <Shield className="h-8 w-8 text-blue-600" />
                 </div>
                 <CardTitle className="text-xl font-semibold text-slate-900">Private Model Access</CardTitle>
               </CardHeader>
