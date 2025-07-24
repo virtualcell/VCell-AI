@@ -1,6 +1,6 @@
 "use client"
 
-import { Search, History, Sparkles, FlaskConical, UserPlus, LogIn } from "lucide-react"
+import { Search, History, Sparkles, FlaskConical, UserPlus, LogIn, Shield, FolderOpen, Settings } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import Image from "next/image"
@@ -123,6 +123,54 @@ export function AppSidebar() {
                   <Link href="/search" className="flex items-center gap-3">
                     <Search className="h-4 w-4" />
                     {!isCollapsed && <span>Biomodel Search</span>}
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Admin Section */}
+        <SidebarGroup>
+          {!isCollapsed && <SidebarGroupLabel className="text-slate-700 font-medium">Admin</SidebarGroupLabel>}
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem key="AdminDashboard">
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === "/admin"}
+                  className="data-[active=true]:bg-purple-50 data-[active=true]:text-purple-700 data-[active=true]:border-r-2 data-[active=true]:border-purple-500"
+                  tooltip={isCollapsed ? "Admin Dashboard" : undefined}
+                >
+                  <Link href="/admin" className="flex items-center gap-3">
+                    <Shield className="h-4 w-4 text-purple-500" />
+                    {!isCollapsed && <span>Admin Dashboard</span>}
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem key="KnowledgeBase">
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === "/admin/knowledge-base"}
+                  className="data-[active=true]:bg-purple-50 data-[active=true]:text-purple-700 data-[active=true]:border-r-2 data-[active=true]:border-purple-500"
+                  tooltip={isCollapsed ? "Knowledge Base" : undefined}
+                >
+                  <Link href="/admin/knowledge-base" className="flex items-center gap-3">
+                    <FolderOpen className="h-4 w-4 text-purple-500" />
+                    {!isCollapsed && <span>Knowledge Base</span>}
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem key="AdminSettings">
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === "/admin/settings"}
+                  className="data-[active=true]:bg-purple-50 data-[active=true]:text-purple-700 data-[active=true]:border-r-2 data-[active=true]:border-purple-500"
+                  tooltip={isCollapsed ? "Settings" : undefined}
+                >
+                  <Link href="/admin/settings" className="flex items-center gap-3">
+                    <Settings className="h-4 w-4 text-purple-500" />
+                    {!isCollapsed && <span>Settings</span>}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
