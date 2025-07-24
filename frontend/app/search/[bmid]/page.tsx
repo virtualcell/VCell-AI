@@ -212,7 +212,7 @@ export default function BiomodelDetailPage() {
                         <ul className="list-disc ml-4">
                           {sim.overrides.map((ov, i) => (
                             <li key={i}>
-                              {ov.name} ({ov.type}): <span className="font-mono text-blue-700">{ov.values.join(", ")}</span> (Cardinality: {ov.cardinality})
+                              {ov.name} ({ov.type}): <span className="font-mono text-blue-700">{ov.values ? ov.values.join(", ") : "No values"}</span> (Cardinality: {ov.cardinality})
                             </li>
                           ))}
                         </ul>
