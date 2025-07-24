@@ -31,7 +31,7 @@ interface KnowledgeFile {
   uploadDate: string
   uploadedBy: string
   description: string
-  tags: string[]
+  tags?: string[]
   status: "active" | "archived" | "processing"
   content?: string
 }
@@ -65,7 +65,6 @@ export default function KnowledgeBasePage() {
             uploadDate: "2019-12-23T15:38:00Z",
             uploadedBy: "admin@example.com",
             description: "VCell Quickstart Guide version 7",
-            tags: ["quickstart", "guide", "tutorial"],
             status: "active"
           },
           {
@@ -76,7 +75,6 @@ export default function KnowledgeBasePage() {
             uploadDate: "2016-11-01T11:01:00Z",
             uploadedBy: "admin@example.com",
             description: "VCell Quickstart Guide version 6",
-            tags: ["quickstart", "guide", "tutorial", "legacy"],
             status: "active"
           },
           {
@@ -87,7 +85,6 @@ export default function KnowledgeBasePage() {
             uploadDate: "2017-07-18T15:51:00Z",
             uploadedBy: "admin@example.com",
             description: "Rule-Based Modeling Guide for VCell 6.1",
-            tags: ["rule-based", "modeling", "guide"],
             status: "active"
           },
           {
@@ -98,7 +95,6 @@ export default function KnowledgeBasePage() {
             uploadDate: "2017-07-18T16:19:00Z",
             uploadedBy: "admin@example.com",
             description: "Extended Rule-Based Modeling Guide for VCell 6.1",
-            tags: ["rule-based", "modeling", "guide", "extended"],
             status: "active"
           },
           {
@@ -109,7 +105,6 @@ export default function KnowledgeBasePage() {
             uploadDate: "2016-11-01T11:51:00Z",
             uploadedBy: "admin@example.com",
             description: "Tutorial 06: Pathway Complex Modeling",
-            tags: ["tutorial", "pathway", "complex", "modeling"],
             status: "active"
           },
           {
@@ -120,7 +115,6 @@ export default function KnowledgeBasePage() {
             uploadDate: "2017-06-14T19:25:00Z",
             uploadedBy: "admin@example.com",
             description: "Spatial Rule-Based Modeling Guide",
-            tags: ["spatial", "rule-based", "modeling", "guide"],
             status: "active"
           },
           {
@@ -131,7 +125,6 @@ export default function KnowledgeBasePage() {
             uploadDate: "2017-06-14T19:25:00Z",
             uploadedBy: "admin@example.com",
             description: "Single Compartment Rule-Based Modeling",
-            tags: ["single-compartment", "rule-based", "modeling"],
             status: "active"
           },
           {
@@ -142,7 +135,6 @@ export default function KnowledgeBasePage() {
             uploadDate: "2020-05-11T08:07:00Z",
             uploadedBy: "admin@example.com",
             description: "Simple FRAP Tutorial version 7.2",
-            tags: ["frap", "tutorial", "fluorescence"],
             status: "active"
           },
           {
@@ -153,7 +145,6 @@ export default function KnowledgeBasePage() {
             uploadDate: "2019-04-30T15:17:00Z",
             uploadedBy: "admin@example.com",
             description: "Simple FRAP Tutorial version 7.0",
-            tags: ["frap", "tutorial", "fluorescence", "legacy"],
             status: "active"
           },
           {
@@ -164,7 +155,6 @@ export default function KnowledgeBasePage() {
             uploadDate: "2020-07-24T16:42:00Z",
             uploadedBy: "admin@example.com",
             description: "PHGFP Tutorial version 7.2",
-            tags: ["phgfp", "tutorial", "fluorescence"],
             status: "active"
           },
           {
@@ -175,7 +165,6 @@ export default function KnowledgeBasePage() {
             uploadDate: "2019-05-01T13:27:00Z",
             uploadedBy: "admin@example.com",
             description: "PHGFP Tutorial version 7.0",
-            tags: ["phgfp", "tutorial", "fluorescence", "legacy"],
             status: "active"
           },
           {
@@ -186,7 +175,6 @@ export default function KnowledgeBasePage() {
             uploadDate: "2018-11-02T08:23:00Z",
             uploadedBy: "admin@example.com",
             description: "MultiApp Tutorial Data File",
-            tags: ["multiapp", "tutorial", "data"],
             status: "active"
           },
           {
@@ -197,7 +185,6 @@ export default function KnowledgeBasePage() {
             uploadDate: "2020-05-11T08:27:00Z",
             uploadedBy: "admin@example.com",
             description: "MultiApp Transport Tutorial version 7.2",
-            tags: ["multiapp", "transport", "tutorial"],
             status: "active"
           },
           {
@@ -208,7 +195,6 @@ export default function KnowledgeBasePage() {
             uploadDate: "2018-09-24T14:20:00Z",
             uploadedBy: "admin@example.com",
             description: "MultiApp Transport Tutorial version 7.0",
-            tags: ["multiapp", "transport", "tutorial", "legacy"],
             status: "active"
           },
           {
@@ -219,7 +205,6 @@ export default function KnowledgeBasePage() {
             uploadDate: "2022-09-13T10:28:00Z",
             uploadedBy: "admin@example.com",
             description: "Moving Boundaries Tutorial",
-            tags: ["moving-boundaries", "tutorial", "dynamics"],
             status: "active"
           },
           {
@@ -230,7 +215,6 @@ export default function KnowledgeBasePage() {
             uploadDate: "2020-07-24T16:04:00Z",
             uploadedBy: "admin@example.com",
             description: "FRAP Binding Tutorial version 7.2",
-            tags: ["frap", "binding", "tutorial", "fluorescence"],
             status: "active"
           },
           {
@@ -241,7 +225,6 @@ export default function KnowledgeBasePage() {
             uploadDate: "2019-04-30T15:30:00Z",
             uploadedBy: "admin@example.com",
             description: "FRAP Binding Tutorial version 7.0",
-            tags: ["frap", "binding", "tutorial", "fluorescence", "legacy"],
             status: "active"
           }
         ]
@@ -262,7 +245,7 @@ export default function KnowledgeBasePage() {
     const filtered = files.filter(file =>
       file.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       file.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      file.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+      (file.tags && file.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())))
     )
     setFilteredFiles(filtered)
   }, [searchTerm, files])
@@ -326,7 +309,6 @@ export default function KnowledgeBasePage() {
         uploadDate: new Date().toISOString(),
         uploadedBy: "admin@example.com",
         description: `Uploaded file: ${files[0].name}`,
-        tags: [],
         status: "active"
       }
 
@@ -479,7 +461,7 @@ export default function KnowledgeBasePage() {
                             <div className="text-sm font-medium text-slate-900">{file.name}</div>
                             <div className="text-sm text-slate-500">{file.description}</div>
                             <div className="flex gap-1 mt-1">
-                              {file.tags.map((tag, index) => (
+                              {file.tags && file.tags.map((tag, index) => (
                                 <Badge key={index} variant="secondary" className="text-xs">
                                   {tag}
                                 </Badge>
@@ -616,7 +598,7 @@ export default function KnowledgeBasePage() {
                 <div>
                   <span className="font-medium">Tags:</span>
                   <div className="flex gap-1 mt-1">
-                    {selectedFile.tags.map((tag, index) => (
+                    {selectedFile.tags && selectedFile.tags.map((tag, index) => (
                       <Badge key={index} variant="secondary">
                         {tag}
                       </Badge>
