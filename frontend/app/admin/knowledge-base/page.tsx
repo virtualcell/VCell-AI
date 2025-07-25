@@ -370,41 +370,6 @@ export default function KnowledgeBasePage() {
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <Card className="shadow-lg border-slate-200">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
-                <FileText className="h-5 w-5 text-blue-500" />
-                Total Files
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-blue-900">{files.length}</div>
-              <div className="text-sm text-slate-600 mt-1">
-                <span className="text-green-600">+3</span> this week
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-lg border-slate-200">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
-                <HardDrive className="h-5 w-5 text-green-500" />
-                Total Size
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-green-900">
-                {formatFileSize(files.reduce((acc, file) => acc + file.size, 0))}
-              </div>
-              <div className="text-sm text-slate-600 mt-1">
-                <span className="text-green-600">+2.1 MB</span> this week
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
         {/* Search and Filters */}
         <Card className="shadow-lg border-slate-200 mb-8">
           <CardContent className="p-6">
@@ -418,10 +383,6 @@ export default function KnowledgeBasePage() {
                   className="pl-10"
                 />
               </div>
-              <Button variant="outline" className="flex items-center gap-2">
-                <Filter className="h-4 w-4" />
-                Filter
-              </Button>
             </div>
           </CardContent>
         </Card>
@@ -432,6 +393,7 @@ export default function KnowledgeBasePage() {
             <CardTitle className="text-2xl font-extrabold text-blue-900 flex items-center gap-3">
               <FileText className="h-6 w-6 text-blue-500" />
               Knowledge Base Files
+              <Badge className="ml-2 bg-blue-600 text-white">{files.length} files</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
@@ -441,9 +403,6 @@ export default function KnowledgeBasePage() {
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">File</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Type</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Size</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Uploaded</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
@@ -473,15 +432,6 @@ export default function KnowledgeBasePage() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
                         {file.type.toUpperCase()}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
-                        {formatFileSize(file.size)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {getStatusBadge(file.status)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                        {new Date(file.uploadDate).toLocaleDateString()}
-                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex gap-2">
                           <Button
@@ -492,14 +442,6 @@ export default function KnowledgeBasePage() {
                             onClick={() => handleViewFile(file)}
                           >
                             <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0 text-green-600 hover:text-green-800 hover:bg-green-50"
-                            title="Download File"
-                          >
-                            <Download className="h-4 w-4" />
                           </Button>
                           <Button
                             variant="ghost"
