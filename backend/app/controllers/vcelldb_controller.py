@@ -123,7 +123,8 @@ async def get_biomodel_applications_files_controller(biomodel_id: str) -> dict:
         if e.response.status_code == 404:
             raise HTTPException(status_code=404, detail="Biomodel not found.")
         raise HTTPException(
-            status_code=e.response.status_code, detail="Error fetching biomodel applications."
+            status_code=e.response.status_code,
+            detail="Error fetching biomodel applications.",
         )
     except httpx.RequestError as e:
         raise HTTPException(

@@ -3,7 +3,7 @@ from app.schemas.qdrant_schema import (
     CreateCollectionRequest,
     InsertPointRequest,
     SearchPointsRequest,
-    DeleteDocumentRequest
+    DeleteDocumentRequest,
 )
 from app.controllers.qdrant_controller import (
     create_collection_controller,

@@ -5,6 +5,7 @@ from app.core.config import settings
 openai_client = None
 qdrant_client = None
 
+
 # OpenAI
 def connect_openai():
     global openai_client
@@ -28,6 +29,7 @@ def connect_qdrant():
     if qdrant_client is None:
         qdrant_client = QdrantClient(url=settings.QDRANT_URL)
     return qdrant_client
+
 
 def get_qdrant_client():
     connect_qdrant()

@@ -1,15 +1,16 @@
 from qdrant_client.models import (
-    Distance, 
-    VectorParams, 
+    Distance,
+    VectorParams,
     PointStruct,
     FilterSelector,
     Filter,
     FieldCondition,
-    MatchValue
+    MatchValue,
 )
 from app.core.singleton import get_qdrant_client
 
 client = get_qdrant_client()
+
 
 def create_qdrant_collection(collection_name: str, vector_size: int, distance: str):
     """
@@ -28,17 +29,15 @@ def create_qdrant_collection(collection_name: str, vector_size: int, distance: s
         collection_name=collection_name,
         vectors_config=VectorParams(size=vector_size, distance=distance),
     )
-    return {
-        "status": "success",
-        "message": collection_name + " created successfully."
-    }
+    return {"status": "success", "message": collection_name + " created successfully."}
+
 
 def insert_qdrant_points(
-        collection_name: str,
-        point_id: int,
-        vector: list[float],
-        payload: dict,
-    ):
+    collection_name: str,
+    point_id: int,
+    vector: list[float],
+    payload: dict,
+):
     """
     Insert a new point into a collection in Qdrant.
 
@@ -55,10 +54,8 @@ def insert_qdrant_points(
             PointStruct(id=point_id, vector=vector, payload=payload),
         ],
     )
-    return {
-        "status": "success",
-        "message": operation_info
-    }
+    return {"status": "success", "message": operation_info}
+
 
 def search_qdrant_points(
     collection_name: str,
@@ -74,16 +71,11 @@ def search_qdrant_points(
         limit (int): The maximum number of points to return.
     """
     search_result = client.query_points(
-        collection_name=collection_name,
-        query=vector,
-        with_payload=True,
-        limit=limit
+        collection_name=collection_name, query=vector, with_payload=True, limit=limit
     ).points
 
-    return {
-        "status": "success",
-        "message": search_result
-    }
+    return {"status": "success", "message": search_result}
+
 
 def delete_qdrant_documents(collection_name: str, file_name: str):
     """
@@ -106,7 +98,4 @@ def delete_qdrant_documents(collection_name: str, file_name: str):
             )
         ),
     )
-    return {
-        "status": "success",
-        "message": file_name + " deleted successfully."
-    }
+    return {"status": "success", "message": file_name + " deleted successfully."}

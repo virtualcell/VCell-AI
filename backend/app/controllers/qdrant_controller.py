@@ -4,7 +4,7 @@ from app.schemas.qdrant_schema import (
     CreateCollectionRequest,
     InsertPointRequest,
     SearchPointsRequest,
-    DeleteDocumentRequest
+    DeleteDocumentRequest,
 )
 from app.services.qdrant_service import (
     create_qdrant_collection,
@@ -14,16 +14,18 @@ from app.services.qdrant_service import (
 )
 
 
-async def create_collection_controller(request: CreateCollectionRequest) -> Dict[str, Any]:
+async def create_collection_controller(
+    request: CreateCollectionRequest,
+) -> Dict[str, Any]:
     """
     Controller function to create a new Qdrant collection.
-    
+
     Args:
         request: CreateCollectionRequest containing collection details
-        
+
     Returns:
         Dict containing status and message
-        
+
     Raises:
         HTTPException: If the collection creation fails.
     """
@@ -31,26 +33,25 @@ async def create_collection_controller(request: CreateCollectionRequest) -> Dict
         result = create_qdrant_collection(
             collection_name=request.collection_name,
             vector_size=request.vector_size,
-            distance=request.distance
+            distance=request.distance,
         )
         return result
     except Exception as e:
         raise HTTPException(
-            status_code=500, 
-            detail=f"Error creating collection: {str(e)}"
+            status_code=500, detail=f"Error creating collection: {str(e)}"
         )
 
 
 async def insert_point_controller(request: InsertPointRequest) -> Dict[str, Any]:
     """
     Controller function to insert a point into a Qdrant collection.
-    
+
     Args:
         request: InsertPointRequest containing point details
-        
+
     Returns:
         Dict containing status and operation info
-        
+
     Raises:
         HTTPException: If the point insertion fails.
     """
@@ -59,26 +60,23 @@ async def insert_point_controller(request: InsertPointRequest) -> Dict[str, Any]
             collection_name=request.collection_name,
             point_id=request.point_id,
             vector=request.vector,
-            payload=request.payload
+            payload=request.payload,
         )
         return result
     except Exception as e:
-        raise HTTPException(
-            status_code=500, 
-            detail=f"Error inserting point: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Error inserting point: {str(e)}")
 
 
 async def search_points_controller(request: SearchPointsRequest) -> Dict[str, Any]:
     """
     Controller function to search for points in a Qdrant collection.
-    
+
     Args:
         request: SearchPointsRequest containing search parameters
-        
+
     Returns:
         Dict containing status and search results
-        
+
     Raises:
         HTTPException: If the search operation fails.
     """
@@ -86,37 +84,32 @@ async def search_points_controller(request: SearchPointsRequest) -> Dict[str, An
         result = search_qdrant_points(
             collection_name=request.collection_name,
             vector=request.vector,
-            limit=request.limit
+            limit=request.limit,
         )
         return result
     except Exception as e:
-        raise HTTPException(
-            status_code=500, 
-            detail=f"Error searching points: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Error searching points: {str(e)}")
 
 
 async def delete_document_controller(request: DeleteDocumentRequest) -> Dict[str, Any]:
     """
     Controller function to delete a document from a Qdrant collection.
-    
+
     Args:
         request: DeleteDocumentRequest containing deletion parameters
-        
+
     Returns:
         Dict containing status and message
-        
+
     Raises:
         HTTPException: If the document deletion fails.
     """
     try:
         result = delete_qdrant_documents(
-            collection_name=request.collection_name,
-            file_name=request.file_name
+            collection_name=request.collection_name, file_name=request.file_name
         )
         return result
     except Exception as e:
         raise HTTPException(
-            status_code=500, 
-            detail=f"Error deleting document: {str(e)}"
+            status_code=500, detail=f"Error deleting document: {str(e)}"
         )

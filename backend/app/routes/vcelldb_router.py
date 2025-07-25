@@ -7,8 +7,8 @@ from app.controllers.vcelldb_controller import (
     get_vcml_controller,
     get_sbml_controller,
     get_diagram_url_controller,
-    get_diagram_image_controller,  
-    get_biomodel_applications_files_controller,  
+    get_diagram_image_controller,
+    get_biomodel_applications_files_controller,
 )
 
 router = APIRouter()
