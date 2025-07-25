@@ -1,5 +1,5 @@
 services:
-  ### Qdrant Vector DB
+  ### Vector DB (Qdrant)
   qdrant:
     image: qdrant/qdrant
     container_name: qdrant-vcell
@@ -10,7 +10,7 @@ services:
       - qdrant_data:/qdrant/storage
     restart: unless-stopped
 
-  ### Backend (FastAPI with Poetry, dev mode)
+  ### Backend (FastAPI with Poetry)
   backend:
     build:
       context: ./backend
@@ -26,7 +26,7 @@ services:
       - qdrant
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
-  ### Frontend (Next.js, dev mode)
+  ### Frontend (Next.js)
   frontend:
     build:
       context: ./frontend
