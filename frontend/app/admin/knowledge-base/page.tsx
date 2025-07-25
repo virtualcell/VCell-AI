@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { MarkdownRenderer } from "@/components/markdown-renderer"
 import { Input } from "@/components/ui/input"
 import { 
   FileText, 
@@ -21,6 +22,12 @@ interface KnowledgeFile {
   type: "pdf" | "txt"
 }
 
+interface FileContent {
+  content: string
+  loading: boolean
+  error: string
+}
+
 export default function KnowledgeBasePage() {
   const [files, setFiles] = useState<KnowledgeFile[]>([])
   const [filteredFiles, setFilteredFiles] = useState<KnowledgeFile[]>([])
@@ -28,35 +35,33 @@ export default function KnowledgeBasePage() {
   const [error, setError] = useState("")
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedFile, setSelectedFile] = useState<KnowledgeFile | null>(null)
+  const [fileContent, setFileContent] = useState<FileContent | null>(null)
   const [showUploadModal, setShowUploadModal] = useState(false)
   const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    // Mock data - replace with actual API calls
     const fetchFiles = async () => {
       try {
         setLoading(true)
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        
-        // Mock files data
-        const mockFiles: KnowledgeFile[] = [
-          {
-            name: "VCell_Quickstart_7_B.pdf",
-            type: "pdf"
-          }
-        ]
-        
-        setFiles(mockFiles)
-        setFilteredFiles(mockFiles)
+        const res = await fetch('http://localhost:8000/kb/files', {
+          headers: { 'accept': 'application/json' },
+        })
+        if (!res.ok) throw new Error('Failed to fetch files')
+        const data = await res.json()
+        if (!data.files || !Array.isArray(data.files)) throw new Error('Invalid response')
+        const files: KnowledgeFile[] = data.files.map((filename: string) => ({
+          name: filename,
+          type: filename.split('.').pop()?.toLowerCase() === 'pdf' ? 'pdf' : 'txt',
+        }))
+        setFiles(files)
+        setFilteredFiles(files)
       } catch (err) {
         setError("Failed to load knowledge base files")
       } finally {
         setLoading(false)
       }
     }
-
     fetchFiles()
   }, [])
 
@@ -113,8 +118,23 @@ export default function KnowledgeBasePage() {
     }
   }
 
-  const handleViewFile = (file: KnowledgeFile) => {
+  const handleViewFile = async (file: KnowledgeFile) => {
     setSelectedFile(file)
+    setFileContent({ content: "", loading: true, error: "" })
+    try {
+      const res = await fetch(`http://localhost:8000/kb/files/${encodeURIComponent(file.name)}/chunks`, {
+        headers: { 'accept': 'application/json' },
+      })
+      if (!res.ok) throw new Error('Failed to fetch file content')
+      const data = await res.json()
+      if (!data.chunks || !Array.isArray(data.chunks)) throw new Error('Invalid response')
+      // Sort by chunk_index just in case
+      const sortedChunks = data.chunks.sort((a: { chunk_index: number }, b: { chunk_index: number }) => a.chunk_index - b.chunk_index)
+      const content = sortedChunks.map((c: any) => c.chunk).join("\n")
+      setFileContent({ content, loading: false, error: "" })
+    } catch (err) {
+      setFileContent({ content: "", loading: false, error: "Failed to load file content" })
+    }
   }
 
   if (loading) return <div className="p-8 text-center">Loading knowledge base...</div>
@@ -287,7 +307,7 @@ export default function KnowledgeBasePage() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setSelectedFile(null)}
+                  onClick={() => { setSelectedFile(null); setFileContent(null); }}
                 >
                   ×
                 </Button>
@@ -295,10 +315,16 @@ export default function KnowledgeBasePage() {
               <div className="space-y-4">
                 <div className="border-t pt-4">
                   <span className="font-medium">Content Preview:</span>
-                  <div className="mt-2 p-4 bg-slate-50 rounded-lg text-sm">
-                    <p className="text-slate-600">
-                      {"No content preview available for this file type."}
-                    </p>
+                  <div className="mt-2 p-4 bg-slate-50 rounded-lg text-sm min-h-[100px]">
+                    {fileContent?.loading && (
+                      <span className="text-slate-400">Loading...</span>
+                    )}
+                    {fileContent?.error && (
+                      <span className="text-red-600">{fileContent.error}</span>
+                    )}
+                    {!fileContent?.loading && !fileContent?.error && fileContent?.content && (
+                      <MarkdownRenderer content={fileContent.content} />
+                    )}
                   </div>
                 </div>
               </div>
@@ -308,4 +334,4 @@ export default function KnowledgeBasePage() {
       </div>
     </div>
   )
-} 
+}
