@@ -1,7 +1,11 @@
 from qdrant_client.models import (
     Distance, 
     VectorParams, 
-    PointStruct
+    PointStruct,
+    FilterSelector,
+    Filter,
+    FieldCondition,
+    MatchValue
 )
 from app.core.singleton import get_qdrant_client
 
@@ -91,12 +95,12 @@ def delete_qdrant_documents(collection_name: str, file_name: str):
     """
     client.delete(
         collection_name=collection_name,
-        points_selector=models.FilterSelector(
-            filter=models.Filter(
+        points_selector=FilterSelector(
+            filter=Filter(
                 must=[
-                    models.FieldCondition(
+                    FieldCondition(
                         key="file_name",
-                        match=models.MatchValue(value=file_name),
+                        match=MatchValue(value=file_name),
                     ),
                 ],
             )
