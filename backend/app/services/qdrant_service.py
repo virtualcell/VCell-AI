@@ -80,3 +80,29 @@ def search_qdrant_points(
         "status": "success",
         "message": search_result
     }
+
+def delete_qdrant_documents(collection_name: str, file_name: str):
+    """
+    Delete a document from a collection in Qdrant.
+
+    Args:
+        collection_name (str): The name of the collection to delete the document from.
+        file_name (str): The name of the document to delete.
+    """
+    client.delete(
+        collection_name=collection_name,
+        points_selector=models.FilterSelector(
+            filter=models.Filter(
+                must=[
+                    models.FieldCondition(
+                        key="file_name",
+                        match=models.MatchValue(value=file_name),
+                    ),
+                ],
+            )
+        ),
+    )
+    return {
+        "status": "success",
+        "message": file_name + " deleted successfully."
+    }
