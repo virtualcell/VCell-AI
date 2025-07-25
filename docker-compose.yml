@@ -2,7 +2,7 @@ services:
   ### Qdrant Vector DB
   qdrant:
     image: qdrant/qdrant
-    container_name: qdrant
+    container_name: qdrant-vcell
     ports:
       - "6333:6333"     # REST API
       - "6334:6334"     # gRPC API
@@ -15,7 +15,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: vcell-backend
+    container_name: backend-vcell
     volumes:
       - ./backend:/app
     ports:
@@ -31,7 +31,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: vcell-frontend
+    container_name: frontend-vcell
     volumes:
       - ./frontend:/app
     ports:
