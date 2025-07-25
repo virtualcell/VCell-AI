@@ -1,5 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, Form
-from typing import Optional
+from fastapi import APIRouter, UploadFile, File
 from app.controllers.knowledge_base_controller import (
     create_collection_controller,
     get_files_controller,

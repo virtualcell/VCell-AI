@@ -7,33 +7,18 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { 
   FileText, 
-  Upload, 
-  Download, 
+  Upload,  
   Eye, 
   Trash2, 
   Search,
   FolderOpen,
   File,
-  FileImage,
-  FileCode,
-  FileArchive,
-  Calendar,
-  HardDrive,
   Plus,
-  Filter
 } from "lucide-react"
 
 interface KnowledgeFile {
-  id: string
   name: string
-  type: "pdf" | "docx" | "txt" | "csv" | "json" | "image" | "archive" | "other"
-  size: number
-  uploadDate: string
-  uploadedBy: string
-  description: string
-  tags?: string[]
-  status: "active" | "archived" | "processing"
-  content?: string
+  type: "pdf" | "txt"
 }
 
 export default function KnowledgeBasePage() {
@@ -58,174 +43,8 @@ export default function KnowledgeBasePage() {
         // Mock files data
         const mockFiles: KnowledgeFile[] = [
           {
-            id: "1",
             name: "VCell_Quickstart_7_B.pdf",
-            type: "pdf",
-            size: 706000,
-            uploadDate: "2019-12-23T15:38:00Z",
-            uploadedBy: "admin@example.com",
-            description: "VCell Quickstart Guide version 7",
-            status: "active"
-          },
-          {
-            id: "2",
-            name: "VCell_Quickstart_6.pdf",
-            type: "pdf",
-            size: 872000,
-            uploadDate: "2016-11-01T11:01:00Z",
-            uploadedBy: "admin@example.com",
-            description: "VCell Quickstart Guide version 6",
-            status: "active"
-          },
-          {
-            id: "3",
-            name: "VCell6.1_Rule-Based_Modeling.pdf",
-            type: "pdf",
-            size: 8200000,
-            uploadDate: "2017-07-18T15:51:00Z",
-            uploadedBy: "admin@example.com",
-            description: "Rule-Based Modeling Guide for VCell 6.1",
-            status: "active"
-          },
-          {
-            id: "4",
-            name: "VCell6.1_Rule-Based_Modeling_Extended.pdf",
-            type: "pdf",
-            size: 9800000,
-            uploadDate: "2017-07-18T16:19:00Z",
-            uploadedBy: "admin@example.com",
-            description: "Extended Rule-Based Modeling Guide for VCell 6.1",
-            status: "active"
-          },
-          {
-            id: "5",
-            name: "Tutorial06_PathwayComplex.pdf",
-            type: "pdf",
-            size: 4500000,
-            uploadDate: "2016-11-01T11:51:00Z",
-            uploadedBy: "admin@example.com",
-            description: "Tutorial 06: Pathway Complex Modeling",
-            status: "active"
-          },
-          {
-            id: "6",
-            name: "SpatialRuleBasedGuide.pdf",
-            type: "pdf",
-            size: 679000,
-            uploadDate: "2017-06-14T19:25:00Z",
-            uploadedBy: "admin@example.com",
-            description: "Spatial Rule-Based Modeling Guide",
-            status: "active"
-          },
-          {
-            id: "7",
-            name: "SingleCompartmentRuleBased.pdf",
-            type: "pdf",
-            size: 1300000,
-            uploadDate: "2017-06-14T19:25:00Z",
-            uploadedBy: "admin@example.com",
-            description: "Single Compartment Rule-Based Modeling",
-            status: "active"
-          },
-          {
-            id: "8",
-            name: "SimpleFRAP_7.2.pdf",
-            type: "pdf",
-            size: 8200000,
-            uploadDate: "2020-05-11T08:07:00Z",
-            uploadedBy: "admin@example.com",
-            description: "Simple FRAP Tutorial version 7.2",
-            status: "active"
-          },
-          {
-            id: "9",
-            name: "SimpleFRAP_7.0.pdf",
-            type: "pdf",
-            size: 3700000,
-            uploadDate: "2019-04-30T15:17:00Z",
-            uploadedBy: "admin@example.com",
-            description: "Simple FRAP Tutorial version 7.0",
-            status: "active"
-          },
-          {
-            id: "10",
-            name: "PHGFP_7.2.pdf",
-            type: "pdf",
-            size: 9500000,
-            uploadDate: "2020-07-24T16:42:00Z",
-            uploadedBy: "admin@example.com",
-            description: "PHGFP Tutorial version 7.2",
-            status: "active"
-          },
-          {
-            id: "11",
-            name: "PHGFP_7.0.pdf",
-            type: "pdf",
-            size: 5500000,
-            uploadDate: "2019-05-01T13:27:00Z",
-            uploadedBy: "admin@example.com",
-            description: "PHGFP Tutorial version 7.0",
-            status: "active"
-          },
-          {
-            id: "12",
-            name: "MultiApp_Tutorial_Data.txt",
-            type: "txt",
-            size: 433,
-            uploadDate: "2018-11-02T08:23:00Z",
-            uploadedBy: "admin@example.com",
-            description: "MultiApp Tutorial Data File",
-            status: "active"
-          },
-          {
-            id: "13",
-            name: "MultiAppTransport_7.2.pdf",
-            type: "pdf",
-            size: 16000000,
-            uploadDate: "2020-05-11T08:27:00Z",
-            uploadedBy: "admin@example.com",
-            description: "MultiApp Transport Tutorial version 7.2",
-            status: "active"
-          },
-          {
-            id: "14",
-            name: "MultiAppTransport_7.0.pdf",
-            type: "pdf",
-            size: 14000000,
-            uploadDate: "2018-09-24T14:20:00Z",
-            uploadedBy: "admin@example.com",
-            description: "MultiApp Transport Tutorial version 7.0",
-            status: "active"
-          },
-          {
-            id: "15",
-            name: "MovingBoundaries.pdf",
-            type: "pdf",
-            size: 9400000,
-            uploadDate: "2022-09-13T10:28:00Z",
-            uploadedBy: "admin@example.com",
-            description: "Moving Boundaries Tutorial",
-            status: "active"
-          },
-          {
-            id: "16",
-            name: "FRAPBinding_7.2.pdf",
-            type: "pdf",
-            size: 17000000,
-            uploadDate: "2020-07-24T16:04:00Z",
-            uploadedBy: "admin@example.com",
-            description: "FRAP Binding Tutorial version 7.2",
-            status: "active"
-          },
-          {
-            id: "17",
-            name: "FRAPBinding_7.0.pdf",
-            type: "pdf",
-            size: 7900000,
-            uploadDate: "2019-04-30T15:30:00Z",
-            uploadedBy: "admin@example.com",
-            description: "FRAP Binding Tutorial version 7.0",
-            status: "active"
+            type: "pdf"
           }
         ]
         
@@ -243,9 +62,7 @@ export default function KnowledgeBasePage() {
 
   useEffect(() => {
     const filtered = files.filter(file =>
-      file.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      file.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (file.tags && file.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())))
+      file.name.toLowerCase().includes(searchTerm.toLowerCase())
     )
     setFilteredFiles(filtered)
   }, [searchTerm, files])
@@ -254,42 +71,11 @@ export default function KnowledgeBasePage() {
     switch (type) {
       case "pdf":
         return <FileText className="h-5 w-5 text-red-500" />
-      case "docx":
-        return <FileText className="h-5 w-5 text-blue-500" />
       case "txt":
         return <FileText className="h-5 w-5 text-gray-500" />
-      case "csv":
-        return <FileCode className="h-5 w-5 text-green-500" />
-      case "json":
-        return <FileCode className="h-5 w-5 text-yellow-500" />
-      case "image":
-        return <FileImage className="h-5 w-5 text-purple-500" />
-      case "archive":
-        return <FileArchive className="h-5 w-5 text-orange-500" />
       default:
         return <File className="h-5 w-5 text-gray-500" />
     }
-  }
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "active":
-        return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Active</Badge>
-      case "archived":
-        return <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">Archived</Badge>
-      case "processing":
-        return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">Processing</Badge>
-      default:
-        return <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">{status}</Badge>
-    }
-  }
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes'
-    const k = 1024
-    const sizes = ['Bytes', 'KB', 'MB', 'GB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
   }
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -302,14 +88,8 @@ export default function KnowledgeBasePage() {
       await new Promise(resolve => setTimeout(resolve, 2000))
       
       const newFile: KnowledgeFile = {
-        id: Date.now().toString(),
         name: files[0].name,
         type: files[0].name.split('.').pop()?.toLowerCase() as any || "other",
-        size: files[0].size,
-        uploadDate: new Date().toISOString(),
-        uploadedBy: "admin@example.com",
-        description: `Uploaded file: ${files[0].name}`,
-        status: "active"
       }
 
       setFiles(prev => [newFile, ...prev])
@@ -327,7 +107,7 @@ export default function KnowledgeBasePage() {
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 500))
-      setFiles(prev => prev.filter(file => file.id !== fileId))
+      setFiles(prev => prev.filter(file => file.name !== fileId))
     } catch (err) {
       setError("Failed to delete file")
     }
@@ -408,7 +188,7 @@ export default function KnowledgeBasePage() {
                 </thead>
                 <tbody className="bg-white divide-y divide-slate-200">
                   {filteredFiles.map((file) => (
-                    <tr key={file.id} className="hover:bg-slate-50">
+                    <tr key={file.name} className="hover:bg-slate-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-10 w-10">
@@ -418,13 +198,7 @@ export default function KnowledgeBasePage() {
                           </div>
                           <div className="ml-4">
                             <div className="text-sm font-medium text-slate-900">{file.name}</div>
-                            <div className="text-sm text-slate-500">{file.description}</div>
                             <div className="flex gap-1 mt-1">
-                              {file.tags && file.tags.map((tag, index) => (
-                                <Badge key={index} variant="secondary" className="text-xs">
-                                  {tag}
-                                </Badge>
-                              ))}
                             </div>
                           </div>
                         </div>
@@ -448,7 +222,7 @@ export default function KnowledgeBasePage() {
                             size="sm"
                             className="h-8 w-8 p-0 text-red-600 hover:text-red-800 hover:bg-red-50"
                             title="Delete File"
-                            onClick={() => handleDeleteFile(file.id)}
+                            onClick={() => handleDeleteFile(file.name)}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -476,7 +250,7 @@ export default function KnowledgeBasePage() {
                     type="file"
                     onChange={handleFileUpload}
                     className="hidden"
-                    accept=".pdf,.docx,.txt,.csv,.json,.png,.jpg,.jpeg,.zip,.rar"
+                    accept=".pdf,.txt,application/pdf,text/plain"
                   />
                   <Button
                     onClick={() => fileInputRef.current?.click()}
@@ -519,39 +293,11 @@ export default function KnowledgeBasePage() {
                 </Button>
               </div>
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="font-medium">Size:</span> {formatFileSize(selectedFile.size)}
-                  </div>
-                  <div>
-                    <span className="font-medium">Type:</span> {selectedFile.type.toUpperCase()}
-                  </div>
-                  <div>
-                    <span className="font-medium">Uploaded:</span> {new Date(selectedFile.uploadDate).toLocaleString()}
-                  </div>
-                  <div>
-                    <span className="font-medium">By:</span> {selectedFile.uploadedBy}
-                  </div>
-                </div>
-                <div>
-                  <span className="font-medium">Description:</span>
-                  <p className="text-slate-600 mt-1">{selectedFile.description}</p>
-                </div>
-                <div>
-                  <span className="font-medium">Tags:</span>
-                  <div className="flex gap-1 mt-1">
-                    {selectedFile.tags && selectedFile.tags.map((tag, index) => (
-                      <Badge key={index} variant="secondary">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
                 <div className="border-t pt-4">
                   <span className="font-medium">Content Preview:</span>
                   <div className="mt-2 p-4 bg-slate-50 rounded-lg text-sm">
                     <p className="text-slate-600">
-                      {selectedFile.content || "No content preview available for this file type."}
+                      {"No content preview available for this file type."}
                     </p>
                   </div>
                 </div>
