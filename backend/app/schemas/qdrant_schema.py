@@ -6,7 +6,7 @@ class CreateCollectionRequest(BaseModel):
     """Schema for creating a Qdrant collection."""
     collection_name: str = Field(..., description="Name of the collection to create")
     vector_size: int = Field(..., description="Size of the vector", gt=0)
-    distance: str = Field(..., description="Distance metric to use", regex="^(cosine|dot)$")
+    distance: str = Field(..., description="Distance metric to use", pattern="^(cosine|dot)$")
 
 
 class InsertPointRequest(BaseModel):
