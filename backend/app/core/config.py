@@ -11,6 +11,9 @@ class Settings(BaseSettings):
     AZURE_API_KEY: str
     AZURE_DEPLOYMENT_NAME: str
 
+    # Qdrant Config
+    QDRANT_URL: str
+
     class Config:
         env_file = ".env"
         cache_on_load = False
