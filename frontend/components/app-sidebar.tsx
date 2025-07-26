@@ -1,10 +1,20 @@
-"use client"
+"use client";
 
-import { Search, History, Sparkles, FlaskConical, UserPlus, LogIn, Shield, FolderOpen, Settings } from "lucide-react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import Image from "next/image"
-import { Button } from "@/components/ui/button"
+import {
+  Search,
+  History,
+  Sparkles,
+  FlaskConical,
+  UserPlus,
+  LogIn,
+  Shield,
+  FolderOpen,
+  Settings,
+} from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
 
 import {
   Sidebar,
@@ -20,7 +30,7 @@ import {
   SidebarSeparator,
   SidebarTrigger,
   useSidebar,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 
 const historyItems = [
   "Calcium Biomodel Comparison",
@@ -28,15 +38,15 @@ const historyItems = [
   "Biomodels authored by ModelBrick",
   "Count of Rule-based models",
   "VCML File Analysis of Calcium Models",
-]
+];
 
 export function AppSidebar() {
-  const pathname = usePathname()
-  const { state } = useSidebar()
-  const isCollapsed = state === "collapsed"
+  const pathname = usePathname();
+  const { state } = useSidebar();
+  const isCollapsed = state === "collapsed";
 
   if (pathname == "/" || pathname == "/signin" || pathname == "/signup") {
-    return null
+    return null;
   }
 
   return (
@@ -52,7 +62,9 @@ export function AppSidebar() {
           />
           {!isCollapsed && (
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">AI Platform</h2>
+              <h2 className="text-lg font-semibold text-slate-900">
+                AI Platform
+              </h2>
               <p className="text-sm text-slate-600">The Model Explorer</p>
             </div>
           )}
@@ -110,7 +122,11 @@ export function AppSidebar() {
 
         {/* Database Tools Section */}
         <SidebarGroup>
-          {!isCollapsed && <SidebarGroupLabel className="text-slate-700 font-medium">Database tools</SidebarGroupLabel>}
+          {!isCollapsed && (
+            <SidebarGroupLabel className="text-slate-700 font-medium">
+              Database tools
+            </SidebarGroupLabel>
+          )}
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem key="BiomodelSearch">
@@ -132,7 +148,11 @@ export function AppSidebar() {
 
         {/* Admin Section */}
         <SidebarGroup>
-          {!isCollapsed && <SidebarGroupLabel className="text-slate-700 font-medium">Admin</SidebarGroupLabel>}
+          {!isCollapsed && (
+            <SidebarGroupLabel className="text-slate-700 font-medium">
+              Admin
+            </SidebarGroupLabel>
+          )}
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem key="AdminDashboard">
@@ -155,7 +175,10 @@ export function AppSidebar() {
                   className="data-[active=true]:bg-purple-50 data-[active=true]:text-purple-700 data-[active=true]:border-r-2 data-[active=true]:border-purple-500"
                   tooltip={isCollapsed ? "Knowledge Base" : undefined}
                 >
-                  <Link href="/admin/knowledge-base" className="flex items-center gap-3">
+                  <Link
+                    href="/admin/knowledge-base"
+                    className="flex items-center gap-3"
+                  >
                     <FolderOpen className="h-4 w-4 text-purple-500" />
                     {!isCollapsed && <span>Knowledge Base</span>}
                   </Link>
@@ -168,7 +191,10 @@ export function AppSidebar() {
                   className="data-[active=true]:bg-purple-50 data-[active=true]:text-purple-700 data-[active=true]:border-r-2 data-[active=true]:border-purple-500"
                   tooltip={isCollapsed ? "Settings" : undefined}
                 >
-                  <Link href="/admin/settings" className="flex items-center gap-3">
+                  <Link
+                    href="/admin/settings"
+                    className="flex items-center gap-3"
+                  >
                     <Settings className="h-4 w-4 text-purple-500" />
                     {!isCollapsed && <span>Settings</span>}
                   </Link>
@@ -213,16 +239,23 @@ export function AppSidebar() {
               </div>
             )}
             <div className="w-full bg-slate-200 rounded-full h-2">
-              <div className="bg-blue-600 h-2 rounded-full transition-all duration-300" style={{ width: "50%" }}></div>
+              <div
+                className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                style={{ width: "50%" }}
+              ></div>
             </div>
             {isCollapsed ? (
               <div className="text-xs text-slate-500 text-center">20</div>
             ) : (
-              <div className="text-xs text-slate-500 text-center">12 of 24 requests used today</div>
+              <div className="text-xs text-slate-500 text-center">
+                12 of 24 requests used today
+              </div>
             )}
           </div>
 
-          <div className={`flex ${isCollapsed ? "flex-col space-y-1" : ""} gap-2`}>
+          <div
+            className={`flex ${isCollapsed ? "flex-col space-y-1" : ""} gap-2`}
+          >
             <Button
               variant="outline"
               size={isCollapsed ? "icon" : "sm"}
@@ -257,5 +290,5 @@ export function AppSidebar() {
         </div>
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }

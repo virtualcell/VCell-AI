@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import React from "react"
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import React from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Search,
   MessageSquare,
@@ -13,23 +13,23 @@ import {
   Briefcase,
   Cog,
   Sparkles,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface PromptTemplate {
-  title: string
-  prompt: string
-  icon: React.ReactElement<any>
-  color: string
+  title: string;
+  prompt: string;
+  icon: React.ReactElement<any>;
+  color: string;
 }
 
 export default function AnalyzePage() {
-  const router = useRouter()
-  const [biomodelId, setBiomodelId] = useState("")
-  const [prompt, setPrompt] = useState("")
+  const router = useRouter();
+  const [biomodelId, setBiomodelId] = useState("");
+  const [prompt, setPrompt] = useState("");
 
   const promptTemplates: PromptTemplate[] = [
     {
@@ -68,25 +68,28 @@ export default function AnalyzePage() {
       icon: <Cog className="h-4 w-4" />,
       color: "text-slate-700",
     },
-  ]
+  ];
 
   const handlePromptTemplateClick = (prompt: string) => {
-    setPrompt(prompt)
-  }
+    setPrompt(prompt);
+  };
 
   const handleAnalyze = () => {
-    if (!biomodelId.trim() || !prompt.trim()) return
-    router.push(`/analyze/${biomodelId}?prompt=${encodeURIComponent(prompt)}`)
-  }
+    if (!biomodelId.trim() || !prompt.trim()) return;
+    router.push(`/analyze/${biomodelId}?prompt=${encodeURIComponent(prompt)}`);
+  };
 
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="container mx-auto p-6 max-w-7xl">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Biomodel AI Analysis</h1>
+          <h1 className="text-3xl font-bold text-slate-900 mb-2">
+            Biomodel AI Analysis
+          </h1>
           <p className="text-slate-600">
-            Unlock insights from your biomodels with the power of AI-driven analysis.
+            Unlock insights from your biomodels with the power of AI-driven
+            analysis.
           </p>
         </div>
 
@@ -101,7 +104,10 @@ export default function AnalyzePage() {
           <CardContent className="p-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div className="space-y-1">
-                <Label htmlFor="biomodelId" className="text-slate-700 font-medium text-sm">
+                <Label
+                  htmlFor="biomodelId"
+                  className="text-slate-700 font-medium text-sm"
+                >
                   Biomodel ID
                 </Label>
                 <div className="relative">
@@ -117,7 +123,10 @@ export default function AnalyzePage() {
               </div>
 
               <div className="space-y-1">
-                <Label htmlFor="prompt" className="text-slate-700 font-medium text-sm">
+                <Label
+                  htmlFor="prompt"
+                  className="text-slate-700 font-medium text-sm"
+                >
                   Analysis Question
                 </Label>
                 <div className="relative">
@@ -135,7 +144,9 @@ export default function AnalyzePage() {
 
             {/* Quick Prompts */}
             <div className="space-y-3">
-              <Label className="text-slate-700 font-medium text-sm">Quick Analysis Templates</Label>
+              <Label className="text-slate-700 font-medium text-sm">
+                Quick Analysis Templates
+              </Label>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                 {promptTemplates.map((template, index) => (
                   <Button
@@ -145,10 +156,10 @@ export default function AnalyzePage() {
                     onClick={() => handlePromptTemplateClick(template.prompt)}
                     className="flex items-center gap-2 h-9 px-3 border-slate-300 hover:border-blue-500 hover:bg-blue-50 transition-colors justify-start"
                   >
-                    <div className={`${template.color}`}>
-                      {template.icon}
-                    </div>
-                    <span className="text-xs font-medium">{template.title}</span>
+                    <div className={`${template.color}`}>{template.icon}</div>
+                    <span className="text-xs font-medium">
+                      {template.title}
+                    </span>
                   </Button>
                 ))}
               </div>
@@ -168,5 +179,5 @@ export default function AnalyzePage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

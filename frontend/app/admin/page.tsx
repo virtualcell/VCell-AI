@@ -1,37 +1,37 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { 
-  Users, 
-  MessageSquare, 
-  FileText, 
+import { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Users,
+  MessageSquare,
+  FileText,
   Shield,
   Settings,
-  Trash2
-} from "lucide-react"
+  Trash2,
+} from "lucide-react";
 
 interface User {
-  id: string
-  name: string
-  email: string
-  role: "admin" | "user" | "moderator"
-  status: "active" | "inactive" | "suspended"
-  joinDate: string
-  lastActive: string
-  conversationsCount: number
-  filesCount: number
+  id: string;
+  name: string;
+  email: string;
+  role: "admin" | "user" | "moderator";
+  status: "active" | "inactive" | "suspended";
+  joinDate: string;
+  lastActive: string;
+  conversationsCount: number;
+  filesCount: number;
 }
 
 interface DashboardStats {
-  totalUsers: number
-  totalConversations: number
-  totalFiles: number
-  newUsersThisMonth: number
-  conversationsThisMonth: number
-  todaysConversations: number
+  totalUsers: number;
+  totalConversations: number;
+  totalFiles: number;
+  newUsersThisMonth: number;
+  conversationsThisMonth: number;
+  todaysConversations: number;
 }
 
 export default function AdminDashboard() {
@@ -41,20 +41,20 @@ export default function AdminDashboard() {
     totalFiles: 0,
     newUsersThisMonth: 0,
     conversationsThisMonth: 0,
-    todaysConversations: 0
-  })
-  const [users, setUsers] = useState<User[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState("")
+    todaysConversations: 0,
+  });
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     // Mock data - replace with actual API calls
     const fetchDashboardData = async () => {
       try {
-        setLoading(true)
+        setLoading(true);
         // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
         // Mock stats data
         setStats({
           totalUsers: 1247,
@@ -62,8 +62,8 @@ export default function AdminDashboard() {
           totalFiles: 234,
           newUsersThisMonth: 45,
           conversationsThisMonth: 1234,
-          todaysConversations: 156
-        })
+          todaysConversations: 156,
+        });
 
         // Mock users data
         setUsers([
@@ -76,7 +76,7 @@ export default function AdminDashboard() {
             joinDate: "2024-01-15",
             lastActive: "2024-12-19T10:30:00Z",
             conversationsCount: 45,
-            filesCount: 12
+            filesCount: 12,
           },
           {
             id: "2",
@@ -87,7 +87,7 @@ export default function AdminDashboard() {
             joinDate: "2024-02-20",
             lastActive: "2024-12-19T09:15:00Z",
             conversationsCount: 67,
-            filesCount: 18
+            filesCount: 18,
           },
           {
             id: "3",
@@ -98,7 +98,7 @@ export default function AdminDashboard() {
             joinDate: "2024-03-10",
             lastActive: "2024-12-18T16:45:00Z",
             conversationsCount: 34,
-            filesCount: 8
+            filesCount: 8,
           },
           {
             id: "4",
@@ -109,7 +109,7 @@ export default function AdminDashboard() {
             joinDate: "2024-01-05",
             lastActive: "2024-12-10T14:20:00Z",
             conversationsCount: 23,
-            filesCount: 5
+            filesCount: 5,
           },
           {
             id: "5",
@@ -120,7 +120,7 @@ export default function AdminDashboard() {
             joinDate: "2024-04-12",
             lastActive: "2024-12-15T11:30:00Z",
             conversationsCount: 15,
-            filesCount: 3
+            filesCount: 3,
           },
           {
             id: "6",
@@ -131,7 +131,7 @@ export default function AdminDashboard() {
             joinDate: "2024-05-08",
             lastActive: "2024-12-18T13:45:00Z",
             conversationsCount: 28,
-            filesCount: 7
+            filesCount: 7,
           },
           {
             id: "7",
@@ -142,47 +142,80 @@ export default function AdminDashboard() {
             joinDate: "2024-06-15",
             lastActive: "2024-12-19T08:30:00Z",
             conversationsCount: 12,
-            filesCount: 2
-          }
-        ])
+            filesCount: 2,
+          },
+        ]);
       } catch (err) {
-        setError("Failed to load dashboard data")
+        setError("Failed to load dashboard data");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchDashboardData()
-  }, [])
+    fetchDashboardData();
+  }, []);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "active":
-        return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Active</Badge>
+        return (
+          <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+            Active
+          </Badge>
+        );
       case "inactive":
-        return <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">Inactive</Badge>
+        return (
+          <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">
+            Inactive
+          </Badge>
+        );
       case "suspended":
-        return <Badge className="bg-red-100 text-red-800 hover:bg-red-100">Suspended</Badge>
+        return (
+          <Badge className="bg-red-100 text-red-800 hover:bg-red-100">
+            Suspended
+          </Badge>
+        );
       default:
-        return <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">{status}</Badge>
+        return (
+          <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">
+            {status}
+          </Badge>
+        );
     }
-  }
+  };
 
   const getRoleBadge = (role: string) => {
     switch (role) {
       case "admin":
-        return <Badge className="bg-purple-100 text-purple-800 hover:bg-purple-100">Admin</Badge>
+        return (
+          <Badge className="bg-purple-100 text-purple-800 hover:bg-purple-100">
+            Admin
+          </Badge>
+        );
       case "moderator":
-        return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Moderator</Badge>
+        return (
+          <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
+            Moderator
+          </Badge>
+        );
       case "user":
-        return <Badge className="bg-slate-100 text-slate-800 hover:bg-slate-100">User</Badge>
+        return (
+          <Badge className="bg-slate-100 text-slate-800 hover:bg-slate-100">
+            User
+          </Badge>
+        );
       default:
-        return <Badge className="bg-slate-100 text-slate-800 hover:bg-slate-100">{role}</Badge>
+        return (
+          <Badge className="bg-slate-100 text-slate-800 hover:bg-slate-100">
+            {role}
+          </Badge>
+        );
     }
-  }
+  };
 
-  if (loading) return <div className="p-8 text-center">Loading admin dashboard...</div>
-  if (error) return <div className="p-8 text-center text-red-600">{error}</div>
+  if (loading)
+    return <div className="p-8 text-center">Loading admin dashboard...</div>;
+  if (error) return <div className="p-8 text-center text-red-600">{error}</div>;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -195,17 +228,19 @@ export default function AdminDashboard() {
                 <Shield className="h-8 w-8 text-blue-500" />
                 Admin Dashboard
               </h1>
-              <p className="text-slate-600 mt-2">Manage users, conversations, and system resources</p>
+              <p className="text-slate-600 mt-2">
+                Manage users, conversations, and system resources
+              </p>
             </div>
             <div className="flex gap-3">
               <Button
-                onClick={() => window.open('/admin/knowledge-base', '_blank')}
+                onClick={() => window.open("/admin/knowledge-base", "_blank")}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded border border-green-600 text-green-700 bg-white font-semibold shadow-sm transition-colors hover:bg-green-50"
               >
                 <FileText className="h-4 w-4" /> Knowledge Base
               </Button>
               <Button
-                onClick={() => window.open('/admin/settings', '_blank')}
+                onClick={() => window.open("/admin/settings", "_blank")}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded border border-blue-600 text-blue-700 bg-white font-semibold shadow-sm transition-colors hover:bg-blue-50"
               >
                 <Settings className="h-4 w-4" /> Settings
@@ -224,9 +259,14 @@ export default function AdminDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="text-2xl font-bold text-blue-900">{stats.totalUsers.toLocaleString()}</div>
+              <div className="text-2xl font-bold text-blue-900">
+                {stats.totalUsers.toLocaleString()}
+              </div>
               <div className="text-xs text-slate-600 mt-1">
-                <span className="text-green-600">+{stats.newUsersThisMonth}</span> this month
+                <span className="text-green-600">
+                  +{stats.newUsersThisMonth}
+                </span>{" "}
+                this month
               </div>
             </CardContent>
           </Card>
@@ -239,9 +279,14 @@ export default function AdminDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="text-2xl font-bold text-green-900">{stats.totalConversations.toLocaleString()}</div>
+              <div className="text-2xl font-bold text-green-900">
+                {stats.totalConversations.toLocaleString()}
+              </div>
               <div className="text-xs text-slate-600 mt-1">
-                <span className="text-green-600">+{stats.conversationsThisMonth}</span> this month
+                <span className="text-green-600">
+                  +{stats.conversationsThisMonth}
+                </span>{" "}
+                this month
               </div>
             </CardContent>
           </Card>
@@ -254,7 +299,9 @@ export default function AdminDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="text-2xl font-bold text-purple-900">{stats.totalFiles.toLocaleString()}</div>
+              <div className="text-2xl font-bold text-purple-900">
+                {stats.totalFiles.toLocaleString()}
+              </div>
               <div className="text-xs text-slate-600 mt-1">
                 <span className="text-green-600">+12</span> this week
               </div>
@@ -269,7 +316,9 @@ export default function AdminDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="text-2xl font-bold text-orange-900">{stats.todaysConversations.toLocaleString()}</div>
+              <div className="text-2xl font-bold text-orange-900">
+                {stats.todaysConversations.toLocaleString()}
+              </div>
               <div className="text-xs text-slate-600 mt-1">
                 <span className="text-green-600">+12%</span> from yesterday
               </div>
@@ -292,11 +341,21 @@ export default function AdminDashboard() {
               <table className="w-full">
                 <thead className="bg-slate-50 border-b border-slate-200">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">User</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Role</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Conversations</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Date Joined</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      User
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      Role
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      Conversations
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      Date Joined
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-slate-200">
@@ -307,13 +366,20 @@ export default function AdminDashboard() {
                           <div className="flex-shrink-0 h-10 w-10">
                             <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
                               <span className="text-sm font-medium text-blue-700">
-                                {user.name.split(' ').map(n => n[0]).join('')}
+                                {user.name
+                                  .split(" ")
+                                  .map((n) => n[0])
+                                  .join("")}
                               </span>
                             </div>
                           </div>
                           <div className="ml-4">
-                            <div className="text-sm font-medium text-slate-900">{user.name}</div>
-                            <div className="text-sm text-slate-500">{user.email}</div>
+                            <div className="text-sm font-medium text-slate-900">
+                              {user.name}
+                            </div>
+                            <div className="text-sm text-slate-500">
+                              {user.email}
+                            </div>
                           </div>
                         </div>
                       </td>
@@ -347,5 +413,5 @@ export default function AdminDashboard() {
         </Card>
       </div>
     </div>
-  )
-} 
+  );
+}

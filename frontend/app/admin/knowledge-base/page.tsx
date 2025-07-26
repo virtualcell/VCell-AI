@@ -1,173 +1,192 @@
-"use client"
+"use client";
 
-import { useEffect, useState, useRef } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { MarkdownRenderer } from "@/components/markdown-renderer"
-import { Input } from "@/components/ui/input"
-import { 
-  FileText, 
-  Upload,  
-  Eye, 
-  Trash2, 
+import { useEffect, useState, useRef } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { MarkdownRenderer } from "@/components/markdown-renderer";
+import { Input } from "@/components/ui/input";
+import {
+  FileText,
+  Upload,
+  Eye,
+  Trash2,
   Search,
   FolderOpen,
   File,
   Plus,
-} from "lucide-react"
+} from "lucide-react";
 
 interface KnowledgeFile {
-  name: string
-  type: "pdf" | "txt"
+  name: string;
+  type: "pdf" | "txt";
 }
 
 interface FileContent {
-  content: string
-  loading: boolean
-  error: string
+  content: string;
+  loading: boolean;
+  error: string;
 }
 
 export default function KnowledgeBasePage() {
-  const [files, setFiles] = useState<KnowledgeFile[]>([])
-  const [filteredFiles, setFilteredFiles] = useState<KnowledgeFile[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState("")
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedFile, setSelectedFile] = useState<KnowledgeFile | null>(null)
-  const [fileContent, setFileContent] = useState<FileContent | null>(null)
-  const [showUploadModal, setShowUploadModal] = useState(false)
-  const [uploading, setUploading] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [files, setFiles] = useState<KnowledgeFile[]>([]);
+  const [filteredFiles, setFilteredFiles] = useState<KnowledgeFile[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedFile, setSelectedFile] = useState<KnowledgeFile | null>(null);
+  const [fileContent, setFileContent] = useState<FileContent | null>(null);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const fetchFiles = async () => {
       try {
-        setLoading(true)
+        setLoading(true);
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/kb/files`, {
-          headers: { 'accept': 'application/json' },
-        })
-        if (!res.ok) throw new Error('Failed to fetch files')
-        const data = await res.json()
-        if (!data.files || !Array.isArray(data.files)) throw new Error('Invalid response')
+          headers: { accept: "application/json" },
+        });
+        if (!res.ok) throw new Error("Failed to fetch files");
+        const data = await res.json();
+        if (!data.files || !Array.isArray(data.files))
+          throw new Error("Invalid response");
         const files: KnowledgeFile[] = data.files.map((filename: string) => ({
           name: filename,
-          type: filename.split('.').pop()?.toLowerCase() === 'pdf' ? 'pdf' : 'txt',
-        }))
-        setFiles(files)
-        setFilteredFiles(files)
+          type:
+            filename.split(".").pop()?.toLowerCase() === "pdf" ? "pdf" : "txt",
+        }));
+        setFiles(files);
+        setFilteredFiles(files);
       } catch (err) {
-        setError("Failed to load knowledge base files")
+        setError("Failed to load knowledge base files");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-    fetchFiles()
-  }, [])
+    };
+    fetchFiles();
+  }, []);
 
   useEffect(() => {
-    const filtered = files.filter(file =>
-      file.name.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    setFilteredFiles(filtered)
-  }, [searchTerm, files])
+    const filtered = files.filter((file) =>
+      file.name.toLowerCase().includes(searchTerm.toLowerCase()),
+    );
+    setFilteredFiles(filtered);
+  }, [searchTerm, files]);
 
   const getFileIcon = (type: string) => {
     switch (type) {
       case "pdf":
-        return <FileText className="h-5 w-5 text-red-500" />
+        return <FileText className="h-5 w-5 text-red-500" />;
       case "txt":
-        return <FileText className="h-5 w-5 text-gray-500" />
+        return <FileText className="h-5 w-5 text-gray-500" />;
       default:
-        return <File className="h-5 w-5 text-gray-500" />
+        return <File className="h-5 w-5 text-gray-500" />;
     }
-  }
+  };
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const filesList = event.target.files
-    if (!filesList || filesList.length === 0) return
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const filesList = event.target.files;
+    if (!filesList || filesList.length === 0) return;
 
-    setUploading(true)
-    setError("")
-    const file = filesList[0]
-    const ext = file.name.split('.').pop()?.toLowerCase()
-    let endpoint = ""
+    setUploading(true);
+    setError("");
+    const file = filesList[0];
+    const ext = file.name.split(".").pop()?.toLowerCase();
+    let endpoint = "";
     if (ext === "pdf") {
-      endpoint = `${process.env.NEXT_PUBLIC_API_URL}/kb/upload-pdf`
+      endpoint = `${process.env.NEXT_PUBLIC_API_URL}/kb/upload-pdf`;
     } else if (ext === "txt") {
-      endpoint = `${process.env.NEXT_PUBLIC_API_URL}/kb/upload-text`
+      endpoint = `${process.env.NEXT_PUBLIC_API_URL}/kb/upload-text`;
     } else {
-      setError("Only PDF and TXT files are supported.")
-      setUploading(false)
-      return
+      setError("Only PDF and TXT files are supported.");
+      setUploading(false);
+      return;
     }
-    const formData = new FormData()
-    formData.append("file", file)
+    const formData = new FormData();
+    formData.append("file", file);
     try {
       const res = await fetch(endpoint, {
         method: "POST",
         body: formData,
-      })
-      if (!res.ok) throw new Error("Failed to upload file")
-      const data = await res.json()
-      if (data.status !== "success") throw new Error("Failed to upload file")
+      });
+      if (!res.ok) throw new Error("Failed to upload file");
+      const data = await res.json();
+      if (data.status !== "success") throw new Error("Failed to upload file");
       const newFile: KnowledgeFile = {
         name: file.name,
         type: ext === "pdf" ? "pdf" : "txt",
-      }
-      setFiles(prev => [newFile, ...prev])
-      setFilteredFiles(prev => [newFile, ...prev])
-      setShowUploadModal(false)
+      };
+      setFiles((prev) => [newFile, ...prev]);
+      setFilteredFiles((prev) => [newFile, ...prev]);
+      setShowUploadModal(false);
     } catch (err) {
-      setError("Failed to upload file")
+      setError("Failed to upload file");
     } finally {
-      setUploading(false)
+      setUploading(false);
     }
-  }
+  };
 
   const handleDeleteFile = async (fileName: string) => {
-    if (!confirm("Are you sure you want to delete this file?")) return
+    if (!confirm("Are you sure you want to delete this file?")) return;
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/kb/files/${encodeURIComponent(fileName)}`, {
-        method: 'DELETE',
-        headers: { 'accept': 'application/json' },
-      })
-      if (!res.ok) throw new Error('Failed to delete file')
-      const data = await res.json()
-      if (data.status !== 'success') throw new Error('Failed to delete file')
-      setFiles(prev => prev.filter(file => file.name !== fileName))
-      setFilteredFiles(prev => prev.filter(file => file.name !== fileName))
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/kb/files/${encodeURIComponent(fileName)}`,
+        {
+          method: "DELETE",
+          headers: { accept: "application/json" },
+        },
+      );
+      if (!res.ok) throw new Error("Failed to delete file");
+      const data = await res.json();
+      if (data.status !== "success") throw new Error("Failed to delete file");
+      setFiles((prev) => prev.filter((file) => file.name !== fileName));
+      setFilteredFiles((prev) => prev.filter((file) => file.name !== fileName));
       // If the deleted file is currently previewed, close the modal
       if (selectedFile && selectedFile.name === fileName) {
-        setSelectedFile(null)
-        setFileContent(null)
+        setSelectedFile(null);
+        setFileContent(null);
       }
     } catch (err) {
-      setError("Failed to delete file")
+      setError("Failed to delete file");
     }
-  }
+  };
 
   const handleViewFile = async (file: KnowledgeFile) => {
-    setSelectedFile(file)
-    setFileContent({ content: "", loading: true, error: "" })
+    setSelectedFile(file);
+    setFileContent({ content: "", loading: true, error: "" });
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/kb/files/${encodeURIComponent(file.name)}/chunks`, {
-        headers: { 'accept': 'application/json' },
-      })
-      if (!res.ok) throw new Error('Failed to fetch file content')
-      const data = await res.json()
-      if (!data.chunks || !Array.isArray(data.chunks)) throw new Error('Invalid response')
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/kb/files/${encodeURIComponent(file.name)}/chunks`,
+        {
+          headers: { accept: "application/json" },
+        },
+      );
+      if (!res.ok) throw new Error("Failed to fetch file content");
+      const data = await res.json();
+      if (!data.chunks || !Array.isArray(data.chunks))
+        throw new Error("Invalid response");
       // Sort by chunk_index just in case
-      const sortedChunks = data.chunks.sort((a: { chunk_index: number }, b: { chunk_index: number }) => a.chunk_index - b.chunk_index)
-      const content = sortedChunks.map((c: any) => c.chunk).join("\n")
-      setFileContent({ content, loading: false, error: "" })
+      const sortedChunks = data.chunks.sort(
+        (a: { chunk_index: number }, b: { chunk_index: number }) =>
+          a.chunk_index - b.chunk_index,
+      );
+      const content = sortedChunks.map((c: any) => c.chunk).join("\n");
+      setFileContent({ content, loading: false, error: "" });
     } catch (err) {
-      setFileContent({ content: "", loading: false, error: "Failed to load file content" })
+      setFileContent({
+        content: "",
+        loading: false,
+        error: "Failed to load file content",
+      });
     }
-  }
+  };
 
-  if (loading) return <div className="p-8 text-center">Loading knowledge base...</div>
-  if (error) return <div className="p-8 text-center text-red-600">{error}</div>
+  if (loading)
+    return <div className="p-8 text-center">Loading knowledge base...</div>;
+  if (error) return <div className="p-8 text-center text-red-600">{error}</div>;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -180,7 +199,9 @@ export default function KnowledgeBasePage() {
                 <FolderOpen className="h-8 w-8 text-blue-500" />
                 Knowledge Base Management
               </h1>
-              <p className="text-slate-600 mt-2">Upload, manage, and organize knowledge base files</p>
+              <p className="text-slate-600 mt-2">
+                Upload, manage, and organize knowledge base files
+              </p>
             </div>
             <div className="flex gap-3">
               <Button
@@ -190,7 +211,7 @@ export default function KnowledgeBasePage() {
                 <Plus className="h-4 w-4" /> Upload File
               </Button>
               <Button
-                onClick={() => window.open('/admin', '_blank')}
+                onClick={() => window.open("/admin", "_blank")}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded border border-blue-600 text-blue-700 bg-white font-semibold shadow-sm transition-colors hover:bg-blue-50"
               >
                 <FileText className="h-4 w-4" /> Back to Dashboard
@@ -222,16 +243,21 @@ export default function KnowledgeBasePage() {
             <CardTitle className="text-2xl font-extrabold text-blue-900 flex items-center gap-3">
               <FileText className="h-6 w-6 text-blue-500" />
               Knowledge Base Files
-              <Badge className="ml-2 bg-blue-600 text-white">{files.length} files</Badge>
+              <Badge className="ml-2 bg-blue-600 text-white">
+                {files.length} files
+              </Badge>
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             {filteredFiles.length === 0 ? (
               <div className="text-center py-16 px-6">
                 <FolderOpen className="h-16 w-16 text-slate-300 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-slate-600 mb-2">No files uploaded yet</h3>
+                <h3 className="text-lg font-semibold text-slate-600 mb-2">
+                  No files uploaded yet
+                </h3>
                 <p className="text-slate-500 mb-6 max-w-md mx-auto">
-                  Your knowledge base is empty. Upload your first file to get started with building your knowledge base.
+                  Your knowledge base is empty. Upload your first file to get
+                  started with building your knowledge base.
                 </p>
                 <Button
                   onClick={() => setShowUploadModal(true)}
@@ -246,9 +272,15 @@ export default function KnowledgeBasePage() {
                 <table className="w-full">
                   <thead className="bg-slate-50 border-b border-slate-200">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">File</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Type</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                        File
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                        Type
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-slate-200">
@@ -262,9 +294,10 @@ export default function KnowledgeBasePage() {
                               </div>
                             </div>
                             <div className="ml-4">
-                              <div className="text-sm font-medium text-slate-900">{file.name}</div>
-                              <div className="flex gap-1 mt-1">
+                              <div className="text-sm font-medium text-slate-900">
+                                {file.name}
                               </div>
+                              <div className="flex gap-1 mt-1"></div>
                             </div>
                           </div>
                         </td>
@@ -310,7 +343,9 @@ export default function KnowledgeBasePage() {
               <div className="space-y-4">
                 <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center">
                   <Upload className="h-8 w-8 text-slate-400 mx-auto mb-2" />
-                  <p className="text-sm text-slate-600 mb-2">Click to select or drag and drop</p>
+                  <p className="text-sm text-slate-600 mb-2">
+                    Click to select or drag and drop
+                  </p>
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -353,7 +388,10 @@ export default function KnowledgeBasePage() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => { setSelectedFile(null); setFileContent(null); }}
+                  onClick={() => {
+                    setSelectedFile(null);
+                    setFileContent(null);
+                  }}
                 >
                   ×
                 </Button>
@@ -368,9 +406,11 @@ export default function KnowledgeBasePage() {
                     {fileContent?.error && (
                       <span className="text-red-600">{fileContent.error}</span>
                     )}
-                    {!fileContent?.loading && !fileContent?.error && fileContent?.content && (
-                      <MarkdownRenderer content={fileContent.content} />
-                    )}
+                    {!fileContent?.loading &&
+                      !fileContent?.error &&
+                      fileContent?.content && (
+                        <MarkdownRenderer content={fileContent.content} />
+                      )}
                   </div>
                 </div>
               </div>
@@ -379,5 +419,5 @@ export default function KnowledgeBasePage() {
         )}
       </div>
     </div>
-  )
+  );
 }

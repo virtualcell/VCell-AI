@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { useState } from "react"
+import { useState } from "react";
 import {
   X,
   ChevronLeft,
@@ -13,21 +13,27 @@ import {
   BarChart3Icon as Diagram3,
   AlertTriangle,
   Sparkles,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface OnboardingModalProps {
-  isOpen: boolean
-  onClose: () => void
+  isOpen: boolean;
+  onClose: () => void;
 }
 
 export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
-  const [currentStep, setCurrentStep] = useState(0)
+  const [currentStep, setCurrentStep] = useState(0);
 
   const steps = [
     {
@@ -38,15 +44,20 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
           <div className="text-center">
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 mb-4">
               <Sparkles className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">Ask questions in plain English!</h3>
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                Ask questions in plain English!
+              </h3>
               <p className="text-slate-600">
-                The AI Assistant understands natural language. Just type your questions.
+                The AI Assistant understands natural language. Just type your
+                questions.
               </p>
             </div>
           </div>
 
           <div className="space-y-4">
-            <Label className="text-slate-700 font-medium">Try asking questions like:</Label>
+            <Label className="text-slate-700 font-medium">
+              Try asking questions like:
+            </Label>
             <div className="space-y-3">
               <div className="bg-white border border-slate-200 rounded-lg p-3">
                 <div className="flex items-center gap-2 text-sm text-slate-600 mb-1">
@@ -70,7 +81,9 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
 
             {/* Mock Input Area */}
             <div className="bg-slate-50 border-2 border-dashed border-slate-300 rounded-lg p-4">
-              <Label className="text-sm text-slate-600 mb-2 block">Try it yourself:</Label>
+              <Label className="text-sm text-slate-600 mb-2 block">
+                Try it yourself:
+              </Label>
               <div className="flex gap-2">
                 <Input
                   placeholder="Ask about biomodels, request files, or generate diagrams..."
@@ -95,20 +108,28 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
           <div className="text-center">
             <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-6 mb-4">
               <Settings className="h-12 w-12 text-purple-600 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">Smart Parameter Filtering</h3>
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                Smart Parameter Filtering
+              </h3>
               <p className="text-slate-600">
-                Set specific parameters to narrow down your searches and avoid repeating the same criteria.
+                Set specific parameters to narrow down your searches and avoid
+                repeating the same criteria.
               </p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
-              <Label className="text-slate-700 font-medium">Use Case Example:</Label>
+              <Label className="text-slate-700 font-medium">
+                Use Case Example:
+              </Label>
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                <div className="text-sm text-amber-800 mb-2 font-medium">Scenario:</div>
+                <div className="text-sm text-amber-800 mb-2 font-medium">
+                  Scenario:
+                </div>
                 <p className="text-sm text-amber-700">
-                  You're researching calcium models and want to ask multiple questions about tutorial models only.
+                  You're researching calcium models and want to ask multiple
+                  questions about tutorial models only.
                 </p>
               </div>
               <div className="space-y-2">
@@ -116,7 +137,8 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
                 <div className="bg-slate-100 p-2 rounded text-xs font-mono">
                   "Find tutorial calcium models"
                   <br />
-                  "Show tutorial models about calcium that use the Combined Stiff Solver"
+                  "Show tutorial models about calcium that use the Combined
+                  Stiff Solver"
                   <br />
                   "Get tutorial calcium models from Juliajessica"
                 </div>
@@ -124,7 +146,9 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
             </div>
 
             <div className="space-y-4">
-              <Label className="text-slate-700 font-medium">Better Approach:</Label>
+              <Label className="text-slate-700 font-medium">
+                Better Approach:
+              </Label>
 
               {/* Mock Tool Parameters */}
               <Card className="border-slate-200 p-2 sm:p-3 text-xs">
@@ -137,10 +161,16 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
                 <CardContent className="p-2 sm:p-3 text-xs">
                   <div className="space-y-2">
                     <Label className="text-xs text-slate-600">Model Type</Label>
-                    <RadioGroup value="tutorial" className="grid grid-cols-1 gap-1">
+                    <RadioGroup
+                      value="tutorial"
+                      className="grid grid-cols-1 gap-1"
+                    >
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem value="tutorial" id="tutorial-demo" />
-                        <Label htmlFor="tutorial-demo" className="text-xs text-slate-700 cursor-pointer">
+                        <Label
+                          htmlFor="tutorial-demo"
+                          className="text-xs text-slate-700 cursor-pointer"
+                        >
                           Tutorial ✓
                         </Label>
                       </div>
@@ -148,7 +178,12 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
                   </div>
                   <div className="space-y-2">
                     <Label className="text-xs text-slate-600">Model Name</Label>
-                    <Input placeholder="calcium" value="calcium" className="h-7 text-xs border-slate-300" disabled />
+                    <Input
+                      placeholder="calcium"
+                      value="calcium"
+                      className="h-7 text-xs border-slate-300"
+                      disabled
+                    />
                   </div>
                 </CardContent>
               </Card>
@@ -177,9 +212,12 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
           <div className="text-center">
             <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-6 mb-4">
               <Search className="h-12 w-12 text-green-600 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">Powerful Analysis Tools</h3>
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                Powerful Analysis Tools
+              </h3>
               <p className="text-slate-600">
-                Use these tools independently or to verify AI responses for accurate results.
+                Use these tools independently or to verify AI responses for
+                accurate results.
               </p>
             </div>
           </div>
@@ -192,12 +230,15 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
                     <Search className="h-5 w-5 text-blue-600" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-slate-900">Biomodel Search</h4>
+                    <h4 className="font-semibold text-slate-900">
+                      Biomodel Search
+                    </h4>
                     <p className="text-xs text-slate-600">Advanced filtering</p>
                   </div>
                 </div>
                 <p className="text-sm text-slate-600">
-                  Search the database with precise filters for name, owner, category, and date ranges.
+                  Search the database with precise filters for name, owner,
+                  category, and date ranges.
                 </p>
               </CardContent>
             </Card>
@@ -210,11 +251,14 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
                   </div>
                   <div>
                     <h4 className="font-semibold text-slate-900">VCML Files</h4>
-                    <p className="text-xs text-slate-600">Virtual Cell format</p>
+                    <p className="text-xs text-slate-600">
+                      Virtual Cell format
+                    </p>
                   </div>
                 </div>
                 <p className="text-sm text-slate-600">
-                  Retrieve complete model definitions with compartments, species, and kinetics.
+                  Retrieve complete model definitions with compartments,
+                  species, and kinetics.
                 </p>
               </CardContent>
             </Card>
@@ -231,7 +275,8 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
                   </div>
                 </div>
                 <p className="text-sm text-slate-600">
-                  Download standardized Systems Biology Markup Language files for external tools.
+                  Download standardized Systems Biology Markup Language files
+                  for external tools.
                 </p>
               </CardContent>
             </Card>
@@ -248,7 +293,8 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
                   </div>
                 </div>
                 <p className="text-sm text-slate-600">
-                  Generate real-time network diagrams showing topology and interactions.
+                  Generate real-time network diagrams showing topology and
+                  interactions.
                 </p>
               </CardContent>
             </Card>
@@ -265,9 +311,12 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
           <div className="text-center">
             <div className="bg-gradient-to-r from-red-50 to-orange-50 rounded-lg p-6 mb-4">
               <AlertTriangle className="h-12 w-12 text-red-600 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">AI Response Limitations</h3>
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                AI Response Limitations
+              </h3>
               <p className="text-slate-600">
-                Understanding these limitations ensures you use the AI Assistant effectively and safely.
+                Understanding these limitations ensures you use the AI Assistant
+                effectively and safely.
               </p>
             </div>
           </div>
@@ -278,8 +327,12 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
                   <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
                     <span className="text-red-600 text-xl">🤖</span>
                   </div>
-                  <h4 className="font-semibold text-red-900 mb-2">AI Hallucinations</h4>
-                  <p className="text-sm text-red-800">AI may generate plausible-sounding but incorrect information</p>
+                  <h4 className="font-semibold text-red-900 mb-2">
+                    AI Hallucinations
+                  </h4>
+                  <p className="text-sm text-red-800">
+                    AI may generate plausible-sounding but incorrect information
+                  </p>
                 </CardContent>
               </Card>
 
@@ -288,9 +341,12 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
                   <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
                     <span className="text-orange-600 text-xl">⚠️</span>
                   </div>
-                  <h4 className="font-semibold text-orange-900 mb-2">Server Errors</h4>
+                  <h4 className="font-semibold text-orange-900 mb-2">
+                    Server Errors
+                  </h4>
                   <p className="text-sm text-orange-800">
-                    Technical issues may affect response accuracy or availability
+                    Technical issues may affect response accuracy or
+                    availability
                   </p>
                 </CardContent>
               </Card>
@@ -300,7 +356,9 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
                   <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-3">
                     <span className="text-yellow-600 text-xl">📊</span>
                   </div>
-                  <h4 className="font-semibold text-yellow-900 mb-2">Private Models</h4>
+                  <h4 className="font-semibold text-yellow-900 mb-2">
+                    Private Models
+                  </h4>
                   <p className="text-sm text-yellow-800">
                     Feature under development to access private models securely
                   </p>
@@ -311,24 +369,24 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
         </div>
       ),
     },
-  ]
+  ];
 
   const nextStep = () => {
     if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1)
+      setCurrentStep(currentStep + 1);
     }
-  }
+  };
 
   const prevStep = () => {
     if (currentStep > 0) {
-      setCurrentStep(currentStep - 1)
+      setCurrentStep(currentStep - 1);
     }
-  }
+  };
 
   const handleClose = () => {
-    setCurrentStep(0)
-    onClose()
-  }
+    setCurrentStep(0);
+    onClose();
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -338,8 +396,12 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
             <div className="flex items-center gap-1 sm:gap-2">
               {steps[currentStep].icon}
               <div>
-                <DialogTitle className="text-base sm:text-lg text-slate-900">{steps[currentStep].title}</DialogTitle>
-                <DialogDescription className="text-[11px] sm:text-xs text-slate-600">{steps[currentStep].subtitle}</DialogDescription>
+                <DialogTitle className="text-base sm:text-lg text-slate-900">
+                  {steps[currentStep].title}
+                </DialogTitle>
+                <DialogDescription className="text-[11px] sm:text-xs text-slate-600">
+                  {steps[currentStep].subtitle}
+                </DialogDescription>
               </div>
             </div>
           </div>
@@ -363,17 +425,28 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
         <div className="py-2 sm:py-3">{steps[currentStep].content}</div>
 
         <div className="flex items-center justify-between border-t border-slate-200 pt-2 sm:pt-3">
-          <Button variant="outline" onClick={prevStep} disabled={currentStep === 0} className="flex items-center gap-1 sm:gap-2 px-1.5 sm:px-2 py-0.5 sm:py-1 text-xs">
+          <Button
+            variant="outline"
+            onClick={prevStep}
+            disabled={currentStep === 0}
+            className="flex items-center gap-1 sm:gap-2 px-1.5 sm:px-2 py-0.5 sm:py-1 text-xs"
+          >
             <ChevronLeft className="h-4 w-4" />
             Previous
           </Button>
           <div className="flex items-center gap-1 sm:gap-2">
             {currentStep === steps.length - 1 ? (
-              <Button onClick={handleClose} className="bg-blue-600 hover:bg-blue-700 text-white px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs">
+              <Button
+                onClick={handleClose}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs"
+              >
                 Get Started
               </Button>
             ) : (
-              <Button onClick={nextStep} className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs">
+              <Button
+                onClick={nextStep}
+                className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs"
+              >
                 Next
                 <ChevronRight className="h-4 w-4" />
               </Button>
@@ -382,5 +455,5 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

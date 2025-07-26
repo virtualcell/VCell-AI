@@ -1,74 +1,75 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { 
-  Settings, 
-  Shield, 
+import { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Settings,
+  Shield,
   Save,
   ArrowLeft,
   CheckCircle,
-  AlertCircle
-} from "lucide-react"
+  AlertCircle,
+} from "lucide-react";
 
 interface SystemSettings {
-  modelProvider: string
-  modelName: string
-  apiRateLimit: number
+  modelProvider: string;
+  modelName: string;
+  apiRateLimit: number;
 }
 
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<SystemSettings>({
     modelProvider: "Azure OpenAI",
     modelName: "gpt-4o-mini",
-    apiRateLimit: 24
-  })
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState("")
-  const [success, setSuccess] = useState("")
+    apiRateLimit: 24,
+  });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   useEffect(() => {
     // Mock data - replace with actual API calls
     const fetchSettings = async () => {
       try {
-        setLoading(true)
+        setLoading(true);
         // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         // Settings are already initialized with default values
       } catch (err) {
-        setError("Failed to load settings")
+        setError("Failed to load settings");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchSettings()
-  }, [])
+    fetchSettings();
+  }, []);
 
   const handleSaveSettings = async () => {
-    setSaving(true)
-    setError("")
-    setSuccess("")
-    
+    setSaving(true);
+    setError("");
+    setSuccess("");
+
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      setSuccess("Settings saved successfully!")
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      setSuccess("Settings saved successfully!");
     } catch (err) {
-      setError("Failed to save settings")
+      setError("Failed to save settings");
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   const handleInputChange = (field: keyof SystemSettings, value: any) => {
-    setSettings(prev => ({ ...prev, [field]: value }))
-  }
+    setSettings((prev) => ({ ...prev, [field]: value }));
+  };
 
-  if (loading) return <div className="p-8 text-center">Loading settings...</div>
+  if (loading)
+    return <div className="p-8 text-center">Loading settings...</div>;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -81,11 +82,13 @@ export default function AdminSettingsPage() {
                 <Settings className="h-8 w-8 text-blue-500" />
                 Admin Settings
               </h1>
-              <p className="text-slate-600 mt-2">Configure LLM settings and preferences</p>
+              <p className="text-slate-600 mt-2">
+                Configure LLM settings and preferences
+              </p>
             </div>
             <div className="flex gap-3">
               <Button
-                onClick={() => window.open('/admin', '_blank')}
+                onClick={() => window.open("/admin", "_blank")}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded border border-blue-600 text-blue-700 bg-white font-semibold shadow-sm transition-colors hover:bg-blue-50"
               >
                 <ArrowLeft className="h-4 w-4" /> Back to Dashboard
@@ -95,7 +98,8 @@ export default function AdminSettingsPage() {
                 disabled={saving}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded border border-green-600 text-green-700 bg-white font-semibold shadow-sm transition-colors hover:bg-green-50"
               >
-                <Save className="h-4 w-4" /> {saving ? "Saving..." : "Save Settings"}
+                <Save className="h-4 w-4" />{" "}
+                {saving ? "Saving..." : "Save Settings"}
               </Button>
             </div>
           </div>
@@ -132,7 +136,9 @@ export default function AdminSettingsPage() {
                 <Input
                   type="text"
                   value={settings.modelProvider}
-                  onChange={(e) => handleInputChange('modelProvider', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("modelProvider", e.target.value)
+                  }
                   className="w-full"
                 />
               </div>
@@ -144,7 +150,9 @@ export default function AdminSettingsPage() {
                 <Input
                   type="text"
                   value={settings.modelName}
-                  onChange={(e) => handleInputChange('modelName', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("modelName", e.target.value)
+                  }
                   className="w-full"
                 />
               </div>
@@ -156,7 +164,9 @@ export default function AdminSettingsPage() {
                 <Input
                   type="number"
                   value={settings.apiRateLimit}
-                  onChange={(e) => handleInputChange('apiRateLimit', parseInt(e.target.value))}
+                  onChange={(e) =>
+                    handleInputChange("apiRateLimit", parseInt(e.target.value))
+                  }
                   className="w-full"
                 />
               </div>
@@ -165,5 +175,5 @@ export default function AdminSettingsPage() {
         </div>
       </div>
     </div>
-  )
-} 
+  );
+}

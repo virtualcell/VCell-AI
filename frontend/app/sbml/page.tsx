@@ -1,65 +1,74 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Badge } from "@/components/ui/badge"
-import { Download, FileText, Code, User, Hash } from "lucide-react"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Download, FileText, Code, User, Hash } from "lucide-react";
 
 interface Application {
-  key: string
-  branchId: string
-  name: string
-  ownerName: string
-  ownerKey: string
-  mathKey: string
-  bngl_url: string
-  sbml_url: string
+  key: string;
+  branchId: string;
+  name: string;
+  ownerName: string;
+  ownerKey: string;
+  mathKey: string;
+  bngl_url: string;
+  sbml_url: string;
 }
 
 interface ApplicationsResponse {
-  biomodel_id: string
-  applications: Application[]
-  total_applications: number
+  biomodel_id: string;
+  applications: Application[];
+  total_applications: number;
 }
 
 export default function SBMLPage() {
-  const [biomodelId, setBiomodelId] = useState("")
-  const [applicationsData, setApplicationsData] = useState<ApplicationsResponse | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
+  const [biomodelId, setBiomodelId] = useState("");
+  const [applicationsData, setApplicationsData] =
+    useState<ApplicationsResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleRetrieve = async () => {
     if (!biomodelId.trim()) {
-      setError("Please enter a biomodel ID")
-      return
+      setError("Please enter a biomodel ID");
+      return;
     }
-    setIsLoading(true)
-    setError("")
+    setIsLoading(true);
+    setError("");
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL
-      const res = await fetch(`${apiUrl}/biomodel/${biomodelId}/applications/files`)
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const res = await fetch(
+        `${apiUrl}/biomodel/${biomodelId}/applications/files`,
+      );
       if (!res.ok) {
-        setError(`Failed to fetch applications data.`)
-        setApplicationsData(null)
+        setError(`Failed to fetch applications data.`);
+        setApplicationsData(null);
       } else {
-        const data = await res.json()
-        setApplicationsData(data)
+        const data = await res.json();
+        setApplicationsData(data);
       }
     } catch (err) {
-      setError(`Failed to fetch applications data.`)
-      setApplicationsData(null)
+      setError(`Failed to fetch applications data.`);
+      setApplicationsData(null);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleOpenInNewTab = (url: string) => {
-    window.open(url, '_blank')
-  }
+    window.open(url, "_blank");
+  };
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -71,7 +80,8 @@ export default function SBMLPage() {
             Biomodel Applications
           </h1>
           <p className="text-slate-600">
-            Retrieve and download SBML and BNGL files for all applications within a biomodel.
+            Retrieve and download SBML and BNGL files for all applications
+            within a biomodel.
           </p>
         </div>
 
@@ -83,13 +93,17 @@ export default function SBMLPage() {
               Applications Retrieval
             </CardTitle>
             <CardDescription>
-              Enter a biomodel ID to fetch all its applications with downloadable SBML and BNGL files
+              Enter a biomodel ID to fetch all its applications with
+              downloadable SBML and BNGL files
             </CardDescription>
           </CardHeader>
           <CardContent className="p-6">
             <div className="flex gap-4 items-end">
               <div className="flex-1 space-y-2">
-                <Label htmlFor="biomodelId" className="text-slate-700 font-medium">
+                <Label
+                  htmlFor="biomodelId"
+                  className="text-slate-700 font-medium"
+                >
                   Biomodel ID
                 </Label>
                 <Input
@@ -110,7 +124,9 @@ export default function SBMLPage() {
             </div>
             {error && (
               <Alert className="mt-4 border-red-200 bg-red-50">
-                <AlertDescription className="text-red-700">{error}</AlertDescription>
+                <AlertDescription className="text-red-700">
+                  {error}
+                </AlertDescription>
               </Alert>
             )}
           </CardContent>
@@ -133,13 +149,17 @@ export default function SBMLPage() {
                     <Badge variant="outline" className="text-slate-600">
                       Biomodel ID
                     </Badge>
-                    <span className="font-mono text-slate-900">{applicationsData.biomodel_id}</span>
+                    <span className="font-mono text-slate-900">
+                      {applicationsData.biomodel_id}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className="text-slate-600">
                       Total Applications
                     </Badge>
-                    <span className="font-semibold text-slate-900">{applicationsData.total_applications}</span>
+                    <span className="font-semibold text-slate-900">
+                      {applicationsData.total_applications}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className="text-slate-600">
@@ -154,7 +174,10 @@ export default function SBMLPage() {
             {/* Applications Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {applicationsData.applications.map((app, index) => (
-                <Card key={app.key} className="shadow-sm border-slate-200 hover:shadow-md transition-shadow">
+                <Card
+                  key={app.key}
+                  className="shadow-sm border-slate-200 hover:shadow-md transition-shadow"
+                >
                   <CardHeader className="bg-slate-50 border-b border-slate-200">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -183,15 +206,21 @@ export default function SBMLPage() {
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
                           <span className="text-slate-500">Branch ID:</span>
-                          <div className="font-mono text-slate-900">{app.branchId}</div>
+                          <div className="font-mono text-slate-900">
+                            {app.branchId}
+                          </div>
                         </div>
                         <div>
                           <span className="text-slate-500">Math Key:</span>
-                          <div className="font-mono text-slate-900">{app.mathKey}</div>
+                          <div className="font-mono text-slate-900">
+                            {app.mathKey}
+                          </div>
                         </div>
                         <div>
                           <span className="text-slate-500">Owner Key:</span>
-                          <div className="font-mono text-slate-900">{app.ownerKey}</div>
+                          <div className="font-mono text-slate-900">
+                            {app.ownerKey}
+                          </div>
                         </div>
                       </div>
 
@@ -225,9 +254,12 @@ export default function SBMLPage() {
               <Card className="shadow-sm border-slate-200">
                 <CardContent className="p-12 text-center">
                   <FileText className="h-12 w-12 text-slate-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-slate-900 mb-2">No Applications Found</h3>
+                  <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                    No Applications Found
+                  </h3>
                   <p className="text-slate-600">
-                    This biomodel doesn't have any applications or the applications data couldn't be retrieved.
+                    This biomodel doesn't have any applications or the
+                    applications data couldn't be retrieved.
                   </p>
                 </CardContent>
               </Card>
@@ -236,5 +268,5 @@ export default function SBMLPage() {
         )}
       </div>
     </div>
-  )
+  );
 }

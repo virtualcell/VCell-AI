@@ -1,54 +1,54 @@
-import React, { useEffect, useState } from "react"
-import { FileText, Loader2, Download } from "lucide-react"
-import XMLViewer from 'react-xml-viewer'
-import { MarkdownRenderer } from "./markdown-renderer"
-import { Button } from "@/components/ui/button"
+import React, { useEffect, useState } from "react";
+import { FileText, Loader2, Download } from "lucide-react";
+import XMLViewer from "react-xml-viewer";
+import { MarkdownRenderer } from "./markdown-renderer";
+import { Button } from "@/components/ui/button";
 
 interface VCMLSectionProps {
-  biomodelId: string
+  biomodelId: string;
 }
 
 export const VCMLSection: React.FC<VCMLSectionProps> = ({ biomodelId }) => {
-  const [vcmlAnalysis, setVcmlAnalysis] = useState<string>("")
-  const [isAnalysisLoading, setIsAnalysisLoading] = useState(false)
-  const [analysisError, setAnalysisError] = useState("")
+  const [vcmlAnalysis, setVcmlAnalysis] = useState<string>("");
+  const [isAnalysisLoading, setIsAnalysisLoading] = useState(false);
+  const [analysisError, setAnalysisError] = useState("");
 
   useEffect(() => {
     const fetchVcmlAnalysis = async () => {
-      setIsAnalysisLoading(true)
-      setAnalysisError("")
+      setIsAnalysisLoading(true);
+      setAnalysisError("");
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
         const res = await fetch(`${apiUrl}/analyse/${biomodelId}/vcml`, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
-        })
-        
+        });
+
         if (res.ok) {
-          const data = await res.json()
-          setVcmlAnalysis(data.response || "")
+          const data = await res.json();
+          setVcmlAnalysis(data.response || "");
         } else {
-          const errorData = await res.json()
-          setAnalysisError(errorData.detail || "Failed to analyze VCML.")
+          const errorData = await res.json();
+          setAnalysisError(errorData.detail || "Failed to analyze VCML.");
         }
       } catch (err) {
-        setAnalysisError("Failed to fetch VCML analysis.")
+        setAnalysisError("Failed to fetch VCML analysis.");
       } finally {
-        setIsAnalysisLoading(false)
+        setIsAnalysisLoading(false);
       }
-    }
+    };
 
     if (biomodelId) {
-      fetchVcmlAnalysis()
+      fetchVcmlAnalysis();
     }
-  }, [biomodelId])
+  }, [biomodelId]);
 
   const handleDownload = () => {
-    const vcellUrl = `https://vcell.cam.uchc.edu/api/v0/biomodel/${biomodelId}/biomodel.vcml`
-    window.open(vcellUrl, '_blank')
-  }
+    const vcellUrl = `https://vcell.cam.uchc.edu/api/v0/biomodel/${biomodelId}/biomodel.vcml`;
+    window.open(vcellUrl, "_blank");
+  };
 
   return (
     <div className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
@@ -57,9 +57,9 @@ export const VCMLSection: React.FC<VCMLSectionProps> = ({ biomodelId }) => {
           <FileText className="h-4 w-4" />
           VCML Analysis
         </h3>
-        <Button 
-          variant="outline" 
-          size="sm" 
+        <Button
+          variant="outline"
+          size="sm"
           onClick={handleDownload}
           className="flex items-center gap-2"
         >
@@ -82,5 +82,5 @@ export const VCMLSection: React.FC<VCMLSectionProps> = ({ biomodelId }) => {
         )}
       </div>
     </div>
-  )
-} 
+  );
+};
