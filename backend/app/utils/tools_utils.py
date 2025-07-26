@@ -3,6 +3,7 @@ from app.services.vcelldb_service import (
     fetch_simulation_details,
     get_vcml_file,
 )
+from app.services.knowledge_base_service import get_similar_chunks
 from app.schemas.vcelldb_schema import BiomodelRequestParams, SimulationRequestParams
 from app.core.logger import get_logger
 
@@ -125,6 +126,32 @@ ToolsDefinitions = [
             "strict": True,
         },
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "search_vcell_knowledge_base",
+            "description": "Retrieves relevant information from the VCell knowledge base containing tutorials, software usage guides, biomodel creation and update instructions. This function performs semantic search to find the most relevant content based on the user's query about VCell software, tutorials, or documentation. Format the user query in the most suitable way to define his needs. The query can include questions about VCell tutorials, software usage, biomodel creation, simulation setup, or any VCell-related documentation.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "The search query to find relevant information in the VCell knowledge base. This can include questions about VCell tutorials, software usage, biomodel creation, simulation setup, or any VCell-related documentation.",
+                    },
+                    "limit": {
+                        "type": "integer",
+                        "default": 5,
+                        "minimum": 1,
+                        "maximum": 20,
+                        "description": "The maximum number of relevant knowledge base chunks to return. Default is 5.",
+                    },
+                },
+                "required": ["query", "limit"],
+                "additionalProperties": False,
+            },
+            "strict": True,
+        },
+    },
 ]
 
 
@@ -156,6 +183,12 @@ async def execute_tool(name, args):
 
         elif name == "get_vcml_file":
             return await get_vcml_file(args["biomodel_id"])
+
+        elif name == "search_vcell_knowledge_base":
+            query = args["query"]
+            limit = args.get("limit", 5)
+            logger.info(f"Executing tool: {name} with query {query}")
+            return get_similar_chunks(query=query, limit=limit)
 
         else:
             return {}
