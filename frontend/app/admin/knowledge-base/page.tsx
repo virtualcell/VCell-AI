@@ -106,13 +106,23 @@ export default function KnowledgeBasePage() {
     }
   }
 
-  const handleDeleteFile = async (fileId: string) => {
+  const handleDeleteFile = async (fileName: string) => {
     if (!confirm("Are you sure you want to delete this file?")) return
-    
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500))
-      setFiles(prev => prev.filter(file => file.name !== fileId))
+      const res = await fetch(`http://localhost:8000/kb/files/${encodeURIComponent(fileName)}`, {
+        method: 'DELETE',
+        headers: { 'accept': 'application/json' },
+      })
+      if (!res.ok) throw new Error('Failed to delete file')
+      const data = await res.json()
+      if (data.status !== 'success') throw new Error('Failed to delete file')
+      setFiles(prev => prev.filter(file => file.name !== fileName))
+      setFilteredFiles(prev => prev.filter(file => file.name !== fileName))
+      // If the deleted file is currently previewed, close the modal
+      if (selectedFile && selectedFile.name === fileName) {
+        setSelectedFile(null)
+        setFileContent(null)
+      }
     } catch (err) {
       setError("Failed to delete file")
     }
