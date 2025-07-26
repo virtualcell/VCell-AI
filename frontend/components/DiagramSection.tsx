@@ -1,49 +1,51 @@
-import React, { useEffect, useState } from "react"
-import { BarChart3Icon as Diagram3, Search, Loader2 } from "lucide-react"
-import { MarkdownRenderer } from "./markdown-renderer"
+import React, { useEffect, useState } from "react";
+import { BarChart3Icon as Diagram3, Search, Loader2 } from "lucide-react";
+import { MarkdownRenderer } from "./markdown-renderer";
 
 interface DiagramSectionProps {
-  biomodelId: string
+  biomodelId: string;
 }
 
-export const DiagramSection: React.FC<DiagramSectionProps> = ({ biomodelId }) => {
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
-  const [diagramAnalysis, setDiagramAnalysis] = useState<string>("")
-  const [isAnalysisLoading, setIsAnalysisLoading] = useState(false)
-  const [analysisError, setAnalysisError] = useState("")
+export const DiagramSection: React.FC<DiagramSectionProps> = ({
+  biomodelId,
+}) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [diagramAnalysis, setDiagramAnalysis] = useState<string>("");
+  const [isAnalysisLoading, setIsAnalysisLoading] = useState(false);
+  const [analysisError, setAnalysisError] = useState("");
 
   useEffect(() => {
     const fetchDiagramAnalysis = async () => {
-      setIsAnalysisLoading(true)
-      setAnalysisError("")
+      setIsAnalysisLoading(true);
+      setAnalysisError("");
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
         const res = await fetch(`${apiUrl}/analyse/${biomodelId}/diagram`, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
-        })
-        
+        });
+
         if (res.ok) {
-          const data = await res.json()
-          setDiagramAnalysis(data.response || "")
+          const data = await res.json();
+          setDiagramAnalysis(data.response || "");
         } else {
-          const errorData = await res.json()
-          setAnalysisError(errorData.detail || "Failed to analyze diagram.")
+          const errorData = await res.json();
+          setAnalysisError(errorData.detail || "Failed to analyze diagram.");
         }
       } catch (err) {
-        setAnalysisError("Failed to fetch diagram analysis.")
+        setAnalysisError("Failed to fetch diagram analysis.");
       } finally {
-        setIsAnalysisLoading(false)
+        setIsAnalysisLoading(false);
       }
-    }
+    };
 
     if (biomodelId) {
-      fetchDiagramAnalysis()
+      fetchDiagramAnalysis();
     }
-  }, [biomodelId])
+  }, [biomodelId]);
 
   return (
     <div className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
@@ -65,7 +67,10 @@ export const DiagramSection: React.FC<DiagramSectionProps> = ({ biomodelId }) =>
               <div className="text-red-500 text-center p-3">{error}</div>
             ) : (
               <img
-                src={`https://vcell.cam.uchc.edu/api/v0/biomodel/${biomodelId}/diagram` || "/placeholder.svg"}
+                src={
+                  `https://vcell.cam.uchc.edu/api/v0/biomodel/${biomodelId}/diagram` ||
+                  "/placeholder.svg"
+                }
                 alt="Biomodel Diagram"
                 className="max-w-full h-auto mx-auto"
                 onError={() => setError("Failed to load diagram image.")}
@@ -92,5 +97,5 @@ export const DiagramSection: React.FC<DiagramSectionProps> = ({ biomodelId }) =>
         </div>
       </div>
     </div>
-  )
-} 
+  );
+};

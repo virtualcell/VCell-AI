@@ -1,135 +1,177 @@
-"use client"
+"use client";
 
-import React from "react"
-import { useState, useEffect } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
-import { Search, Dna, Gauge, FlaskConical, Atom, Briefcase, Cog, Download, FileText } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { ChatBox } from "@/components/ChatBox"
+import React from "react";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import {
+  Search,
+  Dna,
+  Gauge,
+  FlaskConical,
+  Atom,
+  Briefcase,
+  Cog,
+  Download,
+  FileText,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ChatBox } from "@/components/ChatBox";
 
 interface AnalysisResults {
-  title: string
-  description: string
-  aiAnalysis: string
+  title: string;
+  description: string;
+  aiAnalysis: string;
 }
 
-export default function AnalysisResultsPage({ params }: { params: Promise<{ id: string }> }) {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const prompt = searchParams.get('prompt') || ''
-  
+export default function AnalysisResultsPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const prompt = searchParams.get("prompt") || "";
+
   // Unwrap the params Promise
-  const { id } = React.use(params)
-  
-  const [error, setError] = useState("")
-  const [results, setResults] = useState<AnalysisResults | null>(null)
-  const [isAnalysisLoading, setIsAnalysisLoading] = useState(true)
-  const [diagramAnalysis, setDiagramAnalysis] = useState("")
-  const [analysisError, setAnalysisError] = useState("")
-  const [combinedMessages, setCombinedMessages] = useState<string[]>([])
+  const { id } = React.use(params);
+
+  const [error, setError] = useState("");
+  const [results, setResults] = useState<AnalysisResults | null>(null);
+  const [isAnalysisLoading, setIsAnalysisLoading] = useState(true);
+  const [diagramAnalysis, setDiagramAnalysis] = useState("");
+  const [analysisError, setAnalysisError] = useState("");
+  const [combinedMessages, setCombinedMessages] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchDiagramAnalysis = async () => {
-      setIsAnalysisLoading(true)
-      setAnalysisError("")
+      setIsAnalysisLoading(true);
+      setAnalysisError("");
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
         const res = await fetch(`${apiUrl}/analyse/${id}/diagram`, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
-        })
-        
+        });
+
         if (res.ok) {
-          const data = await res.json()
-          setDiagramAnalysis(data.response || "")
+          const data = await res.json();
+          setDiagramAnalysis(data.response || "");
         } else {
-          const errorData = await res.json()
-          setAnalysisError(errorData.detail || "Failed to analyze diagram.")
+          const errorData = await res.json();
+          setAnalysisError(errorData.detail || "Failed to analyze diagram.");
         }
       } catch (err) {
-        setAnalysisError("Failed to fetch diagram analysis.")
+        setAnalysisError("Failed to fetch diagram analysis.");
       } finally {
-        setIsAnalysisLoading(false)
+        setIsAnalysisLoading(false);
       }
-    }
+    };
 
     const fetchAnalysis = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL
-        const url = new URL(`${apiUrl}/analyse/${id}`)
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+        const url = new URL(`${apiUrl}/analyse/${id}`);
         if (prompt) {
-          url.searchParams.set('user_prompt', prompt)
+          url.searchParams.set("user_prompt", prompt);
         }
-        
+
         const analyseRes = await fetch(url.toString(), {
-          method: 'POST',
-          headers: { 
-            'accept': 'application/json' 
-          }
-        })
-        
-        if (!analyseRes.ok) throw new Error("Failed to analyze biomodel.")
-        const analyseData = await analyseRes.json()
+          method: "POST",
+          headers: {
+            accept: "application/json",
+          },
+        });
+
+        if (!analyseRes.ok) throw new Error("Failed to analyze biomodel.");
+        const analyseData = await analyseRes.json();
 
         setResults({
           title: `Analysis for Biomodel ${id}`,
           description: `Results for biomodel ID ${id}.`,
           aiAnalysis: analyseData.response || "No AI analysis available.",
-        })
+        });
       } catch (err) {
-        setError("Failed to analyze biomodel.")
+        setError("Failed to analyze biomodel.");
       } finally {
-        setIsAnalysisLoading(false)
+        setIsAnalysisLoading(false);
       }
-    }
+    };
 
     // Fetch both analyses
     const fetchBothAnalyses = async () => {
-      await Promise.all([fetchDiagramAnalysis(), fetchAnalysis()])
-    }
+      await Promise.all([fetchDiagramAnalysis(), fetchAnalysis()]);
+    };
 
-    fetchBothAnalyses()
-  }, [id, prompt])
+    fetchBothAnalyses();
+  }, [id, prompt]);
 
   // Create combined messages when analyses are ready
   useEffect(() => {
     if (diagramAnalysis || results?.aiAnalysis) {
-      const messageParts: string[] = []
-      
+      const messageParts: string[] = [];
+
       if (diagramAnalysis) {
         const diagramMessage = `# Diagram Analysis \n ![Diagram](https://vcell.cam.uchc.edu/api/v0/biomodel/${id}/diagram)\n\n${diagramAnalysis}`;
-        messageParts.push(diagramMessage)
+        messageParts.push(diagramMessage);
       }
-      
+
       if (results?.aiAnalysis) {
-        const aiMessage = `# Biomodel Analysis \n\n${results.aiAnalysis}`
-        messageParts.push(aiMessage)
+        const aiMessage = `# Biomodel Analysis \n\n${results.aiAnalysis}`;
+        messageParts.push(aiMessage);
       }
-      
-      setCombinedMessages(messageParts)
+
+      setCombinedMessages(messageParts);
     }
-  }, [diagramAnalysis, results?.aiAnalysis, id])
+  }, [diagramAnalysis, results?.aiAnalysis, id]);
 
   const handleReset = () => {
-    router.push('/analyze')
-  }
+    router.push("/analyze");
+  };
 
   const handleDownloadVCML = () => {
-    const vcellUrl = `https://vcell.cam.uchc.edu/api/v0/biomodel/${id}/biomodel.vcml`
-    window.open(vcellUrl, '_blank')
-  }
+    const vcellUrl = `https://vcell.cam.uchc.edu/api/v0/biomodel/${id}/biomodel.vcml`;
+    window.open(vcellUrl, "_blank");
+  };
 
   const quickActions = [
-    { label: "Describe biology of the model", value: "Describe biology of the model", icon: <Dna className="h-4 w-4" /> },
-    { label: "Describe parameters", value: "Describe parameters", icon: <Gauge className="h-4 w-4" /> },
-    { label: "Describe species", value: "Describe species", icon: <Atom className="h-4 w-4" /> },
-    { label: "Describe reactions", value: "Describe reactions", icon: <FlaskConical className="h-4 w-4" /> },
-    { label: "What Applications are used?", value: "What Applications are used?", icon: <Briefcase className="h-4 w-4" /> },
-    { label: "What solvers are used?", value: "What solvers are used?", icon: <Cog className="h-4 w-4" /> },
-    { label: "Analyze VCML", value: "Analyze VCML", icon: <FileText className="h-4 w-4" /> },
-  ]
+    {
+      label: "Describe biology of the model",
+      value: "Describe biology of the model",
+      icon: <Dna className="h-4 w-4" />,
+    },
+    {
+      label: "Describe parameters",
+      value: "Describe parameters",
+      icon: <Gauge className="h-4 w-4" />,
+    },
+    {
+      label: "Describe species",
+      value: "Describe species",
+      icon: <Atom className="h-4 w-4" />,
+    },
+    {
+      label: "Describe reactions",
+      value: "Describe reactions",
+      icon: <FlaskConical className="h-4 w-4" />,
+    },
+    {
+      label: "What Applications are used?",
+      value: "What Applications are used?",
+      icon: <Briefcase className="h-4 w-4" />,
+    },
+    {
+      label: "What solvers are used?",
+      value: "What solvers are used?",
+      icon: <Cog className="h-4 w-4" />,
+    },
+    {
+      label: "Analyze VCML",
+      value: "Analyze VCML",
+      icon: <FileText className="h-4 w-4" />,
+    },
+  ];
 
   if (error) {
     return (
@@ -143,7 +185,7 @@ export default function AnalysisResultsPage({ params }: { params: Promise<{ id: 
           </Button>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -161,15 +203,19 @@ export default function AnalysisResultsPage({ params }: { params: Promise<{ id: 
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={handleDownloadVCML}
                 className="flex items-center gap-2"
               >
                 <Download className="h-4 w-4" />
                 Download VCML
               </Button>
-              <Button variant="outline" onClick={handleReset} className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                onClick={handleReset}
+                className="flex items-center gap-2"
+              >
                 <Search className="h-4 w-4" />
                 New Analysis
               </Button>
@@ -189,5 +235,5 @@ export default function AnalysisResultsPage({ params }: { params: Promise<{ id: 
         </div>
       </div>
     </div>
-  )
-} 
+  );
+}

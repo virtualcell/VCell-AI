@@ -10,6 +10,11 @@ class Settings(BaseSettings):
     AZURE_ENDPOINT: str
     AZURE_API_KEY: str
     AZURE_DEPLOYMENT_NAME: str
+    AZURE_EMBEDDING_DEPLOYMENT_NAME: str
+
+    # Qdrant Config
+    QDRANT_URL: str
+    QDRANT_COLLECTION_NAME: str
 
     class Config:
         env_file = ".env"

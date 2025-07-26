@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState, useEffect } from "react"
+import type React from "react";
+import { useState, useEffect } from "react";
 import {
   MessageSquare,
   Bot,
@@ -9,58 +9,65 @@ import {
   Search,
   FileText,
   BarChart3Icon as Diagram3,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { OnboardingModal } from "@/components/onboarding-modal"
-import { ChatBox } from "@/components/ChatBox"
-
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { OnboardingModal } from "@/components/onboarding-modal";
+import { ChatBox } from "@/components/ChatBox";
 
 export default function ChatPage() {
-  const [showOnboarding, setShowOnboarding] = useState(false)
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
     // Check if user has seen onboarding before
-    const hasSeenOnboarding = localStorage.getItem("vcell-ai-onboarding-seen")
+    const hasSeenOnboarding = localStorage.getItem("vcell-ai-onboarding-seen");
     if (!hasSeenOnboarding) {
-      setShowOnboarding(true)
+      setShowOnboarding(true);
     }
-  }, [])
+  }, []);
 
   const handleOnboardingClose = () => {
-    localStorage.setItem("vcell-ai-onboarding-seen", "true")
-    setShowOnboarding(false)
-  }
+    localStorage.setItem("vcell-ai-onboarding-seen", "true");
+    setShowOnboarding(false);
+  };
 
   // Prepare props for ChatBox
-  const startMessage = `# Welcome to VCell AI Assistant! 🤖\n\nI'm here to help you with **biomodel analysis** and research support.\nFeel free to ask anything! 🚀`
+  const startMessage = `# Welcome to VCell AI Assistant! 🤖\n\nI'm here to help you with **biomodel analysis** and research support.\nFeel free to ask anything! 🚀`;
   const quickActions = [
     {
       label: "List all tutorial models",
-      icon: <Search className="h-3 w-3 mr-2" />, value: "List all tutorial models"
+      icon: <Search className="h-3 w-3 mr-2" />,
+      value: "List all tutorial models",
     },
     {
       label: "List all Calcium models",
-      icon: <FileText className="h-3 w-3 mr-2" />, value: "List all Calcium models"
+      icon: <FileText className="h-3 w-3 mr-2" />,
+      value: "List all Calcium models",
     },
     {
       label: "List all models by ModelBrick",
-      icon: <User className="h-3 w-3 mr-2" />, value: "List all models by ModelBrick"
+      icon: <User className="h-3 w-3 mr-2" />,
+      value: "List all models by ModelBrick",
     },
     {
       label: "What solvers are used in tutorial models",
-      icon: <Diagram3 className="h-3 w-3 mr-2" />, value: "What solvers are used in tutorial models"
+      icon: <Diagram3 className="h-3 w-3 mr-2" />,
+      value: "What solvers are used in tutorial models",
     },
     {
-      label: "What are different types of VCell applications used in Tutorial models",
-      icon: <MessageSquare className="h-3 w-3 mr-2" />, value: "What are different types of VCell applications used in Tutorial models"
+      label:
+        "What are different types of VCell applications used in Tutorial models",
+      icon: <MessageSquare className="h-3 w-3 mr-2" />,
+      value:
+        "What are different types of VCell applications used in Tutorial models",
     },
     {
       label: "What Tutorial models use Spatial Stochastic applications?",
-      icon: <Bot className="h-3 w-3 mr-2" />, value: "What Tutorial models use Spatial Stochastic applications?"
+      icon: <Bot className="h-3 w-3 mr-2" />,
+      value: "What Tutorial models use Spatial Stochastic applications?",
     },
-  ]
-  const cardTitle = "VCell AI Assistant"
+  ];
+  const cardTitle = "VCell AI Assistant";
 
   return (
     <div className="h-screen bg-slate-50 flex flex-col">
@@ -80,7 +87,8 @@ export default function ChatPage() {
             </Button>
           </div>
           <p className="text-slate-600">
-            Interact with our AI assistant for biomodel analysis and research support with integrated tool access.
+            Interact with our AI assistant for biomodel analysis and research
+            support with integrated tool access.
           </p>
         </div>
 
@@ -88,7 +96,9 @@ export default function ChatPage() {
         <div className="mb-6 flex-shrink-0">
           <Alert className="border-amber-200 bg-amber-50">
             <AlertDescription className="text-amber-800">
-              <strong>⚠️ Important:</strong> Responses are AI generated and may contain errors, or hallucinations. Please use the option "Let AI analyze the JSON" if you suspect hallucination.
+              <strong>⚠️ Important:</strong> Responses are AI generated and may
+              contain errors, or hallucinations. Please use the option "Let AI
+              analyze the JSON" if you suspect hallucination.
             </AlertDescription>
           </Alert>
         </div>
@@ -103,7 +113,10 @@ export default function ChatPage() {
         </div>
       </div>
       {/* Onboarding Modal */}
-      <OnboardingModal isOpen={showOnboarding} onClose={handleOnboardingClose} />
+      <OnboardingModal
+        isOpen={showOnboarding}
+        onClose={handleOnboardingClose}
+      />
     </div>
-  )
+  );
 }

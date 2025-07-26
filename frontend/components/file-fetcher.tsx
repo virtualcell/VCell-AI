@@ -1,22 +1,28 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import XMLViewer from 'react-xml-viewer'
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import XMLViewer from "react-xml-viewer";
 
 export interface FileFetcherProps {
-  fileType: "sbml" | "vcml"
-  icon: React.ReactNode
-  title: string
-  description: string
-  fileLabel: string
-  fileExt: string
-  contentTitle: string
-  placeholder: string
+  fileType: "sbml" | "vcml";
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  fileLabel: string;
+  fileExt: string;
+  contentTitle: string;
+  placeholder: string;
 }
 
 export default function FileFetcher({
@@ -27,64 +33,66 @@ export default function FileFetcher({
   fileLabel,
   fileExt,
   contentTitle,
-  placeholder
+  placeholder,
 }: FileFetcherProps) {
-  const [biomodelId, setBiomodelId] = useState("")
-  const [fileContent, setFileContent] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
-  const [copied, setCopied] = useState(false)
+  const [biomodelId, setBiomodelId] = useState("");
+  const [fileContent, setFileContent] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [copied, setCopied] = useState(false);
 
   const handleRetrieve = async () => {
     if (!biomodelId.trim()) {
-      setError("Please enter a biomodel ID")
-      return
+      setError("Please enter a biomodel ID");
+      return;
     }
-    setIsLoading(true)
-    setError("")
+    setIsLoading(true);
+    setError("");
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL
-      const res = await fetch(`${apiUrl}/biomodel/${biomodelId}/biomodel.${fileExt}`)
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const res = await fetch(
+        `${apiUrl}/biomodel/${biomodelId}/biomodel.${fileExt}`,
+      );
       if (!res.ok) {
-        setError(`Failed to fetch ${fileType.toUpperCase()} from backend.`)
-        setFileContent("")
+        setError(`Failed to fetch ${fileType.toUpperCase()} from backend.`);
+        setFileContent("");
       } else {
-        let text = await res.text()
+        let text = await res.text();
         if (text.startsWith('"') && text.endsWith('"')) {
-          text = text.slice(1, -1)
+          text = text.slice(1, -1);
         }
-        setFileContent(text)
+        setFileContent(text);
       }
     } catch (err) {
-      setError(`Failed to fetch ${fileType.toUpperCase()} from backend.`)
-      setFileContent("")
+      setError(`Failed to fetch ${fileType.toUpperCase()} from backend.`);
+      setFileContent("");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleDownload = () => {
-    if (!fileContent) return
-    const blob = new Blob([fileContent], { type: "application/xml" })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = `biomodel_${biomodelId}.${fileExt}`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-  }
+    if (!fileContent) return;
+    const blob = new Blob([fileContent], { type: "application/xml" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `biomodel_${biomodelId}.${fileExt}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
 
   const copyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(fileContent)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+      await navigator.clipboard.writeText(fileContent);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error("Failed to copy:", err)
+      console.error("Failed to copy:", err);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -106,7 +114,10 @@ export default function FileFetcher({
           <CardContent className="p-6">
             <div className="flex gap-4 items-end">
               <div className="flex-1 space-y-2">
-                <Label htmlFor="biomodelId" className="text-slate-700 font-medium">
+                <Label
+                  htmlFor="biomodelId"
+                  className="text-slate-700 font-medium"
+                >
                   {fileLabel}
                 </Label>
                 <Input
@@ -122,12 +133,16 @@ export default function FileFetcher({
                 disabled={isLoading}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-6"
               >
-                {isLoading ? `Retrieving...` : `Retrieve ${fileType.toUpperCase()}`}
+                {isLoading
+                  ? `Retrieving...`
+                  : `Retrieve ${fileType.toUpperCase()}`}
               </Button>
             </div>
             {error && (
               <Alert className="mt-4 border-red-200 bg-red-50">
-                <AlertDescription className="text-red-700">{error}</AlertDescription>
+                <AlertDescription className="text-red-700">
+                  {error}
+                </AlertDescription>
               </Alert>
             )}
           </CardContent>
@@ -138,14 +153,25 @@ export default function FileFetcher({
             <CardHeader className="bg-slate-50 border-b border-slate-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-slate-900">{contentTitle}</CardTitle>
+                  <CardTitle className="text-slate-900">
+                    {contentTitle}
+                  </CardTitle>
                   <CardDescription>Biomodel ID: {biomodelId}</CardDescription>
                 </div>
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline" onClick={copyToClipboard} className="h-8">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={copyToClipboard}
+                    className="h-8"
+                  >
                     {copied ? "Copied" : "Copy"}
                   </Button>
-                  <Button size="sm" onClick={handleDownload} className="bg-green-600 hover:bg-green-700 text-white h-8">
+                  <Button
+                    size="sm"
+                    onClick={handleDownload}
+                    className="bg-green-600 hover:bg-green-700 text-white h-8"
+                  >
                     Download
                   </Button>
                 </div>
@@ -153,12 +179,12 @@ export default function FileFetcher({
             </CardHeader>
             <CardContent className="p-0">
               <div className="max-h-96 overflow-y-auto">
-                <XMLViewer xml={fileContent}/>
+                <XMLViewer xml={fileContent} />
               </div>
             </CardContent>
           </Card>
         )}
       </div>
     </div>
-  )
+  );
 }

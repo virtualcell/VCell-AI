@@ -1,91 +1,102 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useParams } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { User, Lock, Globe, Calendar, Hash, Layers, FlaskConical, Users, FileText } from "lucide-react"
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  User,
+  Lock,
+  Globe,
+  Calendar,
+  Hash,
+  Layers,
+  FlaskConical,
+  Users,
+  FileText,
+} from "lucide-react";
 
 interface Simulation {
-  key: string
-  branchId: string
-  name: string
-  ownerName: string
-  ownerKey: string
-  mathKey: string
-  solverName: string
-  scanCount: number
+  key: string;
+  branchId: string;
+  name: string;
+  ownerName: string;
+  ownerKey: string;
+  mathKey: string;
+  solverName: string;
+  scanCount: number;
   bioModelLink: {
-    bioModelKey: string
-    bioModelBranchId: string
-    bioModelName: string
-    simContextKey: string
-    simContextBranchId: string
-    simContextName: string
-  }
+    bioModelKey: string;
+    bioModelBranchId: string;
+    bioModelName: string;
+    simContextKey: string;
+    simContextBranchId: string;
+    simContextName: string;
+  };
   overrides: Array<{
-    name: string
-    type: string
-    values: string[]
-    cardinality: number
-  }>
+    name: string;
+    type: string;
+    values: string[];
+    cardinality: number;
+  }>;
 }
 
 interface Application {
-  key: string
-  branchId: string
-  name: string
-  ownerName: string
-  ownerKey: string
-  mathKey: string
+  key: string;
+  branchId: string;
+  name: string;
+  ownerName: string;
+  ownerKey: string;
+  mathKey: string;
 }
 
 interface BiomodelDetail {
-  bmKey: string
-  name: string
-  privacy: number
-  groupUsers: string[]
-  savedDate: number
-  annot: string
-  branchID: string
-  modelKey: string
-  ownerName: string
-  ownerKey: string
-  simulations: Simulation[]
-  applications: Application[]
+  bmKey: string;
+  name: string;
+  privacy: number;
+  groupUsers: string[];
+  savedDate: number;
+  annot: string;
+  branchID: string;
+  modelKey: string;
+  ownerName: string;
+  ownerKey: string;
+  simulations: Simulation[];
+  applications: Application[];
 }
 
 export default function BiomodelDetailPage() {
-  const params = useParams<{ bmid: string }>()
-  const bmid = params?.bmid
-  const [data, setData] = useState<BiomodelDetail | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState("")
+  const params = useParams<{ bmid: string }>();
+  const bmid = params?.bmid;
+  const [data, setData] = useState<BiomodelDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!bmid) return
-    setLoading(true)
-    setError("")
+    if (!bmid) return;
+    setLoading(true);
+    setError("");
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/biomodel?bmId=${bmid}`)
       .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch biomodel details")
-        return res.json()
+        if (!res.ok) throw new Error("Failed to fetch biomodel details");
+        return res.json();
       })
       .then((json) => {
         if (json.data && Array.isArray(json.data) && json.data.length > 0) {
-          setData(json.data[0])
+          setData(json.data[0]);
         } else {
-          setError("Biomodel not found.")
+          setError("Biomodel not found.");
         }
       })
       .catch((err) => setError(err.message))
-      .finally(() => setLoading(false))
-  }, [bmid])
+      .finally(() => setLoading(false));
+  }, [bmid]);
 
-  if (loading) return <div className="p-8 text-center">Loading biomodel...</div>
-  if (error) return <div className="p-8 text-center text-red-600">{error}</div>
-  if (!data) return null
+  if (loading)
+    return <div className="p-8 text-center">Loading biomodel...</div>;
+  if (error) return <div className="p-8 text-center text-red-600">{error}</div>;
+  if (!data) return null;
 
-  const biomodelDiagramUrl = `https://vcell.cam.uchc.edu/api/v0/biomodel/${data.bmKey}/diagram`
+  const biomodelDiagramUrl = `https://vcell.cam.uchc.edu/api/v0/biomodel/${data.bmKey}/diagram`;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -101,8 +112,8 @@ export default function BiomodelDetailPage() {
                 <div className="flex gap-3">
                   <button
                     onClick={() => {
-                      const vcellUrl = `https://vcell.cam.uchc.edu/api/v0/biomodel/${data?.bmKey}/biomodel.vcml`
-                      window.open(vcellUrl, '_blank')
+                      const vcellUrl = `https://vcell.cam.uchc.edu/api/v0/biomodel/${data?.bmKey}/biomodel.vcml`;
+                      window.open(vcellUrl, "_blank");
                     }}
                     className="inline-flex items-center gap-2 px-4 py-2 rounded border border-blue-600 text-blue-700 bg-white font-semibold shadow-sm transition-colors hover:bg-blue-50"
                   >
@@ -110,7 +121,10 @@ export default function BiomodelDetailPage() {
                   </button>
                   <button
                     onClick={() => {
-                      window.open(`/analyze/${data?.bmKey}?prompt=Describe%20model`, '_blank')
+                      window.open(
+                        `/analyze/${data?.bmKey}?prompt=Describe%20model`,
+                        "_blank",
+                      );
                     }}
                     className="inline-flex items-center gap-2 px-4 py-2 rounded border border-yellow-500 text-yellow-700 bg-white font-semibold shadow-sm transition-colors hover:bg-yellow-50"
                   >
@@ -119,15 +133,36 @@ export default function BiomodelDetailPage() {
                 </div>
               </div>
               <div className="flex flex-wrap gap-4 mt-3 text-base text-slate-600">
-                <span className="flex items-center gap-1"><Hash className="h-4 w-4 text-blue-400" /> <span className="font-mono text-blue-700">{data.bmKey}</span></span>
-                <span className="flex items-center gap-1"><User className="h-4 w-4 text-blue-400" /> {data.ownerName}</span>
-                <span className="flex items-center gap-1"><Calendar className="h-4 w-4 text-blue-400" /> {new Date(data.savedDate).toLocaleString()}</span>
                 <span className="flex items-center gap-1">
-                  {data.privacy === 1 ? <Lock className="h-4 w-4 text-red-400" /> : <Globe className="h-4 w-4 text-green-500" />}
-                  <span className={data.privacy === 1 ? "text-red-600" : "text-green-1200"}>{data.privacy === 1 ? "Private" : "Public"}</span>
+                  <Hash className="h-4 w-4 text-blue-400" />{" "}
+                  <span className="font-mono text-blue-700">{data.bmKey}</span>
+                </span>
+                <span className="flex items-center gap-1">
+                  <User className="h-4 w-4 text-blue-400" /> {data.ownerName}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Calendar className="h-4 w-4 text-blue-400" />{" "}
+                  {new Date(data.savedDate).toLocaleString()}
+                </span>
+                <span className="flex items-center gap-1">
+                  {data.privacy === 1 ? (
+                    <Lock className="h-4 w-4 text-red-400" />
+                  ) : (
+                    <Globe className="h-4 w-4 text-green-500" />
+                  )}
+                  <span
+                    className={
+                      data.privacy === 1 ? "text-red-600" : "text-green-1200"
+                    }
+                  >
+                    {data.privacy === 1 ? "Private" : "Public"}
+                  </span>
                 </span>
                 {data.groupUsers.length > 0 && (
-                  <span className="flex items-center gap-1"><Users className="h-4 w-4 text-blue-400" /> {data.groupUsers.join(", ")}</span>
+                  <span className="flex items-center gap-1">
+                    <Users className="h-4 w-4 text-blue-400" />{" "}
+                    {data.groupUsers.join(", ")}
+                  </span>
                 )}
               </div>
             </div>
@@ -137,7 +172,9 @@ export default function BiomodelDetailPage() {
             <div className="mb-8">
               <div className="flex items-center gap-2 mb-2">
                 <FlaskConical className="h-5 w-5 text-blue-400" />
-                <span className="font-semibold text-slate-800">Biomodel Diagram</span>
+                <span className="font-semibold text-slate-800">
+                  Biomodel Diagram
+                </span>
               </div>
               <img
                 src={biomodelDiagramUrl || "/placeholder.svg"}
@@ -150,61 +187,102 @@ export default function BiomodelDetailPage() {
             <div className="mb-8">
               <div className="flex items-center gap-2 mb-2">
                 <FileText className="h-5 w-5 text-blue-400" />
-                <span className="font-semibold text-slate-800">Description</span>
+                <span className="font-semibold text-slate-800">
+                  Description
+                </span>
               </div>
               <div className="whitespace-pre-line text-slate-700 bg-blue-50 rounded p-4 border border-blue-100 shadow-sm">
-                {data.annot && data.annot.trim() !== "" ? data.annot : "No description is available for this biomodel"}
+                {data.annot && data.annot.trim() !== ""
+                  ? data.annot
+                  : "No description is available for this biomodel"}
               </div>
             </div>
             <div className="mb-8">
               <div className="flex items-center gap-2 mb-2">
                 <Layers className="h-5 w-5 text-blue-400" />
-                <span className="font-semibold text-slate-800">Applications</span>
+                <span className="font-semibold text-slate-800">
+                  Applications
+                </span>
               </div>
               <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-1">
                 {data.applications?.map((app) => {
-                  const encodedAppName = encodeURIComponent(app.name || "")
-                  const bnglUrl = `https://vcell.cam.uchc.edu/api/v0/biomodel/${data.bmKey}/biomodel.bngl?appname=${encodedAppName}`
-                  const sbmlUrl = `https://vcell.cam.uchc.edu/api/v0/biomodel/${data.bmKey}/biomodel.sbml?appname=${encodedAppName}`
+                  const encodedAppName = encodeURIComponent(app.name || "");
+                  const bnglUrl = `https://vcell.cam.uchc.edu/api/v0/biomodel/${data.bmKey}/biomodel.bngl?appname=${encodedAppName}`;
+                  const sbmlUrl = `https://vcell.cam.uchc.edu/api/v0/biomodel/${data.bmKey}/biomodel.sbml?appname=${encodedAppName}`;
                   return (
-                    <li key={app.key} className="bg-slate-50 border border-slate-200 rounded p-3 flex flex-col gap-1 shadow-sm">
-                      <span className="font-medium text-blue-900 flex items-center gap-2"><Hash className="h-4 w-4 text-blue-300" />{app.name}</span>
+                    <li
+                      key={app.key}
+                      className="bg-slate-50 border border-slate-200 rounded p-3 flex flex-col gap-1 shadow-sm"
+                    >
+                      <span className="font-medium text-blue-900 flex items-center gap-2">
+                        <Hash className="h-4 w-4 text-blue-300" />
+                        {app.name}
+                      </span>
                       <span className="text-xs text-slate-500 flex gap-4">
-                        App Key: <span className="font-mono text-blue-700">{app.key}</span>
-                        MathKey: <span className="font-mono text-blue-700">{app.mathKey}</span>
+                        App Key:{" "}
+                        <span className="font-mono text-blue-700">
+                          {app.key}
+                        </span>
+                        MathKey:{" "}
+                        <span className="font-mono text-blue-700">
+                          {app.mathKey}
+                        </span>
                       </span>
                       <div className="flex gap-2 mt-2">
                         <button
-                          onClick={() => window.open(bnglUrl, '_blank')}
+                          onClick={() => window.open(bnglUrl, "_blank")}
                           className="inline-flex items-center gap-2 px-3 py-1 rounded border border-green-600 text-green-700 bg-white font-semibold shadow-sm transition-colors hover:bg-green-50 text-xs"
                         >
                           Download BNGL
                         </button>
                         <button
-                          onClick={() => window.open(sbmlUrl, '_blank')}
+                          onClick={() => window.open(sbmlUrl, "_blank")}
                           className="inline-flex items-center gap-2 px-3 py-1 rounded border border-blue-600 text-blue-700 bg-white font-semibold shadow-sm transition-colors hover:bg-blue-50 text-xs"
                         >
                           Download SBML
                         </button>
                       </div>
                     </li>
-                  )
+                  );
                 })}
               </ul>
             </div>
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <FlaskConical className="h-5 w-5 text-blue-400" />
-                <span className="font-semibold text-slate-800">Simulations</span>
+                <span className="font-semibold text-slate-800">
+                  Simulations
+                </span>
               </div>
               <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-1">
                 {data.simulations?.map((sim) => (
-                  <li key={sim.key} className="bg-slate-50 border border-slate-200 rounded p-3 shadow-sm">
-                    <div className="font-medium text-blue-900 flex items-center gap-2 mb-1"><Hash className="h-4 w-4 text-blue-300" />{sim.name}</div>
+                  <li
+                    key={sim.key}
+                    className="bg-slate-50 border border-slate-200 rounded p-3 shadow-sm"
+                  >
+                    <div className="font-medium text-blue-900 flex items-center gap-2 mb-1">
+                      <Hash className="h-4 w-4 text-blue-300" />
+                      {sim.name}
+                    </div>
                     <div className="text-xs text-slate-500 mb-1 flex flex-wrap gap-2">
-                      <span>Solver: <span className="font-mono text-blue-700">{sim.solverName}</span></span>
-                      <span>Scan Count: <span className="font-mono text-blue-700">{sim.scanCount}</span></span>
-                      <span>Sim Context: <span className="font-mono text-blue-700">{sim.bioModelLink.simContextName}</span></span>
+                      <span>
+                        Solver:{" "}
+                        <span className="font-mono text-blue-700">
+                          {sim.solverName}
+                        </span>
+                      </span>
+                      <span>
+                        Scan Count:{" "}
+                        <span className="font-mono text-blue-700">
+                          {sim.scanCount}
+                        </span>
+                      </span>
+                      <span>
+                        Sim Context:{" "}
+                        <span className="font-mono text-blue-700">
+                          {sim.bioModelLink.simContextName}
+                        </span>
+                      </span>
                     </div>
                     {sim.overrides && sim.overrides.length > 0 && (
                       <div className="text-xs text-slate-600 mt-2">
@@ -212,7 +290,11 @@ export default function BiomodelDetailPage() {
                         <ul className="list-disc ml-4">
                           {sim.overrides.map((ov, i) => (
                             <li key={i}>
-                              {ov.name} ({ov.type}): <span className="font-mono text-blue-700">{ov.values.join(", ")}</span> (Cardinality: {ov.cardinality})
+                              {ov.name} ({ov.type}):{" "}
+                              <span className="font-mono text-blue-700">
+                                {ov.values ? ov.values.join(", ") : "No values"}
+                              </span>{" "}
+                              (Cardinality: {ov.cardinality})
                             </li>
                           ))}
                         </ul>
@@ -226,5 +308,5 @@ export default function BiomodelDetailPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

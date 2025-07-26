@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import FileFetcher from "@/components/file-fetcher"
-import { FileText } from "lucide-react"
+import FileFetcher from "@/components/file-fetcher";
+import { FileText } from "lucide-react";
 
 export default function VCMLPage() {
   return (
@@ -15,5 +15,5 @@ export default function VCMLPage() {
       contentTitle="VCML File Content"
       placeholder="Enter biomodel ID (e.g., 257427200)"
     />
-  )
+  );
 }

@@ -1,40 +1,46 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { LogIn, Mail, Lock, Eye, EyeOff } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { LogIn, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function SignInPage() {
-  const router = useRouter()
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError("")
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
 
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       // For now, just redirect to home
-      router.push("/")
+      router.push("/");
     } catch (err) {
-      setError("Invalid email or password. Please try again.")
+      setError("Invalid email or password. Please try again.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
@@ -45,7 +51,9 @@ export default function SignInPage() {
               <LogIn className="h-8 w-8 text-white" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold text-center">Welcome back</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">
+            Welcome back
+          </CardTitle>
           <CardDescription className="text-center">
             Sign in to your VCell Platform account
           </CardDescription>
@@ -57,22 +65,24 @@ export default function SignInPage() {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            
+
             <Alert className="bg-blue-50 border-blue-200">
               <AlertDescription className="text-blue-800">
-                <strong>VCell Account Integration:</strong> This will be the same as your VCell account at{" "}
-                <a 
-                  href="https://vcell.cam.uchc.edu/api/v0/loginform" 
-                  target="_blank" 
+                <strong>VCell Account Integration:</strong> This will be the
+                same as your VCell account at{" "}
+                <a
+                  href="https://vcell.cam.uchc.edu/api/v0/loginform"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="underline hover:text-blue-600"
                 >
                   vcell.cam.uchc.edu/api/v0
                 </a>
-                . It will be used to query your private models and save your conversation history.
+                . It will be used to query your private models and save your
+                conversation history.
               </AlertDescription>
             </Alert>
-            
+
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <div className="relative">
@@ -107,32 +117,32 @@ export default function SignInPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
                 </button>
               </div>
             </div>
 
             <div className="flex items-center justify-between">
-              <Link 
-                href="/forgot-password" 
+              <Link
+                href="/forgot-password"
                 className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
               >
                 Forgot password?
               </Link>
             </div>
 
-            <Button 
-              type="submit" 
-              className="w-full" 
-              disabled={isLoading}
-            >
+            <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Signing in..." : "Sign In"}
             </Button>
 
             <div className="text-center text-sm text-gray-600">
               Don't have an account?{" "}
-              <Link 
-                href="/signup" 
+              <Link
+                href="/signup"
                 className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
               >
                 Sign up
@@ -142,5 +152,5 @@ export default function SignInPage() {
         </CardContent>
       </Card>
     </div>
-  )
-} 
+  );
+}

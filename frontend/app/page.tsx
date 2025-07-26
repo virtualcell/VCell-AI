@@ -1,10 +1,17 @@
-"use client"
+"use client";
 
-import { ArrowRight, MessageSquare, Wrench, Shield, LogIn, UserPlus } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import Link from "next/link"
-import Image from "next/image"
+import {
+  ArrowRight,
+  MessageSquare,
+  Wrench,
+  Shield,
+  LogIn,
+  UserPlus,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
+import Image from "next/image";
 
 export default function LandingPage() {
   return (
@@ -14,14 +21,16 @@ export default function LandingPage() {
         <div className="container mx-auto px-4 py-4 max-w-6xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Image 
-                src="/VCellLogo.png" 
-                alt="VCell Logo" 
-                width={100} 
-                height={100} 
+              <Image
+                src="/VCellLogo.png"
+                alt="VCell Logo"
+                width={100}
+                height={100}
                 className="rounded-lg"
               />
-              <span className="text-xl font-semibold text-slate-900">AI Explorer</span>
+              <span className="text-xl font-semibold text-slate-900">
+                AI Explorer
+              </span>
             </div>
             <div className="flex items-center gap-3">
               <Button variant="outline" size="sm" asChild>
@@ -44,25 +53,25 @@ export default function LandingPage() {
       <main className="flex-1 flex flex-col items-center justify-center">
         <div className="container mx-auto px-4 max-w-6xl flex flex-col items-center justify-center">
           {/* Hero Section */}
-          <div className="text-center mb-16"> 
+          <div className="text-center mb-16">
             <div className="flex items-center justify-center gap-4 mb-6">
-              <Image 
-                src="/VCellLogo.png" 
-                alt="VCell Logo" 
-                width={318} 
-                height={120} 
+              <Image
+                src="/VCellLogo.png"
+                alt="VCell Logo"
+                width={318}
+                height={120}
                 className="rounded-lg"
               />
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-slate-900 leading-tight"> 
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-slate-900 leading-tight">
                 VCell Models
                 <br />
                 <span className="text-blue-600">AI Explorer</span>
               </h1>
             </div>
 
-            <p className="text-lg md:text-xl text-slate-600 mb-8 max-w-3xl mx-auto leading-relaxed"> 
-              Discover, analyze, and explore biomodels with the power of AI. Comprehensive platform for scientific
-              model research.
+            <p className="text-lg md:text-xl text-slate-600 mb-8 max-w-3xl mx-auto leading-relaxed">
+              Discover, analyze, and explore biomodels with the power of AI.
+              Comprehensive platform for scientific model research.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -88,44 +97,53 @@ export default function LandingPage() {
           </div>
 
           {/* Features Section */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16 w-full"> 
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16 w-full">
             {/* AI Chatbot Feature */}
             <Card className="border-slate-200 shadow-lg hover:shadow-xl transition-shadow duration-200">
-              <CardHeader className="text-center pb-2"> 
-                <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2"> 
+              <CardHeader className="text-center pb-2">
+                <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
                   <MessageSquare className="h-8 w-8 text-blue-600" />
                 </div>
-                <CardTitle className="text-xl font-semibold text-slate-900">AI-Powered Chatbot</CardTitle>
+                <CardTitle className="text-xl font-semibold text-slate-900">
+                  AI-Powered Chatbot
+                </CardTitle>
               </CardHeader>
               <CardContent className="text-center">
                 <p className="text-slate-600 leading-relaxed">
-                  Ask questions in natural language and get intelligent responses. The Chatbot can retrieve,
-                  and analyze biomodels using LLMs with Tool Calling.
+                  Ask questions in natural language and get intelligent
+                  responses. The Chatbot can retrieve, and analyze biomodels
+                  using LLMs with Tool Calling.
                 </p>
               </CardContent>
             </Card>
 
             {/* All-in-One Tools Feature */}
             <Card className="border-slate-200 shadow-lg hover:shadow-xl transition-shadow duration-200">
-              <CardHeader className="text-center pb-2"> 
-                <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2"> 
+              <CardHeader className="text-center pb-2">
+                <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
                   <Wrench className="h-8 w-8 text-blue-600" />
                 </div>
-                <CardTitle className="text-xl font-semibold text-slate-900">Everything in One Place</CardTitle>
+                <CardTitle className="text-xl font-semibold text-slate-900">
+                  Everything in One Place
+                </CardTitle>
               </CardHeader>
               <CardContent className="text-center">
-                <div className="space-y-2"> 
-                  <p className="text-slate-600 leading-relaxed mb-2"> 
+                <div className="space-y-2">
+                  <p className="text-slate-600 leading-relaxed mb-2">
                     All essential tools in one platform
                   </p>
-                  <div className="space-y-1 text-sm"> 
+                  <div className="space-y-1 text-sm">
                     <div className="flex items-center justify-center gap-2">
                       <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      <span className="text-slate-700">Biomodel Database Search</span>
+                      <span className="text-slate-700">
+                        Biomodel Database Search
+                      </span>
                     </div>
                     <div className="flex items-center justify-center gap-2">
                       <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      <span className="text-slate-700">VCML and SBML File Retrieval</span>
+                      <span className="text-slate-700">
+                        VCML and SBML File Retrieval
+                      </span>
                     </div>
                     <div className="flex items-center justify-center gap-2">
                       <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
@@ -138,15 +156,18 @@ export default function LandingPage() {
 
             {/* Private Access Feature */}
             <Card className="border-slate-200 shadow-lg hover:shadow-xl transition-shadow duration-200">
-              <CardHeader className="text-center pb-2"> 
-                <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2"> 
+              <CardHeader className="text-center pb-2">
+                <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
                   <Shield className="h-8 w-8 text-blue-600" />
                 </div>
-                <CardTitle className="text-xl font-semibold text-slate-900">Private Model Access</CardTitle>
+                <CardTitle className="text-xl font-semibold text-slate-900">
+                  Private Model Access
+                </CardTitle>
               </CardHeader>
               <CardContent className="text-center">
                 <p className="text-slate-600 leading-relaxed">
-                  Access private and restricted biomodels with secure Auth0 authentication.
+                  Access private and restricted biomodels with secure Auth0
+                  authentication.
                 </p>
               </CardContent>
             </Card>
@@ -159,5 +180,5 @@ export default function LandingPage() {
         <p className="text-slate-500 my-4">VCell AI Model Explorer</p>
       </footer>
     </div>
-  )
+  );
 }
