@@ -84,20 +84,39 @@ export default function KnowledgeBasePage() {
   }
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files
-    if (!files || files.length === 0) return
+    const filesList = event.target.files
+    if (!filesList || filesList.length === 0) return
 
     setUploading(true)
+    setError("")
+    const file = filesList[0]
+    const ext = file.name.split('.').pop()?.toLowerCase()
+    let endpoint = ""
+    if (ext === "pdf") {
+      endpoint = "http://localhost:8000/kb/upload-pdf"
+    } else if (ext === "txt") {
+      endpoint = "http://localhost:8000/kb/upload-text"
+    } else {
+      setError("Only PDF and TXT files are supported.")
+      setUploading(false)
+      return
+    }
+    const formData = new FormData()
+    formData.append("file", file)
     try {
-      // Simulate file upload
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
+      const res = await fetch(endpoint, {
+        method: "POST",
+        body: formData,
+      })
+      if (!res.ok) throw new Error("Failed to upload file")
+      const data = await res.json()
+      if (data.status !== "success") throw new Error("Failed to upload file")
       const newFile: KnowledgeFile = {
-        name: files[0].name,
-        type: files[0].name.split('.').pop()?.toLowerCase() as any || "other",
+        name: file.name,
+        type: ext === "pdf" ? "pdf" : "txt",
       }
-
       setFiles(prev => [newFile, ...prev])
+      setFilteredFiles(prev => [newFile, ...prev])
       setShowUploadModal(false)
     } catch (err) {
       setError("Failed to upload file")
