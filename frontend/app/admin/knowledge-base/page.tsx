@@ -44,7 +44,7 @@ export default function KnowledgeBasePage() {
     const fetchFiles = async () => {
       try {
         setLoading(true)
-        const res = await fetch('http://localhost:8000/kb/files', {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/kb/files`, {
           headers: { 'accept': 'application/json' },
         })
         if (!res.ok) throw new Error('Failed to fetch files')
@@ -93,9 +93,9 @@ export default function KnowledgeBasePage() {
     const ext = file.name.split('.').pop()?.toLowerCase()
     let endpoint = ""
     if (ext === "pdf") {
-      endpoint = "http://localhost:8000/kb/upload-pdf"
+      endpoint = `${process.env.NEXT_PUBLIC_API_URL}/kb/upload-pdf`
     } else if (ext === "txt") {
-      endpoint = "http://localhost:8000/kb/upload-text"
+      endpoint = `${process.env.NEXT_PUBLIC_API_URL}/kb/upload-text`
     } else {
       setError("Only PDF and TXT files are supported.")
       setUploading(false)
@@ -128,7 +128,7 @@ export default function KnowledgeBasePage() {
   const handleDeleteFile = async (fileName: string) => {
     if (!confirm("Are you sure you want to delete this file?")) return
     try {
-      const res = await fetch(`http://localhost:8000/kb/files/${encodeURIComponent(fileName)}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/kb/files/${encodeURIComponent(fileName)}`, {
         method: 'DELETE',
         headers: { 'accept': 'application/json' },
       })
@@ -151,7 +151,7 @@ export default function KnowledgeBasePage() {
     setSelectedFile(file)
     setFileContent({ content: "", loading: true, error: "" })
     try {
-      const res = await fetch(`http://localhost:8000/kb/files/${encodeURIComponent(file.name)}/chunks`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/kb/files/${encodeURIComponent(file.name)}/chunks`, {
         headers: { 'accept': 'application/json' },
       })
       if (!res.ok) throw new Error('Failed to fetch file content')

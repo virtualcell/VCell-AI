@@ -6,7 +6,7 @@ from app.controllers.knowledge_base_controller import (
     upload_text_controller,
     delete_file_controller,
     get_similar_controller,
-    get_file_chunks_controller
+    get_file_chunks_controller,
 )
 
 router = APIRouter()
@@ -68,10 +68,7 @@ async def delete_file_endpoint(file_name: str):
 
 
 @router.get("/similar")
-async def get_similar_endpoint(
-    query: str,
-    limit: int = 10
-):
+async def get_similar_endpoint(query: str, limit: int = 10):
     """
     Get similar chunks from the knowledge base.
     """
@@ -89,4 +86,4 @@ async def get_file_chunks_endpoint_router(file_name: str):
     try:
         return await get_file_chunks_controller(file_name)
     except Exception as e:
-        raise e 
+        raise e
