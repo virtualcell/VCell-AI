@@ -16,6 +16,7 @@ import {
 interface SystemSettings {
   modelProvider: string;
   modelName: string;
+  apiKey: string;
   apiRateLimit: number;
 }
 
@@ -23,6 +24,7 @@ export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<SystemSettings>({
     modelProvider: "Azure OpenAI",
     modelName: "gpt-4o-mini",
+    apiKey: "sk-proj-1234567890",
     apiRateLimit: 24,
   });
   const [loading, setLoading] = useState(true);
@@ -154,6 +156,21 @@ export default function AdminSettingsPage() {
                     handleInputChange("modelName", e.target.value)
                   }
                   className="w-full"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  API Key
+                </label>
+                <Input
+                  type="password"
+                  value={settings.apiKey}
+                  onChange={(e) =>
+                    handleInputChange("apiKey", e.target.value)
+                  }
+                  className="w-full"
+                  placeholder="Enter your API key"
                 />
               </div>
 
