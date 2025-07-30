@@ -171,92 +171,90 @@ export default function AdminSettingsPage() {
 
           {/* Hosted Settings Tab */}
           <TabsContent value="hosted">
-            <div className="flex justify-center">
-              <Card className="shadow-lg border-slate-200 w-full max-w-4xl">
-                <CardHeader className="bg-gradient-to-r from-green-100 to-green-50 border-b border-slate-200 px-6 py-5">
-                  <CardTitle className="text-xl font-extrabold text-green-900 flex items-center gap-3">
-                    <Shield className="h-6 w-6 text-green-500" />
-                    Hosted LLM Settings
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6 space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                      Model Provider
-                    </label>
-                    <Input
-                      type="text"
-                      value={settings.modelProvider}
-                      onChange={(e) =>
-                        handleInputChange("modelProvider", e.target.value)
-                      }
-                      className="w-full"
-                    />
-                  </div>
+            <Card className="shadow-lg border-slate-200 w-full">
+              <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-50 border-b border-slate-200 px-6 py-5">
+                <CardTitle className="text-xl font-extrabold text-blue-900 flex items-center gap-3">
+                  <Shield className="h-6 w-6 text-blue-500" />
+                  Hosted LLM Settings
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Model Provider
+                  </label>
+                  <Input
+                    type="text"
+                    value={settings.modelProvider}
+                    onChange={(e) =>
+                      handleInputChange("modelProvider", e.target.value)
+                    }
+                    className="w-full"
+                  />
+                </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                      Model Name
-                    </label>
-                    <Input
-                      type="text"
-                      value={settings.modelName}
-                      onChange={(e) =>
-                        handleInputChange("modelName", e.target.value)
-                      }
-                      className="w-full"
-                    />
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Model Name
+                  </label>
+                  <Input
+                    type="text"
+                    value={settings.modelName}
+                    onChange={(e) =>
+                      handleInputChange("modelName", e.target.value)
+                    }
+                    className="w-full"
+                  />
+                </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                      API Key
-                    </label>
-                    <Input
-                      type="password"
-                      value={settings.apiKey}
-                      onChange={(e) =>
-                        handleInputChange("apiKey", e.target.value)
-                      }
-                      className="w-full"
-                      placeholder="Enter your API key"
-                    />
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    API Key
+                  </label>
+                  <Input
+                    type="password"
+                    value={settings.apiKey}
+                    onChange={(e) =>
+                      handleInputChange("apiKey", e.target.value)
+                    }
+                    className="w-full"
+                    placeholder="Enter your API key"
+                  />
+                </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                      API Rate Limit (requests/hour)
-                    </label>
-                    <Input
-                      type="number"
-                      value={settings.apiRateLimit}
-                      onChange={(e) =>
-                        handleInputChange("apiRateLimit", parseInt(e.target.value))
-                      }
-                      className="w-full"
-                    />
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    API Rate Limit (requests/hour)
+                  </label>
+                  <Input
+                    type="number"
+                    value={settings.apiRateLimit}
+                    onChange={(e) =>
+                      handleInputChange("apiRateLimit", parseInt(e.target.value))
+                    }
+                    className="w-full"
+                  />
+                </div>
 
-                  <div className="pt-4">
-                    <Button
-                      onClick={handleSaveSettings}
-                      disabled={saving}
-                      className="inline-flex items-center gap-2 px-6 py-2 rounded border border-green-600 text-green-700 bg-white font-semibold shadow-sm transition-colors hover:bg-green-50"
-                    >
-                      <Save className="h-4 w-4" />{" "}
-                      {saving ? "Saving..." : "Save Hosted Settings"}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                <div className="pt-4">
+                  <Button
+                    onClick={handleSaveSettings}
+                    disabled={saving}
+                    className="inline-flex items-center gap-2 px-6 py-2 rounded border border-blue-600 text-blue-700 bg-white font-semibold shadow-sm transition-colors hover:bg-blue-50"
+                  >
+                    <Save className="h-4 w-4" />{" "}
+                    {saving ? "Saving..." : "Save Hosted Settings"}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Local Settings Tab */}
           <TabsContent value="local">
             <div className="space-y-6">
               {/* Setup Guide */}
-              <Card className="shadow-lg border-slate-200">
+              <Card className="shadow-lg border-slate-200 w-full">
                 <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-50 border-b border-slate-200 px-6 py-5">
                   <CardTitle className="text-xl font-extrabold text-blue-900 flex items-center gap-3">
                     <Monitor className="h-6 w-6 text-blue-500" />
@@ -283,13 +281,13 @@ export default function AdminSettingsPage() {
                   <div className="bg-slate-50 p-4 rounded-lg space-y-3">
                     <h3 className="font-semibold text-slate-800">Step 2: Configure Environment Variables</h3>
                     <p className="text-slate-600">Configure the .env files following the .env.example in both frontend and backend folders</p>
-                    <div className="flex items-center gap-2">
-                      <code className="bg-slate-800 text-green-400 px-3 py-2 rounded flex-1">
-                        # Frontend .env
-                        cp frontend/.env.example frontend/.env
-                        # Backend .env  
-                        cp backend/.env.example backend/.env
-                      </code>
+                    <div className="flex items-start gap-2">
+                      <pre className="bg-slate-800 text-green-400 px-3 py-2 rounded flex-1 text-sm whitespace-pre-wrap">
+{`# Frontend .env
+cp frontend/.env.example frontend/.env
+# Backend .env  
+cp backend/.env.example backend/.env`}
+                      </pre>
                       <Button
                         onClick={() => copyToClipboard("cp frontend/.env.example frontend/.env && cp backend/.env.example backend/.env")}
                         size="sm"
@@ -336,10 +334,10 @@ export default function AdminSettingsPage() {
               </Card>
 
               {/* Local Settings Form */}
-              <Card className="shadow-lg border-slate-200">
-                <CardHeader className="bg-gradient-to-r from-purple-100 to-purple-50 border-b border-slate-200 px-6 py-5">
-                  <CardTitle className="text-xl font-extrabold text-purple-900 flex items-center gap-3">
-                    <Monitor className="h-6 w-6 text-purple-500" />
+              <Card className="shadow-lg border-slate-200 w-full">
+                <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-50 border-b border-slate-200 px-6 py-5">
+                  <CardTitle className="text-xl font-extrabold text-blue-900 flex items-center gap-3">
+                    <Monitor className="h-6 w-6 text-blue-500" />
                     Local LLM Configuration
                   </CardTitle>
                 </CardHeader>
@@ -420,7 +418,7 @@ export default function AdminSettingsPage() {
                     <Button
                       onClick={handleSaveLocalSettings}
                       disabled={saving}
-                      className="inline-flex items-center gap-2 px-6 py-2 rounded border border-purple-600 text-purple-700 bg-white font-semibold shadow-sm transition-colors hover:bg-purple-50"
+                      className="inline-flex items-center gap-2 px-6 py-2 rounded border border-blue-600 text-blue-700 bg-white font-semibold shadow-sm transition-colors hover:bg-blue-50"
                     >
                       <Save className="h-4 w-4" />{" "}
                       {saving ? "Saving..." : "Save Local Settings"}
