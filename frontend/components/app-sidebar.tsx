@@ -146,6 +146,37 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
+        {/* Configuration Section */}
+        <SidebarGroup>
+          {!isCollapsed && (
+            <SidebarGroupLabel className="text-slate-700 font-medium">
+              Configuration
+            </SidebarGroupLabel>
+          )}
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem key="AdminSettings">
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === "/admin/settings"}
+                  className="data-[active=true]:bg-blue-50 data-[active=true]:text-blue-700 data-[active=true]:border-r-2 data-[active=true]:border-blue-600"
+                  tooltip={isCollapsed ? "Settings" : undefined}
+                >
+                  <Link
+                    href="/admin/settings"
+                    className="flex items-center gap-3"
+                  >
+                    <Settings className="h-4 w-4" />
+                    {!isCollapsed && <span>Settings</span>}
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarSeparator />
+
         {/* Admin Section */}
         <SidebarGroup>
           {!isCollapsed && (
@@ -181,22 +212,6 @@ export function AppSidebar() {
                   >
                     <FolderOpen className="h-4 w-4 text-purple-500" />
                     {!isCollapsed && <span>Knowledge Base</span>}
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem key="AdminSettings">
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === "/admin/settings"}
-                  className="data-[active=true]:bg-purple-50 data-[active=true]:text-purple-700 data-[active=true]:border-r-2 data-[active=true]:border-purple-500"
-                  tooltip={isCollapsed ? "Settings" : undefined}
-                >
-                  <Link
-                    href="/admin/settings"
-                    className="flex items-center gap-3"
-                  >
-                    <Settings className="h-4 w-4 text-purple-500" />
-                    {!isCollapsed && <span>Settings</span>}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
