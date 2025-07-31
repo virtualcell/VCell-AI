@@ -249,8 +249,8 @@ export function AppSidebar() {
           <div className="space-y-2">
             {!isCollapsed && (
               <div className="flex justify-between items-center text-xs text-slate-600">
-                <span>Daily Usage</span>
-                <span>12 remaining</span>
+                <span>Monthly Token Limit</span>
+                <span>12K remaining</span>
               </div>
             )}
             <div className="w-full bg-slate-200 rounded-full h-2">
@@ -263,7 +263,7 @@ export function AppSidebar() {
               <div className="text-xs text-slate-500 text-center">20</div>
             ) : (
               <div className="text-xs text-slate-500 text-center">
-                12 of 24 requests used today
+                12K of 24K tokens used this month
               </div>
             )}
           </div>
