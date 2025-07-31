@@ -162,7 +162,7 @@ export default function AdminDashboard() {
             lastActive: "2024-12-19T08:30:00Z",
             conversationsCount: 12,
             filesCount: 2,
-            usedToken: 50,
+            usedToken: 4500,
             monthlyTokenLimit: 500,
           },
         ]);
@@ -473,14 +473,14 @@ export default function AdminDashboard() {
                             />
                             <Button
                               size="sm"
-                              className="h-6 w-6 p-0 text-green-600 hover:text-green-800 hover:bg-green-50"
+                              className="bg-white h-6 w-6 p-0 text-green-600 hover:text-green-800 hover:bg-green-50"
                               onClick={() => handleSaveTokenLimit(user.id)}
                             >
                               <Save className="h-3 w-3" />
                             </Button>
                             <Button
                               size="sm"
-                              className="h-6 w-6 p-0 text-red-600 hover:text-red-800 hover:bg-red-50"
+                              className="bg-white h-6 w-6 p-0 text-red-600 hover:text-red-800 hover:bg-red-50"
                               onClick={handleCancelEdit}
                             >
                               <X className="h-3 w-3" />
