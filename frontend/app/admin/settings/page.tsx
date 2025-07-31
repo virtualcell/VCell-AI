@@ -224,7 +224,7 @@ export default function AdminSettingsPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    API Rate Limit (requests/hour)
+                    Monthly Token Limit
                   </label>
                   <Input
                     type="number"
@@ -233,7 +233,11 @@ export default function AdminSettingsPage() {
                       handleInputChange("apiRateLimit", parseInt(e.target.value))
                     }
                     className="w-full"
+                    placeholder="e.g., 1000000 for 1M tokens"
                   />
+                  <p className="text-xs text-slate-500 mt-1">
+                    This applies to all users. To set a specific limit for a certain user, go to the admin dashboard and set it manually there.
+                  </p>
                 </div>
 
                 <div className="pt-4">
