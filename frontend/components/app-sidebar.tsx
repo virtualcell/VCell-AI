@@ -249,21 +249,21 @@ export function AppSidebar() {
           <div className="space-y-2">
             {!isCollapsed && (
               <div className="flex justify-between items-center text-xs text-slate-600">
-                <span>Daily Usage</span>
-                <span>12 remaining</span>
+                <span>Monthly Token Limit</span>
+                <span>600K remaining</span>
               </div>
             )}
             <div className="w-full bg-slate-200 rounded-full h-2">
               <div
                 className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                style={{ width: "50%" }}
+                style={{ width: "40%" }}
               ></div>
             </div>
             {isCollapsed ? (
-              <div className="text-xs text-slate-500 text-center">20</div>
+              <div className="text-xs text-slate-500 text-center">0.4M</div>
             ) : (
               <div className="text-xs text-slate-500 text-center">
-                12 of 24 requests used today
+                400K of 1M tokens used this month
               </div>
             )}
           </div>

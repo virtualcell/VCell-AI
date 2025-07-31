@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   Users,
   MessageSquare,
@@ -11,6 +12,8 @@ import {
   Shield,
   Settings,
   Trash2,
+  Save,
+  X,
 } from "lucide-react";
 
 interface User {
@@ -23,6 +26,8 @@ interface User {
   lastActive: string;
   conversationsCount: number;
   filesCount: number;
+  usedToken: number;
+  monthlyTokenLimit: number;
 }
 
 interface DashboardStats {
@@ -46,6 +51,8 @@ export default function AdminDashboard() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [editingTokenLimit, setEditingTokenLimit] = useState<string | null>(null);
+  const [tempTokenLimit, setTempTokenLimit] = useState<string>("");
 
   useEffect(() => {
     // Mock data - replace with actual API calls
@@ -77,6 +84,8 @@ export default function AdminDashboard() {
             lastActive: "2024-12-19T10:30:00Z",
             conversationsCount: 45,
             filesCount: 12,
+            usedToken: 1200,
+            monthlyTokenLimit: 10000,
           },
           {
             id: "2",
@@ -88,6 +97,8 @@ export default function AdminDashboard() {
             lastActive: "2024-12-19T09:15:00Z",
             conversationsCount: 67,
             filesCount: 18,
+            usedToken: 800,
+            monthlyTokenLimit: 8000,
           },
           {
             id: "3",
@@ -99,6 +110,8 @@ export default function AdminDashboard() {
             lastActive: "2024-12-18T16:45:00Z",
             conversationsCount: 34,
             filesCount: 8,
+            usedToken: 500,
+            monthlyTokenLimit: 5000,
           },
           {
             id: "4",
@@ -110,6 +123,8 @@ export default function AdminDashboard() {
             lastActive: "2024-12-10T14:20:00Z",
             conversationsCount: 23,
             filesCount: 5,
+            usedToken: 300,
+            monthlyTokenLimit: 3000,
           },
           {
             id: "5",
@@ -121,6 +136,8 @@ export default function AdminDashboard() {
             lastActive: "2024-12-15T11:30:00Z",
             conversationsCount: 15,
             filesCount: 3,
+            usedToken: 200,
+            monthlyTokenLimit: 2000,
           },
           {
             id: "6",
@@ -132,6 +149,8 @@ export default function AdminDashboard() {
             lastActive: "2024-12-18T13:45:00Z",
             conversationsCount: 28,
             filesCount: 7,
+            usedToken: 100,
+            monthlyTokenLimit: 1000,
           },
           {
             id: "7",
@@ -143,6 +162,8 @@ export default function AdminDashboard() {
             lastActive: "2024-12-19T08:30:00Z",
             conversationsCount: 12,
             filesCount: 2,
+            usedToken: 4500,
+            monthlyTokenLimit: 500,
           },
         ]);
       } catch (err) {
@@ -211,6 +232,38 @@ export default function AdminDashboard() {
           </Badge>
         );
     }
+  };
+
+  const handleEditTokenLimit = (userId: string, currentLimit: number) => {
+    setEditingTokenLimit(userId);
+    setTempTokenLimit(currentLimit.toString());
+  };
+
+  const handleSaveTokenLimit = (userId: string) => {
+    const newLimit = parseInt(tempTokenLimit);
+    if (!isNaN(newLimit) && newLimit >= 0) {
+      setUsers(users.map(user => 
+        user.id === userId 
+          ? { ...user, monthlyTokenLimit: newLimit }
+          : user
+      ));
+    }
+    setEditingTokenLimit(null);
+    setTempTokenLimit("");
+  };
+
+  const handleCancelEdit = () => {
+    setEditingTokenLimit(null);
+    setTempTokenLimit("");
+  };
+
+  const formatTokenCount = (count: number) => {
+    if (count >= 1000000) {
+      return `${(count / 1000000).toFixed(1)}M`;
+    } else if (count >= 1000) {
+      return `${(count / 1000).toFixed(1)}K`;
+    }
+    return count.toString();
   };
 
   if (loading)
@@ -351,6 +404,12 @@ export default function AdminDashboard() {
                       Conversations
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      Used Token
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      Monthly Token Limit
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                       Date Joined
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
@@ -388,6 +447,59 @@ export default function AdminDashboard() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
                         {user.conversationsCount}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
+                        <div className="flex items-center">
+                          <span className="font-medium">{formatTokenCount(user.usedToken)}</span>
+                          <div className="ml-2 w-16 bg-slate-200 rounded-full h-2">
+                            <div 
+                              className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                              style={{ 
+                                width: `${Math.min((user.usedToken / user.monthlyTokenLimit) * 100, 100)}%` 
+                              }}
+                            ></div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
+                        {editingTokenLimit === user.id ? (
+                          <div className="flex items-center gap-2">
+                            <Input
+                              type="number"
+                              value={tempTokenLimit}
+                              onChange={(e) => setTempTokenLimit(e.target.value)}
+                              className="w-20 h-8 text-sm"
+                              min="0"
+                            />
+                            <Button
+                              size="sm"
+                              className="bg-white h-6 w-6 p-0 text-green-600 hover:text-green-800 hover:bg-green-50"
+                              onClick={() => handleSaveTokenLimit(user.id)}
+                            >
+                              <Save className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              className="bg-white h-6 w-6 p-0 text-red-600 hover:text-red-800 hover:bg-red-50"
+                              onClick={handleCancelEdit}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{formatTokenCount(user.monthlyTokenLimit)}</span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0 text-blue-600 hover:text-blue-800 hover:bg-blue-50"
+                              onClick={() => handleEditTokenLimit(user.id, user.monthlyTokenLimit)}
+                              title="Edit Token Limit"
+                            >
+                              <Settings className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                         {new Date(user.joinDate).toLocaleDateString()}
