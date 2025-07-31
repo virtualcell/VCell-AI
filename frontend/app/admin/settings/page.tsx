@@ -38,7 +38,7 @@ export default function AdminSettingsPage() {
     modelProvider: "Azure OpenAI",
     modelName: "gpt-4o-mini",
     apiKey: "sk-proj-1234567890",
-    apiRateLimit: 24,
+    apiRateLimit: 1000000,
   });
   const [localSettings, setLocalSettings] = useState<LocalSettings>({
     baseUrl: "http://localhost:11434",
