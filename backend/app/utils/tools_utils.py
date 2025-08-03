@@ -130,13 +130,13 @@ ToolsDefinitions = [
         "type": "function",
         "function": {
             "name": "search_vcell_knowledge_base",
-            "description": "Retrieves relevant information from the VCell knowledge base containing tutorials, software usage guides, biomodel creation and update instructions. This function performs semantic search to find the most relevant content based on the user's query about VCell software, tutorials, or documentation. Format the user query in the most suitable way to define his needs. The query can include questions about VCell tutorials, software usage, biomodel creation, simulation setup, or any VCell-related documentation.",
+            "description": "Use this tool for ANY query that is NOT about fetching specific biomodels, simulations, or VCML files from the database. This tool searches the VCell knowledge base for general information, concepts, explanations, tutorials, software usage guides, biomodel creation instructions, simulation setup help, and any VCell-related educational content. IMPORTANT: Use this tool when the user asks for knowledge, information, explanations, or help with VCell concepts - NOT when they want to fetch specific data from the database. If the retrieved chunks are not relevant to the user's question, you can discard them and not use them in your response. This tool is your primary source for answering questions about VCell functionality, concepts, and how-to information.",
             "parameters": {
                 "type": "object",
                 "properties": {
                     "query": {
                         "type": "string",
-                        "description": "The search query to find relevant information in the VCell knowledge base. This can include questions about VCell tutorials, software usage, biomodel creation, simulation setup, or any VCell-related documentation.",
+                        "description": "The search query to find relevant information in the VCell knowledge base. This should be a natural language question or topic about VCell concepts, usage, tutorials, or general information.",
                     },
                     "limit": {
                         "type": "integer",
