@@ -7,3 +7,5 @@ backend/.pytest_cache
 backend/.env
 backend/app/.env
 backend/app.log
+backend/Downloads
+backend/.ipynb_checkpoints

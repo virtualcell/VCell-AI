@@ -19,6 +19,8 @@ pypdf = "^5.8.0"
 pypdf2 = "^3.0.1"
 python-multipart = "^0.0.20"
 markitdown = {extras = ["all"], version = "^0.1.2"}
+notebook = "^7.4.4"
+ipykernel = "^6.30.0"
 
 
 [tool.poetry.group.dev.dependencies]
