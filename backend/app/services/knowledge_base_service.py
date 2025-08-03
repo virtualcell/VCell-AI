@@ -106,7 +106,7 @@ def extract_text_from_pdf(file_path: str) -> str:
     """
     try:
         result = markitdown_client.convert(file_path)
-        return result.text
+        return result.text_content
     except Exception as e:
         raise Exception(f"Error extracting text from PDF: {str(e)}")
 
