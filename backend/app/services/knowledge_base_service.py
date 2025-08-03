@@ -62,7 +62,7 @@ def chunk_text(text: str):
     Args:
         text (str): The text to chunk.
     """
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1250, chunk_overlap=250)
     return text_splitter.split_text(text)
 
 
