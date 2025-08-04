@@ -1,5 +1,6 @@
 import os
 import uuid
+from markitdown import MarkItDown
 from typing import List, Dict, Any, Optional
 from app.core.config import settings
 from app.core.singleton import get_openai_client, get_qdrant_client
@@ -13,6 +14,7 @@ from app.services.qdrant_service import (
 
 openai_client = get_openai_client()
 qdrant_client = get_qdrant_client()
+markitdown_client = MarkItDown(llm_client=openai_client, model=settings.AZURE_DEPLOYMENT_NAME)
 
 KB_COLLECTION_NAME = settings.QDRANT_COLLECTION_NAME
 
@@ -62,7 +64,7 @@ def chunk_text(text: str):
     Args:
         text (str): The text to chunk.
     """
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1250, chunk_overlap=250)
     return text_splitter.split_text(text)
 
 
@@ -103,30 +105,8 @@ def extract_text_from_pdf(file_path: str) -> str:
         str: Extracted text from the PDF.
     """
     try:
-        # Try to import PyPDF2, fallback to pypdf
-        try:
-            import PyPDF2
-
-            with open(file_path, "rb") as file:
-                pdf_reader = PyPDF2.PdfReader(file)
-                text = ""
-                for page in pdf_reader.pages:
-                    text += page.extract_text() + "\n"
-                return text
-        except ImportError:
-            try:
-                import pypdf
-
-                with open(file_path, "rb") as file:
-                    pdf_reader = pypdf.PdfReader(file)
-                    text = ""
-                    for page in pdf_reader.pages:
-                        text += page.extract_text() + "\n"
-                    return text
-            except ImportError:
-                raise ImportError(
-                    "Neither PyPDF2 nor pypdf is installed. Please install one of them."
-                )
+        result = markitdown_client.convert(file_path)
+        return result.text_content
     except Exception as e:
         raise Exception(f"Error extracting text from PDF: {str(e)}")
 
