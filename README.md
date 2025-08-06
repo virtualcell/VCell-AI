@@ -16,7 +16,7 @@ This is a monolithic repository containing both frontend and backend services:
 - **Vector Database**: Qdrant for knowledge base storage and retrieval
 - **Containerization**: Docker and Docker Compose
 
-## 📁 Project Structure
+## Project Structure
 ```
 VCell-GSoC/
 ├── frontend/               # Next.js frontend application
