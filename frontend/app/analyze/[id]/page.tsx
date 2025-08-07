@@ -329,7 +329,7 @@ export default function AnalysisResultsPage({
                   AI Analysis Assistant
                 </span>
               </div>
-              <div className="bg-slate-50 border border-slate-200 rounded shadow-sm">
+              <div className="bg-slate-50 border border-slate-200 rounded shadow-sm h-[900px] overflow-hidden">
                 <ChatBox
                   startMessage={combinedMessages}
                   quickActions={quickActions}
