@@ -32,7 +32,7 @@ export default function ChatPage() {
   };
 
   // Prepare props for ChatBox
-  const startMessage = `# Welcome to VCell AI Assistant! 🤖\n\nI'm here to help you with **biomodel analysis** and research support.\nFeel free to ask anything! 🚀`;
+  const startMessage = `I'm here to help you with **biomodel analysis**, **vcell software** and **research support**  .\nFeel free to ask anything! 🚀`;
   const quickActions = [
     {
       label: "List all tutorial models",
@@ -86,10 +86,6 @@ export default function ChatPage() {
               How to Use
             </Button>
           </div>
-          <p className="text-slate-600 text-sm">
-            Interact with our AI assistant for biomodel analysis and research
-            support with integrated tool access.
-          </p>
         </div>
 
         {/* Persistent Warning */}
