@@ -172,8 +172,8 @@ export default function AnalysisResultsPage({
     }
   }, [diagramAnalysis, results?.aiAnalysis, id]);
 
-  const handleReset = () => {
-    router.push("/analyze");
+  const handleGoToBiomodel = () => {
+    router.push(`/search/${id}`);
   };
 
   const handleDownloadVCML = () => {
@@ -225,7 +225,7 @@ export default function AnalysisResultsPage({
         <div className="text-center">
           <h2 className="text-2xl font-semibold text-red-600 mb-2">Error</h2>
           <p className="text-slate-600 mb-3">{error}</p>
-          <Button onClick={handleReset} className="flex items-center gap-2">
+          <Button onClick={() => router.push("/analyze")} className="flex items-center gap-2">
             <Search className="h-4 w-4" />
             Try Again
           </Button>
@@ -259,10 +259,10 @@ export default function AnalysisResultsPage({
                     <FileText className="h-4 w-4" /> Download VCML
                   </button>
                   <button
-                    onClick={handleReset}
+                    onClick={handleGoToBiomodel}
                     className="inline-flex items-center gap-2 px-4 py-2 rounded border border-yellow-500 text-yellow-700 bg-white font-semibold shadow-sm transition-colors hover:bg-yellow-50"
                   >
-                    <Search className="h-4 w-4" /> New Analysis
+                    <FlaskConical className="h-4 w-4" /> Biomodel Page
                   </button>
                 </div>
               </div>
@@ -315,7 +315,7 @@ export default function AnalysisResultsPage({
               <img
                 src={biomodelDiagramUrl || "/placeholder.svg"}
                 alt="Biomodel Diagram"
-                className="max-w-full h-auto mx-auto border border-slate-200 rounded shadow"
+                className="max-w-2xl h-auto mx-auto border border-slate-200 rounded shadow"
                 onError={() => setError("Failed to load diagram image.")}
                 onLoad={() => setError("")}
               />
