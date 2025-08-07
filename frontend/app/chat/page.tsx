@@ -73,9 +73,9 @@ export default function ChatPage() {
     <div className="h-screen bg-slate-50 flex flex-col">
       <div className="container mx-auto p-6 max-w-7xl flex-1 flex flex-col min-h-0">
         {/* Header */}
-        <div className="mb-6 flex-shrink-0">
-          <div className="flex items-center justify-between mb-2">
-            <h1 className="text-3xl font-bold text-slate-900">AI Assistant</h1>
+        <div className="mb-4 flex-shrink-0">
+          <div className="flex items-center justify-between mb-1">
+            <h1 className="text-2xl font-bold text-slate-900">AI Assistant</h1>
             <Button
               variant="outline"
               size="sm"
@@ -86,19 +86,17 @@ export default function ChatPage() {
               How to Use
             </Button>
           </div>
-          <p className="text-slate-600">
+          <p className="text-slate-600 text-sm">
             Interact with our AI assistant for biomodel analysis and research
             support with integrated tool access.
           </p>
         </div>
 
         {/* Persistent Warning */}
-        <div className="mb-6 flex-shrink-0">
-          <Alert className="border-amber-200 bg-amber-50">
-            <AlertDescription className="text-amber-800">
-              <strong>⚠️ Important:</strong> Responses are AI generated and may
-              contain errors, or hallucinations. Please use the option "Let AI
-              analyze the JSON" if you suspect hallucination.
+        <div className="mb-3 flex-shrink-0">
+          <Alert className="border-amber-200 bg-amber-50 py-2">
+            <AlertDescription className="text-amber-800 text-sm">
+              <strong>⚠️ Important:</strong> Responses are AI generated and may contain errors, or hallucinations.
             </AlertDescription>
           </Alert>
         </div>
