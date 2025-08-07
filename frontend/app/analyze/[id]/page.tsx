@@ -166,7 +166,9 @@ export default function AnalysisResultsPage({
         messageParts.push(aiMessage);
       }
 
-      setCombinedMessages(messageParts);
+      const joined_messages = messageParts.join("\n\n");
+
+      setCombinedMessages([joined_messages]);
     }
   }, [diagramAnalysis, results?.aiAnalysis, id]);
 
