@@ -3,9 +3,6 @@ __pycache__
 *.pyo
 *.pyd
 .Python
-env
-pip-log.txt
-pip-delete-this-directory.txt
 .tox
 .coverage
 .coverage.*
@@ -19,5 +16,4 @@ coverage.xml
 .pytest_cache
 .hypothesis
 .venv
-.env
 *.log

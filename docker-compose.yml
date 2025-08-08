@@ -7,31 +7,22 @@ services:
       - "6333:6333"     # REST API
       - "6334:6334"     # gRPC API
     volumes:
-      - qdrant_data:/qdrant/storage
+      - qdrant-data:/qdrant/storage
     restart: unless-stopped
-    networks:
-      - vcell-network
 
   ### Backend (FastAPI with Poetry)
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: backend-vcell
-    volumes:
-      - ./backend:/app
+    build: ./backend
+    container_name: vcell-backend
     ports:
       - "8000:8000"
-    env_file:
-      - ./backend/.env
     depends_on:
       - qdrant
-    networks:
-      - vcell-network
-    environment:
-      - QDRANT_HOST=qdrant
-      - QDRANT_PORT=6333
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./backend:/app 
+    command: ["sh", "-c", "poetry run uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+    env_file:
+      - ./backend/.env
 
   ### Frontend (Next.js)
   frontend:
@@ -39,25 +30,13 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: frontend-vcell
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
     ports:
       - "3000:3000"
-    env_file:
-      - ./frontend/.env
-    command: npm run dev
     depends_on:
       - backend
-    networks:
-      - vcell-network
-    environment:
-      - NEXT_PUBLIC_API_URL=http://backend:8000
-      - NEXT_PUBLIC_BACKEND_URL=http://localhost:8000
-
-networks:
-  vcell-network:
-    driver: bridge
+    env_file:
+      - ./frontend/.env
 
 volumes:
-  qdrant_data:
+  qdrant-data:
+    driver: local
