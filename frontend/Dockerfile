@@ -1,18 +1,21 @@
-# 1. Base image with Node.js
-FROM node:20-alpine
+# 1. Base image with Node.js (using debian-based for better compatibility)
+FROM node:22-slim
 
 # 2. Set working directory
 WORKDIR /app
 
-# 3. Install dependencies
-COPY package.json package-lock.json ./
+# 3. Install dependencies first for better caching
+COPY package.json package-lock.json* pnpm-lock.yaml* ./
 RUN npm install
 
-# 4. Copy the rest of the app
+# 4. Copy .env file
+COPY .env ./
+
+# 5. Copy the rest of the app
 COPY . .
 
-# 5. Expose the dev server port
+# 6. Expose the dev server port
 EXPOSE 3000
 
-# 6. Start the Next.js development server
+# 7. Start the Next.js development server
 CMD ["npm", "run", "dev"]

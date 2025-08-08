@@ -89,13 +89,13 @@ export function AppSidebar() {
                   asChild
                   isActive={pathname === "/chat"}
                   className="data-[active=true]:bg-yellow-50 data-[active=true]:text-yellow-700 data-[active=true]:border-r-2 data-[active=true]:border-yellow-500"
-                  tooltip={isCollapsed ? "Database Explorer" : undefined}
+                  tooltip={isCollapsed ? "VCell assistant" : undefined}
                 >
                   <Link href="/chat" className="flex items-center gap-3">
                     <span className="relative flex items-center">
                       <Sparkles className="h-4 w-4 text-yellow-400" />
                     </span>
-                    {!isCollapsed && <span>Database Explorer</span>}
+                    {!isCollapsed && <span>VCell Assistant</span>}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
