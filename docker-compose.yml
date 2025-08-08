@@ -9,6 +9,8 @@ services:
     volumes:
       - qdrant_data:/qdrant/storage
     restart: unless-stopped
+    networks:
+      - vcell-network
 
   ### Backend (FastAPI with Poetry)
   backend:
@@ -24,6 +26,11 @@ services:
       - ./backend/.env
     depends_on:
       - qdrant
+    networks:
+      - vcell-network
+    environment:
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
   ### Frontend (Next.js)
@@ -34,6 +41,7 @@ services:
     container_name: frontend-vcell
     volumes:
       - ./frontend:/app
+      - /app/node_modules
     ports:
       - "3000:3000"
     env_file:
@@ -41,6 +49,15 @@ services:
     command: npm run dev
     depends_on:
       - backend
+    networks:
+      - vcell-network
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend:8000
+      - NEXT_PUBLIC_BACKEND_URL=http://localhost:8000
+
+networks:
+  vcell-network:
+    driver: bridge
 
 volumes:
   qdrant_data:
