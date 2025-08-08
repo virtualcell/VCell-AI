@@ -8,11 +8,14 @@ WORKDIR /app
 COPY package.json package-lock.json* pnpm-lock.yaml* ./
 RUN npm install
 
-# 4. Copy the rest of the app
+# 4. Copy .env file
+COPY .env ./
+
+# 5. Copy the rest of the app
 COPY . .
 
-# 5. Expose the dev server port
+# 6. Expose the dev server port
 EXPOSE 3000
 
-# 6. Start the Next.js development server
+# 7. Start the Next.js development server
 CMD ["npm", "run", "dev"]
