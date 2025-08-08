@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.logger import get_logger
 from app.core.config import settings
+from app.services.knowledge_base_service import create_knowledge_base_collection_if_not_exists
 
 logger = get_logger(__file__)
 
@@ -24,6 +25,18 @@ app = FastAPI()
 
 logger.info(f"Starting App : \n {ascii_art}")
 logger.info("App Ready")
+
+@app.on_event("startup")
+async def startup_event():
+    """
+    Initialize the knowledge base collection on startup.
+    """
+    logger.info("Initializing knowledge base collection...")
+    result = create_knowledge_base_collection_if_not_exists()
+    if result["status"] == "success":
+        logger.info(f"Knowledge base initialization: {result['message']}")
+    else:
+        logger.error(f"Knowledge base initialization failed: {result['message']}")
 
 # CORS setup
 app.add_middleware(
