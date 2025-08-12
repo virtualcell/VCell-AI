@@ -10,15 +10,15 @@ router = APIRouter()
 
 
 @router.post("/query")
-async def query_llm(user_prompt: str):
+async def query_llm(conversation_history: dict):
     """
     Endpoint to query the LLM and execute the necessary tools.
     Args:
-        user_prompt (str): The prompt entered by the user.
+        conversation_history (dict): The conversation history containing user prompts and responses.
     Returns:
         dict: The final response after processing the prompt with the tools.
     """
-    result, bmkeys = await get_llm_response(user_prompt)
+    result, bmkeys = await get_llm_response(conversation_history.get("conversation_history", []))
     return {"response": result, "bmkeys": bmkeys}
 
 

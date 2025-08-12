@@ -43,14 +43,17 @@ async def get_llm_response(system_prompt: str, user_prompt: str):
     return response.choices[0].message.content
 
 
-async def get_response_with_tools(user_prompt: str):
+async def get_response_with_tools(conversation_history: list[dict]):
     messages = [
         {
             "role": "system",
             "content": SYSTEM_PROMPT,
         },
-        {"role": "user", "content": user_prompt},
     ]
+
+    messages = messages + conversation_history
+
+    user_prompt = conversation_history[-1]["content"]
 
     logger.info(f"User prompt: {user_prompt}")
 

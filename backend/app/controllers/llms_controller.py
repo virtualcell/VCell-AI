@@ -7,16 +7,16 @@ from app.services.llms_service import (
 )
 
 
-async def get_llm_response(user_prompt: str) -> tuple[str, list]:
+async def get_llm_response(conversation_history: list[dict]) -> tuple[str, list]:
     """
     Controller function to interact with the LLM service.
     Args:
-        user_prompt (str): The query or input provided by the user.
+        conversation_history (list[dict]): The conversation history containing user prompts and responses.
     Returns:
         tuple[str, list]: A tuple containing the final response and bmkeys list.
     """
     try:
-        result, bmkeys = await get_response_with_tools(user_prompt)
+        result, bmkeys = await get_response_with_tools(conversation_history)
         return result, bmkeys
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
