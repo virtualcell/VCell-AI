@@ -11,6 +11,7 @@ from app.services.qdrant_service import (
     search_qdrant_points,
     delete_qdrant_documents,
 )
+from langfuse import observe
 
 openai_client = get_openai_client()
 qdrant_client = get_qdrant_client()
@@ -42,7 +43,6 @@ def create_knowledge_base_collection_if_not_exists():
     except Exception as e:
         return {"status": "error", "message": f"Error creating collection: {str(e)}"}
 
-
 def embed_text(text: str):
     """
     Embed a text string using Azure OpenAI.
@@ -51,7 +51,8 @@ def embed_text(text: str):
         text (str): The text to embed.
     """
     response = openai_client.embeddings.create(
-        input=text, model=settings.AZURE_EMBEDDING_DEPLOYMENT_NAME
+        input=text, 
+        model=settings.AZURE_EMBEDDING_DEPLOYMENT_NAME
     )
     return response.data[0].embedding
 
@@ -240,7 +241,7 @@ def delete_knowledge_base_file(
     except Exception as e:
         return {"status": "error", "message": f"Error deleting file: {str(e)}"}
 
-
+@observe(name="GET_SIMILAR_CHUNKS")
 def get_similar_chunks(
     collection_name: str = KB_COLLECTION_NAME, query: str = "", limit: int = 10
 ):

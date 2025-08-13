@@ -1,4 +1,4 @@
-from openai import AzureOpenAI
+from langfuse.openai import AzureOpenAI
 from qdrant_client import QdrantClient
 from app.core.config import settings
 

@@ -16,6 +16,11 @@ class Settings(BaseSettings):
     QDRANT_URL: str
     QDRANT_COLLECTION_NAME: str
 
+    # Langfuse Config
+    LANGFUSE_SECRET_KEY: str
+    LANGFUSE_PUBLIC_KEY: str
+    LANGFUSE_HOST: str
+
     class Config:
         env_file = ".env"
         cache_on_load = False
