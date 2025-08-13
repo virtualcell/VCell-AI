@@ -21,6 +21,7 @@ python-multipart = "^0.0.20"
 markitdown = {extras = ["all"], version = "^0.1.2"}
 notebook = "^7.4.4"
 ipykernel = "^6.30.0"
+langfuse = "^3.2.4"
 
 
 [tool.poetry.group.dev.dependencies]
