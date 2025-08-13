@@ -2,12 +2,14 @@ from app.core.logger import get_logger
 import httpx
 from app.schemas.vcelldb_schema import BiomodelRequestParams, SimulationRequestParams
 from urllib.parse import urlencode, quote
+from langfuse import observe
 
 VCELL_API_BASE_URL = "https://vcell.cam.uchc.edu/api/v0"
 
 logger = get_logger("vcelldb_service")
 
 
+@observe(name="FETCH_BIOMODELS")
 async def fetch_biomodels(params: BiomodelRequestParams) -> dict:
     """
     Fetch a list of biomodels from the VCell API based on filtering and sorting parameters.
@@ -52,6 +54,7 @@ async def fetch_biomodels(params: BiomodelRequestParams) -> dict:
     }
 
 
+@observe(name="FETCH_SIMULATION_DETAILS")
 async def fetch_simulation_details(params: SimulationRequestParams) -> dict:
     """
     Fetch detailed information about a specific simulation for a given biomodel.
@@ -70,6 +73,7 @@ async def fetch_simulation_details(params: SimulationRequestParams) -> dict:
         return response.json()
 
 
+@observe(name="GET_VCML_FILE")
 async def get_vcml_file(biomodel_id: str, truncate: bool = False) -> str:
     """
     Fetches the VCML file content for a given biomodel.
@@ -91,6 +95,7 @@ async def get_vcml_file(biomodel_id: str, truncate: bool = False) -> str:
             return response.text
 
 
+@observe(name="GET_SBML_FILE")
 async def get_sbml_file(biomodel_id: str) -> str:
     """
     Fetches the SBML file content for a given biomodel.
@@ -109,6 +114,7 @@ async def get_sbml_file(biomodel_id: str) -> str:
         return response.text
 
 
+@observe(name="GET_DIAGRAM_URL")
 async def get_diagram_url(biomodel_id: str) -> str:
     """
     Gets diagram image URL for a given biomodel.
@@ -122,6 +128,7 @@ async def get_diagram_url(biomodel_id: str) -> str:
     return f"{VCELL_API_BASE_URL}/biomodel/{biomodel_id}/diagram"
 
 
+@observe(name="GET_DIAGRAM_IMAGE")
 async def get_diagram_image(biomodel_id: str) -> bytes:
     """
     Fetches the diagram image for a given biomodel from the VCell API and returns the image bytes.
@@ -140,6 +147,7 @@ async def get_diagram_image(biomodel_id: str) -> bytes:
         return response.content
 
 
+@observe(name="FETCH_BIOMODEL_APPLICATIONS_FILES")
 async def fetch_biomodel_applications_files(biomodel_id: str) -> dict:
     """
     Fetch applications data along with SBML and BNGL file URLs for a given biomodel.
