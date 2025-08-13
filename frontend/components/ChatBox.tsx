@@ -172,11 +172,22 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
         ? `${promptPrefix} ${msg}${parameterContext}`
         : `${msg}${parameterContext}`;
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/query?user_prompt=${encodeURIComponent(finalPrompt)}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/query`,
         {
           method: "POST",
-          headers: { accept: "application/json" },
-          body: "",
+          headers: {
+            "Content-Type": "application/json",
+            accept: "application/json",
+          },
+          body: JSON.stringify({
+            conversation_history: [
+              ...messages,
+              { role: "user", content: finalPrompt },
+            ].map(msg => ({
+              role: msg.role,
+              content: msg.content,
+            })),
+          }),
         },
       );
       const data = await res.json();
