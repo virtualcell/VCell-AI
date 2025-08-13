@@ -36,6 +36,7 @@ async def get_llm_response(system_prompt: str, user_prompt: str):
     ]
 
     response = client.chat.completions.create(
+        name="GET_LLM_RESPONSE",
         model=settings.AZURE_DEPLOYMENT_NAME,
         messages=messages,
     )
@@ -58,6 +59,7 @@ async def get_response_with_tools(conversation_history: list[dict]):
     logger.info(f"User prompt: {user_prompt}")
 
     response = client.chat.completions.create(
+        name="GET_RESPONSE_WITH_TOOLS::RETRIEVE_TOOLS",
         model=settings.AZURE_DEPLOYMENT_NAME,
         messages=messages,
         tools=tools,
@@ -97,8 +99,12 @@ async def get_response_with_tools(conversation_history: list[dict]):
 
     # Send back the final response incorporating the tool result
     completion = client.chat.completions.create(
+        name = "GET_RESPONSE_WITH_TOOLS::PROCESS_TOOL_RESULTS",
         model=settings.AZURE_DEPLOYMENT_NAME,
         messages=messages,
+        metadata={
+            "tool_calls":tool_calls,
+        },
     )
 
     final_response = completion.choices[0].message.content
@@ -209,6 +215,7 @@ async def analyse_diagram(biomodel_id: str):
             {"type": "image_url", "image_url": {"url": diagram_url}},
         ]
         response = client.chat.completions.create(
+            name="ANALYSE_DIAGRAM",
             model=settings.AZURE_DEPLOYMENT_NAME,
             messages=[
                 {
