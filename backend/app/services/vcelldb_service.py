@@ -9,18 +9,20 @@ VCELL_API_BASE_URL = "https://vcell.cam.uchc.edu/api/v0"
 
 logger = get_logger("vcelldb_service")
 
+
 async def check_vcell_connectivity() -> bool:
     """
     Check if the VCell API is reachable by attempting to resolve the hostname.
-    
+
     Returns:
         bool: True if the API is reachable, False otherwise.
     """
     try:
         import socket
+
         hostname = "vcell.cam.uchc.edu"
         logger.info(f"Checking connectivity to {hostname}")
-        
+
         # Try to resolve the hostname
         ip_address = socket.gethostbyname(hostname)
         logger.info(f"Successfully resolved {hostname} to {ip_address}")
@@ -98,7 +100,9 @@ async def fetch_simulation_details(params: SimulationRequestParams) -> dict:
 
 
 @observe(name="GET_VCML_FILE")
-async def get_vcml_file(biomodel_id: str, truncate: bool = False, max_retries: int = 3) -> str:
+async def get_vcml_file(
+    biomodel_id: str, truncate: bool = False, max_retries: int = 3
+) -> str:
     """
     Fetches the VCML file content for a given biomodel with retry logic.
 
@@ -110,51 +114,65 @@ async def get_vcml_file(biomodel_id: str, truncate: bool = False, max_retries: i
         str: VCML content of the biomodel.
     """
     logger.info(f"Fetching VCML file for biomodel: {biomodel_id}")
-    
+
     # Check connectivity first
     if not await check_vcell_connectivity():
-        logger.error("VCell API is not reachable. Please check your network connection and DNS settings.")
-        raise Exception("VCell API is not reachable. Please check your network connection and DNS settings.")
-    
+        logger.error(
+            "VCell API is not reachable. Please check your network connection and DNS settings."
+        )
+        raise Exception(
+            "VCell API is not reachable. Please check your network connection and DNS settings."
+        )
+
     for attempt in range(max_retries + 1):
         try:
             url = f"{VCELL_API_BASE_URL}/biomodel/{biomodel_id}/biomodel.vcml"
-            logger.info(f"Requesting URL: {url} (attempt {attempt + 1}/{max_retries + 1})")
-            
+            logger.info(
+                f"Requesting URL: {url} (attempt {attempt + 1}/{max_retries + 1})"
+            )
+
             async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.get(url)
                 logger.info(f"Response status: {response.status_code}")
                 logger.info(f"Response headers: {dict(response.headers)}")
                 response.raise_for_status()
-                
+
                 if truncate:
                     return response.text[:500]
                 else:
                     return response.text
-                    
+
         except httpx.HTTPStatusError as e:
-            logger.error(f"HTTP error fetching VCML file for biomodel {biomodel_id}: {e.response.status_code} - {e.response.text}")
+            logger.error(
+                f"HTTP error fetching VCML file for biomodel {biomodel_id}: {e.response.status_code} - {e.response.text}"
+            )
             if attempt == max_retries:
                 raise e
             logger.warning(f"Retrying in {2 ** attempt} seconds...")
-            await asyncio.sleep(2 ** attempt)
-            
+            await asyncio.sleep(2**attempt)
+
         except httpx.RequestError as e:
-            logger.error(f"Request error fetching VCML file for biomodel {biomodel_id}: {str(e)}")
+            logger.error(
+                f"Request error fetching VCML file for biomodel {biomodel_id}: {str(e)}"
+            )
             if attempt == max_retries:
                 raise e
             logger.warning(f"Retrying in {2 ** attempt} seconds...")
-            await asyncio.sleep(2 ** attempt)
-            
+            await asyncio.sleep(2**attempt)
+
         except Exception as e:
-            logger.error(f"Unexpected error fetching VCML file for biomodel {biomodel_id}: {str(e)}")
+            logger.error(
+                f"Unexpected error fetching VCML file for biomodel {biomodel_id}: {str(e)}"
+            )
             if attempt == max_retries:
                 raise e
             logger.warning(f"Retrying in {2 ** attempt} seconds...")
-            await asyncio.sleep(2 ** attempt)
-    
+            await asyncio.sleep(2**attempt)
+
     # This should never be reached, but just in case
-    raise Exception(f"Failed to fetch VCML file for biomodel {biomodel_id} after {max_retries + 1} attempts")
+    raise Exception(
+        f"Failed to fetch VCML file for biomodel {biomodel_id} after {max_retries + 1} attempts"
+    )
 
 
 @observe(name="GET_SBML_FILE")
@@ -171,19 +189,25 @@ async def get_sbml_file(biomodel_id: str) -> str:
     try:
         url = f"{VCELL_API_BASE_URL}/biomodel/{biomodel_id}/biomodel.sbml"
         logger.info(f"Requesting SBML file URL: {url}")
-        
+
         async with httpx.AsyncClient(timeout=180.0) as client:
             response = await client.get(url)
             response.raise_for_status()
             return response.text
     except httpx.HTTPStatusError as e:
-        logger.error(f"HTTP error fetching SBML file for biomodel {biomodel_id}: {e.response.status_code} - {e.response.text}")
+        logger.error(
+            f"HTTP error fetching SBML file for biomodel {biomodel_id}: {e.response.status_code} - {e.response.text}"
+        )
         raise e
     except httpx.RequestError as e:
-        logger.error(f"Request error fetching SBML file for biomodel {biomodel_id}: {str(e)}")
+        logger.error(
+            f"Request error fetching SBML file for biomodel {biomodel_id}: {str(e)}"
+        )
         raise e
     except Exception as e:
-        logger.error(f"Unexpected error fetching SBML file for biomodel {biomodel_id}: {str(e)}")
+        logger.error(
+            f"Unexpected error fetching SBML file for biomodel {biomodel_id}: {str(e)}"
+        )
         raise e
 
 
