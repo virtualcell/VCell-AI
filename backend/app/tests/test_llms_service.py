@@ -1,6 +1,3 @@
-import pytest
-import json
-from unittest.mock import Mock, patch, AsyncMock
 import sys
 import os
 
@@ -10,7 +7,6 @@ from app.services.llms_service import (
     get_llm_response,
     get_response_with_tools,
     analyse_vcml,
-    analyse_biomodel,
     analyse_diagram,
 )
 

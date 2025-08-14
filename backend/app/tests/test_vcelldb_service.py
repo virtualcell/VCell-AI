@@ -1,6 +1,3 @@
-import pytest
-import httpx
-from unittest.mock import Mock, patch, AsyncMock
 import sys
 import os
 
@@ -10,9 +7,6 @@ from app.services.vcelldb_service import (
     fetch_biomodels,
     fetch_simulation_details,
     get_vcml_file,
-    get_sbml_file,
-    get_diagram_url,
-    get_diagram_image,
     fetch_biomodel_applications_files,
 )
 from app.schemas.vcelldb_schema import BiomodelRequestParams, SimulationRequestParams
