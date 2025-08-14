@@ -1,5 +1,9 @@
 import sys
 import os
+import pytest
+
+# This tells pytest that all tests in the file should run in asyncio mode.
+pytestmark = pytest.mark.asyncio
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
@@ -23,8 +27,8 @@ class TestVCellDBService:
             bmName="calcium",
             category="all",
             owner="",
-            savedLow="",
-            savedHigh="",
+            savedLow=None,
+            savedHigh=None,
             startRow=1,
             maxRows=1000,
             orderBy="date_desc",
