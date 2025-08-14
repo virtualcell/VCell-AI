@@ -6,7 +6,12 @@ from app.services.vcelldb_service import (
 )
 from app.services.knowledge_base_service import get_similar_chunks
 from app.schemas.vcelldb_schema import BiomodelRequestParams, SimulationRequestParams
-from app.schemas.tool_schema import ToolDefinition, ToolDefinitions, FunctionDefinition, ParameterSchema
+from app.schemas.tool_schema import (
+    ToolDefinition,
+    ToolDefinitions,
+    FunctionDefinition,
+    ParameterSchema,
+)
 from app.core.logger import get_logger
 
 logger = get_logger("tools_utils")

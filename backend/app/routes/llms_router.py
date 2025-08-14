@@ -18,7 +18,9 @@ async def query_llm(conversation_history: dict):
     Returns:
         dict: The final response after processing the prompt with the tools.
     """
-    result, bmkeys = await get_llm_response(conversation_history.get("conversation_history", []))
+    result, bmkeys = await get_llm_response(
+        conversation_history.get("conversation_history", [])
+    )
     return {"response": result, "bmkeys": bmkeys}
 
 
