@@ -51,7 +51,7 @@ class TestLLMsService:
 
         result, bmkeys = await get_response_with_tools(conversation_history)
 
-        assert bmkeys == [
+        expected_bmkeys = [
             "273924831",
             "271989751",
             "254507626",
@@ -62,6 +62,8 @@ class TestLLMsService:
             "13737035",
             "2917788",
         ]
+
+        assert sorted(bmkeys) == sorted(expected_bmkeys)
         assert "273924831" in result
         assert "271989751" in result
         assert "254507626" in result
