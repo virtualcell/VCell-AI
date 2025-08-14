@@ -125,14 +125,16 @@ async def analyse_vcml(biomodel_id: str):
     """
     try:
         # Fetch VCML details
-        vcml = await get_vcml_file(biomodel_id)
+        logger.info(f"Fetching VCML file for biomodel: {biomodel_id}")
+        vcml = await get_vcml_file(biomodel_id, truncate=False)
         # Analyze VCML with LLM
+        logger.info(f"Analyzing VCML file for biomodel: {biomodel_id} with content: {str(vcml[:500])}")
         vcml_system_prompt = "You are a VCell BioModel Assistant, designed to help users understand and interact with biological models in VCell. Your task is to provide human-readable, concise responses based on the given VCML."
         vcml_prompt = f"Analyze the following VCML content for Biomodel {biomodel_id}: {str(vcml)}"
         vcml_analysis = await get_llm_response(vcml_system_prompt, vcml_prompt)
         return vcml_analysis
     except Exception as e:
-        logger.error(f"Error analyzing VCML for biomodel {biomodel_id}: {str(e)}")
+        logger.error(f"Error analyzing VCML for biomodel {biomodel_id}: {str(e)}", exc_info=True)
         return f"An error occurred during VCML analysis: {str(e)}"
 
 
