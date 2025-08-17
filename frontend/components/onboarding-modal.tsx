@@ -92,96 +92,91 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
     },
      {
       title: "Available Tools",
-      subtitle: "Standalone tools and result verification",
+      subtitle: "Tools the LLM uses to provide factual answers",
       icon: <Search className="h-8 w-8 text-blue-600" />,
       content: (
-        <div className="space-y-6">
+        <div className="space-y-4">
           <div className="text-center">
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 mb-4">
-              <Search className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">
-                Powerful Analysis Tools
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 mb-3">
+              <Search className="h-10 w-10 text-blue-600 mx-auto mb-2" />
+              <h3 className="text-base font-semibold text-slate-900 mb-1">
+                LLM Analysis Tools
               </h3>
-              <p className="text-slate-600">
-                Use these tools independently or to verify AI responses for
-                accurate results.
+              <p className="text-slate-600 text-sm">
+                The LLM uses these tools and a curated knowledge base to provide accurate, factual answers to your questions.
               </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <Card className="border-slate-200 hover:shadow-md transition-shadow">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <Search className="h-5 w-5 text-blue-600" />
+              <CardContent className="p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <Search className="h-4 w-4 text-blue-600" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-slate-900">
+                    <h4 className="font-semibold text-slate-900 text-sm">
                       Biomodel Search
                     </h4>
-                    <p className="text-xs text-slate-600">Advanced filtering</p>
+                    <p className="text-xs text-slate-600">Database querying</p>
                   </div>
                 </div>
-                <p className="text-sm text-slate-600">
-                  Search the database with precise filters for name, owner,
-                  category, and date ranges.
+                <p className="text-xs text-slate-600">
+                  The LLM searches the database with precise filters to find relevant models and information.
                 </p>
               </CardContent>
             </Card>
 
             <Card className="border-slate-200 hover:shadow-md transition-shadow">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <FileText className="h-5 w-5 text-blue-600" />
+              <CardContent className="p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <FileText className="h-4 w-4 text-blue-600" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-slate-900">VCML Files</h4>
+                    <h4 className="font-semibold text-slate-900 text-sm">VCML Files</h4>
                     <p className="text-xs text-slate-600">
-                      Virtual Cell format
+                      Model definitions
                     </p>
                   </div>
                 </div>
-                <p className="text-sm text-slate-600">
-                  Retrieve complete model definitions with compartments,
-                  species, and kinetics.
+                <p className="text-xs text-slate-600">
+                  The LLM accesses complete model definitions with compartments, species, and kinetics for detailed analysis.
                 </p>
               </CardContent>
             </Card>
 
             <Card className="border-slate-200 hover:shadow-md transition-shadow">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <Code className="h-5 w-5 text-blue-600" />
+              <CardContent className="p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <MessageSquare className="h-4 w-4 text-blue-600" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-slate-900">SBML Files</h4>
-                    <p className="text-xs text-slate-600">Standard format</p>
+                    <h4 className="font-semibold text-slate-900 text-sm">Knowledge Base</h4>
+                    <p className="text-xs text-slate-600">Curated documentation</p>
                   </div>
                 </div>
-                <p className="text-sm text-slate-600">
-                  Download standardized Systems Biology Markup Language files
-                  for external tools.
+                <p className="text-xs text-slate-600">
+                  The LLM uses a comprehensive set of documents curated by the VCell team to answer questions factually and accurately.
                 </p>
               </CardContent>
             </Card>
 
             <Card className="border-slate-200 hover:shadow-md transition-shadow">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <Diagram3 className="h-5 w-5 text-blue-600" />
+              <CardContent className="p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <Diagram3 className="h-4 w-4 text-blue-600" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-slate-900">Diagrams</h4>
+                    <h4 className="font-semibold text-slate-900 text-sm">Diagrams</h4>
                     <p className="text-xs text-slate-600">Visual networks</p>
                   </div>
                 </div>
-                <p className="text-sm text-slate-600">
-                  Generate real-time network diagrams showing topology and
-                  interactions.
+                <p className="text-xs text-slate-600">
+                  The LLM can generate real-time network diagrams showing topology and interactions for visual understanding.
                 </p>
               </CardContent>
             </Card>
