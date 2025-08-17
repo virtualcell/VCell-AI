@@ -9,6 +9,7 @@ import {
   Search,
   FileText,
   BarChart3Icon as Diagram3,
+  HelpCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -75,26 +76,25 @@ export default function ChatPage() {
         {/* Header */}
         <div className="mb-4 flex-shrink-0">
           <div className="flex items-center justify-between mb-1">
-            <h1 className="text-2xl font-bold text-slate-900">AI Assistant</h1>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowOnboarding(true)}
-              className="flex items-center gap-2"
-            >
-              <MessageSquare className="h-4 w-4" />
-              How to Use
-            </Button>
+            <div className="flex items-center gap-4 w-full">
+              {/* Warning Alert - takes most of the space */}
+              <Alert className="border-amber-200 bg-amber-50 py-2 flex-1">
+                <AlertDescription className="text-amber-800 text-sm">
+                  <strong>⚠️ Important:</strong> Responses are AI generated and may contain errors, or hallucinations.
+                </AlertDescription>
+              </Alert>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowOnboarding(true)}
+                className="flex items-center gap-2 flex-shrink-0"
+              >
+                <HelpCircle className="h-4 w-4" />
+                How to Use
+              </Button>
+            </div>
           </div>
-        </div>
-
-        {/* Persistent Warning */}
-        <div className="mb-3 flex-shrink-0">
-          <Alert className="border-amber-200 bg-amber-50 py-2">
-            <AlertDescription className="text-amber-800 text-sm">
-              <strong>⚠️ Important:</strong> Responses are AI generated and may contain errors, or hallucinations.
-            </AlertDescription>
-          </Alert>
         </div>
 
         {/* Chat Interface - takes remaining space */}
