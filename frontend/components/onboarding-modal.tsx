@@ -192,7 +192,7 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
         <div className="space-y-4">
           <div className="space-y-3">
             <Label className="text-slate-700 font-medium text-sm">
-              Example Response with Interactive Elements:
+              Example Response:
             </Label>
             
             <div className="bg-white border-2 border-slate-300 rounded-lg p-4 font-mono text-sm">
@@ -227,44 +227,43 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
       subtitle: "Understanding AI limitations",
       icon: <AlertTriangle className="h-8 w-8 text-blue-600" />,
       content: (
-        <div className="space-y-6">
+        <div className="space-y-4">
           <div className="text-center">
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 mb-4">
-              <AlertTriangle className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 mb-3">
+              <AlertTriangle className="h-10 w-10 text-blue-600 mx-auto mb-2" />
+              <h3 className="text-base font-semibold text-slate-900 mb-1">
                 AI Response Limitations
               </h3>
-              <p className="text-slate-600">
-                Understanding these limitations ensures you use the AI Assistant
-                effectively and safely.
+              <p className="text-slate-600 text-sm">
+                Understanding these limitations ensures you use the AI effectively.
               </p>
             </div>
           </div>
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <Card className="border-blue-200 bg-blue-50">
-                <CardContent className="p-4 text-center">
-                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <span className="text-blue-600 text-xl">🤖</span>
+                <CardContent className="p-3 text-center">
+                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <span className="text-blue-600 text-lg">🤖</span>
                   </div>
-                  <h4 className="font-semibold text-blue-900 mb-2">
+                  <h4 className="font-semibold text-blue-900 mb-1 text-sm">
                     AI Hallucinations
                   </h4>
-                  <p className="text-sm text-blue-800">
+                  <p className="text-xs text-blue-800">
                     AI may generate plausible-sounding but incorrect information
                   </p>
                 </CardContent>
               </Card>
 
               <Card className="border-blue-200 bg-blue-50">
-                <CardContent className="p-4 text-center">
-                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <span className="text-blue-600 text-xl">⚠️</span>
+                <CardContent className="p-3 text-center">
+                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <span className="text-blue-600 text-lg">⚠️</span>
                   </div>
-                  <h4 className="font-semibold text-blue-900 mb-2">
+                  <h4 className="font-semibold text-blue-900 mb-1 text-sm">
                     Server Errors
                   </h4>
-                  <p className="text-sm text-blue-800">
+                  <p className="text-xs text-blue-800">
                     Technical issues may affect response accuracy or
                     availability
                   </p>
@@ -272,14 +271,14 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
               </Card>
 
               <Card className="border-blue-200 bg-blue-50">
-                <CardContent className="p-4 text-center">
-                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <span className="text-blue-600 text-xl">📊</span>
+                <CardContent className="p-3 text-center">
+                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <span className="text-blue-600 text-lg">📊</span>
                   </div>
-                  <h4 className="font-semibold text-blue-900 mb-2">
+                  <h4 className="font-semibold text-blue-900 mb-1 text-sm">
                     Private Models
                   </h4>
-                  <p className="text-sm text-blue-800">
+                  <p className="text-xs text-blue-800">
                     Feature under development to access private models securely
                   </p>
                 </CardContent>
