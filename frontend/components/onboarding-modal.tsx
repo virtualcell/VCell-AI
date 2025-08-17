@@ -185,6 +185,44 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
       ),
     },
     {
+      title: "Understand the Response",
+      subtitle: "How to interpret and explore AI responses",
+      icon: <FileText className="h-8 w-8 text-blue-600" />,
+      content: (
+        <div className="space-y-4">
+          <div className="space-y-3">
+            <Label className="text-slate-700 font-medium text-sm">
+              Example Response with Interactive Elements:
+            </Label>
+            
+            <div className="bg-white border-2 border-slate-300 rounded-lg p-4 font-mono text-sm">
+              <div className="space-y-1">
+                <div className="font-semibold text-slate-900">DupontCellCalcium</div>
+                <div className="text-slate-700">
+                  ID: 114597194 -- <span className="bg-blue-500 text-white px-2 py-1 rounded text-xs font-medium shadow-lg animate-pulse cursor-pointer hover:bg-blue-600 transition-colors">Database</span>
+                </div>
+                <div className="text-slate-700">Owner: moutoutan</div>
+                <div className="text-slate-700">Description: A model simulating calcium dynamics in a cellular context.</div>
+                <div className="text-slate-700">Applications: Application0</div>
+                <div className="text-slate-700">Simulations: Multiple simulations with varying configurations.</div>
+              </div>
+            </div>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <div className="flex items-start gap-2">
+                <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="text-blue-600 text-xs">💡</span>
+                </div>
+                <div className="text-xs text-blue-800">
+                  <strong>Interactive Database Link:</strong> The blue, shining "Database" button is a hyperlink that takes you to a dedicated page where you can view all database details about that specific model. On that page, you can also have an LLM discussion where the AI is well-instructed about that particular model's context and specifications.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ),
+    },
+    {
       title: "Important Disclaimers",
       subtitle: "Understanding AI limitations",
       icon: <AlertTriangle className="h-8 w-8 text-blue-600" />,
