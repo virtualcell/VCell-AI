@@ -4,6 +4,11 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
   User,
   Lock,
   Globe,
@@ -13,6 +18,7 @@ import {
   FlaskConical,
   Users,
   FileText,
+  ChevronsUpDown,
 } from "lucide-react";
 
 interface Simulation {
@@ -178,27 +184,40 @@ export default function BiomodelDetailPage() {
                 onLoad={() => setError("")}
               />
             </div>
-            <div className="mb-6">
-              <div className="flex items-center gap-2 mb-2">
-                <FileText className="h-4 w-4 text-blue-400" />
-                <span className="font-semibold text-slate-800 text-sm">
-                  Description
-                </span>
-              </div>
-              <div className="whitespace-pre-line text-slate-700 bg-blue-50 rounded p-3 border border-blue-100 shadow-sm text-sm">
-                {data.annot && data.annot.trim() !== ""
-                  ? data.annot
-                  : "No description is available for this biomodel"}
-              </div>
-            </div>
-            <div className="mb-6">
-              <div className="flex items-center gap-2 mb-2">
-                <Layers className="h-4 w-4 text-blue-400" />
-                <span className="font-semibold text-slate-800 text-sm">
-                  Applications
-                </span>
-              </div>
-              <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-1">
+            
+            {/* Description Section */}
+            <Collapsible className="mb-6" defaultOpen>
+              <CollapsibleTrigger asChild>
+                <div className="flex items-center gap-2 mb-2 cursor-pointer hover:bg-slate-50 p-2 rounded transition-colors">
+                  <FileText className="h-4 w-4 text-blue-400" />
+                  <span className="font-semibold text-slate-800 text-sm">
+                    Description
+                  </span>
+                  <ChevronsUpDown className="h-4 w-4 text-slate-400 ml-auto" />
+                </div>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="whitespace-pre-line text-slate-700 bg-blue-50 rounded p-3 border border-blue-100 shadow-sm text-sm">
+                  {data.annot && data.annot.trim() !== ""
+                    ? data.annot
+                    : "No description is available for this biomodel"}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+            
+            {/* Applications Section */}
+            <Collapsible className="mb-6" defaultOpen>
+              <CollapsibleTrigger asChild>
+                <div className="flex items-center gap-2 mb-2 cursor-pointer hover:bg-slate-50 p-2 rounded transition-colors">
+                  <Layers className="h-4 w-4 text-blue-400" />
+                  <span className="font-semibold text-slate-800 text-sm">
+                    Applications
+                  </span>
+                  <ChevronsUpDown className="h-4 w-4 text-slate-400 ml-auto" />
+                </div>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-1">
                 {data.applications?.map((app) => {
                   const encodedAppName = encodeURIComponent(app.name || "");
                   const bnglUrl = `https://vcell.cam.uchc.edu/api/v0/biomodel/${data.bmKey}/biomodel.bngl?appname=${encodedAppName}`;
@@ -240,15 +259,22 @@ export default function BiomodelDetailPage() {
                   );
                 })}
               </ul>
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <FlaskConical className="h-4 w-4 text-blue-400" />
-                <span className="font-semibold text-slate-800 text-sm">
-                  Simulations
-                </span>
-              </div>
-              <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-1">
+            </CollapsibleContent>
+            </Collapsible>
+            
+            {/* Simulations Section */}
+            <Collapsible defaultOpen>
+              <CollapsibleTrigger asChild>
+                <div className="flex items-center gap-2 mb-2 cursor-pointer hover:bg-slate-50 p-2 rounded transition-colors">
+                  <FlaskConical className="h-4 w-4 text-blue-400" />
+                  <span className="font-semibold text-slate-800 text-sm">
+                    Simulations
+                  </span>
+                  <ChevronsUpDown className="h-4 w-4 text-slate-400 ml-auto" />
+                </div>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-1">
                 {data.simulations?.map((sim) => (
                   <li
                     key={sim.key}
@@ -297,7 +323,8 @@ export default function BiomodelDetailPage() {
                   </li>
                 ))}
               </ul>
-            </div>
+            </CollapsibleContent>
+            </Collapsible>
           </CardContent>
         </Card>
       </div>
