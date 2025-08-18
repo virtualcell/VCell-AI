@@ -101,21 +101,21 @@ export default function BiomodelDetailPage() {
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="container mx-auto p-8 max-w-6xl">
-        <Card className="mb-10 shadow-lg border-slate-200">
-          <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-50 border-b border-slate-200 px-6 py-5 flex flex-col md:flex-row md:items-center md:justify-between">
-            <div className="flex flex-col gap-2 w-full">
+        <Card className="mb-8 shadow-lg border-slate-200">
+          <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-50 border-b border-slate-200 px-5 py-4 flex flex-col md:flex-row md:items-center md:justify-between">
+            <div className="flex flex-col gap-1.5 w-full">
               <div className="flex items-center justify-between w-full">
-                <CardTitle className="text-3xl font-extrabold text-blue-900 flex items-center gap-3">
-                  <FlaskConical className="h-8 w-8 text-blue-500" />
+                <CardTitle className="text-2xl font-extrabold text-blue-900 flex items-center gap-2.5">
+                  <FlaskConical className="h-7 w-7 text-blue-500" />
                   {data.name}
                 </CardTitle>
-                <div className="flex gap-3">
+                <div className="flex gap-2.5">
                   <button
                     onClick={() => {
                       const vcellUrl = `https://vcell.cam.uchc.edu/api/v0/biomodel/${data?.bmKey}/biomodel.vcml`;
                       window.open(vcellUrl, "_blank");
                     }}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded border border-blue-600 text-blue-700 bg-white font-semibold shadow-sm transition-colors hover:bg-blue-50"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-blue-600 text-blue-700 bg-white font-semibold shadow-sm transition-colors hover:bg-blue-50 text-sm"
                   >
                     <FileText className="h-4 w-4" /> Download VCML
                   </button>
@@ -126,13 +126,13 @@ export default function BiomodelDetailPage() {
                         "_blank",
                       );
                     }}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded border border-yellow-500 text-yellow-700 bg-white font-semibold shadow-sm transition-colors hover:bg-yellow-50"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-yellow-500 text-yellow-700 bg-white font-semibold shadow-sm transition-colors hover:bg-yellow-50 text-sm"
                   >
                     <FlaskConical className="h-4 w-4" /> AI Analysis
                   </button>
                 </div>
               </div>
-              <div className="flex flex-wrap gap-4 mt-3 text-base text-slate-600">
+              <div className="flex flex-wrap gap-3 mt-2 text-sm text-slate-600">
                 <span className="flex items-center gap-1">
                   <Hash className="h-4 w-4 text-blue-400" />{" "}
                   <span className="font-mono text-blue-700">{data.bmKey}</span>
