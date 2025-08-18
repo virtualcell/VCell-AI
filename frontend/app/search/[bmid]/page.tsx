@@ -167,9 +167,9 @@ export default function BiomodelDetailPage() {
               </div>
             </div>
           </CardHeader>
-          <CardContent className="p-8 bg-white">
+          <CardContent className="p-6 bg-white">
             {/* Biomodel Diagram block */}
-            <div className="mb-8">
+            <div className="mb-6">
               <img
                 src={biomodelDiagramUrl || "/placeholder.svg"}
                 alt="Biomodel Diagram"
@@ -178,27 +178,27 @@ export default function BiomodelDetailPage() {
                 onLoad={() => setError("")}
               />
             </div>
-            <div className="mb-8">
+            <div className="mb-6">
               <div className="flex items-center gap-2 mb-2">
-                <FileText className="h-5 w-5 text-blue-400" />
-                <span className="font-semibold text-slate-800">
+                <FileText className="h-4 w-4 text-blue-400" />
+                <span className="font-semibold text-slate-800 text-sm">
                   Description
                 </span>
               </div>
-              <div className="whitespace-pre-line text-slate-700 bg-blue-50 rounded p-4 border border-blue-100 shadow-sm">
+              <div className="whitespace-pre-line text-slate-700 bg-blue-50 rounded p-3 border border-blue-100 shadow-sm text-sm">
                 {data.annot && data.annot.trim() !== ""
                   ? data.annot
                   : "No description is available for this biomodel"}
               </div>
             </div>
-            <div className="mb-8">
+            <div className="mb-6">
               <div className="flex items-center gap-2 mb-2">
-                <Layers className="h-5 w-5 text-blue-400" />
-                <span className="font-semibold text-slate-800">
+                <Layers className="h-4 w-4 text-blue-400" />
+                <span className="font-semibold text-slate-800 text-sm">
                   Applications
                 </span>
               </div>
-              <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-1">
+              <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-1">
                 {data.applications?.map((app) => {
                   const encodedAppName = encodeURIComponent(app.name || "");
                   const bnglUrl = `https://vcell.cam.uchc.edu/api/v0/biomodel/${data.bmKey}/biomodel.bngl?appname=${encodedAppName}`;
@@ -206,13 +206,13 @@ export default function BiomodelDetailPage() {
                   return (
                     <li
                       key={app.key}
-                      className="bg-slate-50 border border-slate-200 rounded p-3 flex flex-col gap-1 shadow-sm"
+                      className="bg-slate-50 border border-slate-200 rounded p-2 flex flex-col gap-1 shadow-sm"
                     >
-                      <span className="font-medium text-blue-900 flex items-center gap-2">
-                        <Hash className="h-4 w-4 text-blue-300" />
+                      <span className="font-medium text-blue-900 flex items-center gap-2 text-sm">
+                        <Hash className="h-3 w-3 text-blue-300" />
                         {app.name}
                       </span>
-                      <span className="text-xs text-slate-500 flex gap-4">
+                      <span className="text-xs text-slate-500 flex gap-3">
                         App Key:{" "}
                         <span className="font-mono text-blue-700">
                           {app.key}
@@ -222,16 +222,16 @@ export default function BiomodelDetailPage() {
                           {app.mathKey}
                         </span>
                       </span>
-                      <div className="flex gap-2 mt-2">
+                      <div className="flex gap-2 mt-1">
                         <button
                           onClick={() => window.open(bnglUrl, "_blank")}
-                          className="inline-flex items-center gap-2 px-3 py-1 rounded border border-green-600 text-green-700 bg-white font-semibold shadow-sm transition-colors hover:bg-green-50 text-xs"
+                          className="inline-flex items-center gap-1 px-2 py-1 rounded border border-green-600 text-green-700 bg-white font-semibold shadow-sm transition-colors hover:bg-green-50 text-xs"
                         >
                           Download BNGL
                         </button>
                         <button
                           onClick={() => window.open(sbmlUrl, "_blank")}
-                          className="inline-flex items-center gap-2 px-3 py-1 rounded border border-blue-600 text-blue-700 bg-white font-semibold shadow-sm transition-colors hover:bg-blue-50 text-xs"
+                          className="inline-flex items-center gap-1 px-2 py-1 rounded border border-blue-600 text-blue-700 bg-white font-semibold shadow-sm transition-colors hover:bg-blue-50 text-xs"
                         >
                           Download SBML
                         </button>
@@ -243,19 +243,19 @@ export default function BiomodelDetailPage() {
             </div>
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <FlaskConical className="h-5 w-5 text-blue-400" />
-                <span className="font-semibold text-slate-800">
+                <FlaskConical className="h-4 w-4 text-blue-400" />
+                <span className="font-semibold text-slate-800 text-sm">
                   Simulations
                 </span>
               </div>
-              <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-1">
+              <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-1">
                 {data.simulations?.map((sim) => (
                   <li
                     key={sim.key}
-                    className="bg-slate-50 border border-slate-200 rounded p-3 shadow-sm"
+                    className="bg-slate-50 border border-slate-200 rounded p-2 shadow-sm"
                   >
-                    <div className="font-medium text-blue-900 flex items-center gap-2 mb-1">
-                      <Hash className="h-4 w-4 text-blue-300" />
+                    <div className="font-medium text-blue-900 flex items-center gap-2 mb-1 text-sm">
+                      <Hash className="h-3 w-3 text-blue-300" />
                       {sim.name}
                     </div>
                     <div className="text-xs text-slate-500 mb-1 flex flex-wrap gap-2">
