@@ -170,16 +170,10 @@ export default function BiomodelDetailPage() {
           <CardContent className="p-8 bg-white">
             {/* Biomodel Diagram block */}
             <div className="mb-8">
-              <div className="flex items-center gap-2 mb-2">
-                <FlaskConical className="h-5 w-5 text-blue-400" />
-                <span className="font-semibold text-slate-800">
-                  Biomodel Diagram
-                </span>
-              </div>
               <img
                 src={biomodelDiagramUrl || "/placeholder.svg"}
                 alt="Biomodel Diagram"
-                className="max-w-full h-auto mx-auto border border-slate-200 rounded shadow"
+                className="max-w-full h-[350px] mx-auto border border-slate-200 rounded shadow"
                 onError={() => setError("Failed to load diagram image.")}
                 onLoad={() => setError("")}
               />
