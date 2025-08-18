@@ -85,6 +85,9 @@ export default function BiomodelDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("overview");
+  const [diagramAnalysis, setDiagramAnalysis] = useState("");
+  const [analysisError, setAnalysisError] = useState("");
+  const [combinedMessages, setCombinedMessages] = useState<string[]>([]);
 
   const quickActions = [
     {
@@ -144,8 +147,42 @@ export default function BiomodelDetailPage() {
       .finally(() => setLoading(false));
   }, [bmid]);
 
-  if (loading)
-    return <div className="p-8 text-center">Loading biomodel...</div>;
+  useEffect(() => {
+    if (!data?.bmKey) return;
+    
+    const fetchDiagramAnalysis = async () => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+        const res = await fetch(`${apiUrl}/analyse/${data.bmKey}/diagram`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (res.ok) {
+          const responseData = await res.json();
+          setDiagramAnalysis(responseData.response || "");
+        } else {
+          const errorData = await res.json();
+          setAnalysisError(errorData.detail || "Failed to analyze diagram.");
+        }
+      } catch (err) {
+        setAnalysisError("Failed to fetch diagram analysis.");
+      }
+    };
+
+    fetchDiagramAnalysis();
+  }, [data?.bmKey]);
+
+  // Create combined messages when diagram analysis is ready
+  useEffect(() => {
+    if (diagramAnalysis) {
+      const diagramMessage = `# Diagram Analysis \n ${diagramAnalysis}`;
+      setCombinedMessages([diagramMessage]);
+    }
+  }, [diagramAnalysis]);
+
   if (error) return <div className="p-8 text-center text-red-600">{error}</div>;
   if (!data) return null;
 
@@ -398,7 +435,7 @@ export default function BiomodelDetailPage() {
                   </div>
                   <div className="bg-slate-50 border border-slate-200 rounded shadow-sm h-[600px] overflow-hidden">
                     <ChatBox
-                      startMessage={[]}
+                      startMessage={combinedMessages}
                       quickActions={quickActions}
                       cardTitle="VCell AI Assistant"
                       promptPrefix={`Analyze the biomodel with the bmId ${data.bmKey}`}
