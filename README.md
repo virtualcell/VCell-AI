@@ -111,7 +111,7 @@ npm run dev
  - LLM queries in Search page are defined at frontend/app/search/[bmid]/page.tsx, value is prefixed with the text defined in the ChatBox component in the same file.
  -  LLM queries in Chat page are defined at frontend/app/chat/[bmid]/page.tsx, value is prefixed with the text defined in the ChatBox component in the same file.
  -  The returned results are formatted in frontend/components, e.g. hyperlinks to model details are inserted in frontend/components/ChatBox.tsx
- -  The RAG is using the knowledge base populated by the Admin.
+ -  The RAG is using the knowledge base populated by backend/populate_db.ipynb
 
 
 ## 📄 License
