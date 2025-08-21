@@ -36,11 +36,23 @@ jobs:
 
     - name: Create .env file with GitHub Secrets
       run: |
+        echo "FRONTEND_URL=${{ secrets.FRONTEND_URL }}" >> backend/app/.env
+    
+        # Azure OpenAI Configuration
         echo "AZURE_API_VERSION=${{ secrets.AZURE_API_VERSION }}" >> backend/app/.env
         echo "AZURE_ENDPOINT=${{ secrets.AZURE_ENDPOINT }}" >> backend/app/.env
         echo "AZURE_API_KEY=${{ secrets.AZURE_API_KEY }}" >> backend/app/.env
         echo "AZURE_DEPLOYMENT_NAME=${{ secrets.AZURE_DEPLOYMENT_NAME }}" >> backend/app/.env
-        echo "FRONTEND_URL=${{ secrets.FRONTEND_URL }}" >> backend/app/.env
+        echo "AZURE_EMBEDDING_DEPLOYMENT_NAME=${{ secrets.AZURE_EMBEDDING_DEPLOYMENT_NAME }}" >> backend/app/.env
+    
+        # Qdrant Configuration
+        echo "QDRANT_URL=${{ secrets.QDRANT_URL }}" >> backend/app/.env
+        echo "QDRANT_COLLECTION_NAME=${{ secrets.QDRANT_COLLECTION_NAME }}" >> backend/app/.env
+    
+        # Langfuse Configuration
+        echo "LANGFUSE_SECRET_KEY=${{ secrets.LANGFUSE_SECRET_KEY }}" >> backend/app/.env
+        echo "LANGFUSE_PUBLIC_KEY=${{ secrets.LANGFUSE_PUBLIC_KEY }}" >> backend/app/.env
+        echo "LANGFUSE_HOST=${{ secrets.LANGFUSE_HOST }}" >> backend/app/.env
     - name: Run Tests with Poetry
       run: |
         cd backend/app
