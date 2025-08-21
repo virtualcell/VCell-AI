@@ -106,5 +106,13 @@ npm install
 npm run dev
 ```
 
+### LLM calls
+ - The system prompt for all LLM queries is defined in backend/app/utils/system_prompt.py
+ - LLM queries in Search page are defined at frontend/app/search/[bmid]/page.tsx, value is prefixed with the text defined in the ChatBox component in the same file.
+ -  LLM queries in Chat page are defined at frontend/app/chat/[bmid]/page.tsx, value is prefixed with the text defined in the ChatBox component in the same file.
+ -  The returned results are formatted in frontend/components, e.g. hyperlinks to model details are inserted in frontend/components/ChatBox.tsx
+ -  The RAG is using the knowledge base populated by the Admin.
+
+
 ## 📄 License
 This project is part of Google Summer of Code and is licensed under the MIT License.
