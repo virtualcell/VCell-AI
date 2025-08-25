@@ -34,6 +34,7 @@ interface ChatParameters {
 interface ChatBoxProps {
   startMessage: string | string[];
   quickActions: QuickAction[];
+  supplementalActions?: QuickAction[];
   cardTitle: string;
   promptPrefix?: string;
   isLoading?: boolean;
@@ -43,6 +44,7 @@ interface ChatBoxProps {
 export const ChatBox: React.FC<ChatBoxProps> = ({
   startMessage,
   quickActions,
+  supplementalActions,
   cardTitle,
   promptPrefix,
   isLoading: isInitialLoading = false,
@@ -344,6 +346,19 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
                   className="h-4 px-1 text-xs text-slate-500 hover:text-slate-700 hover:bg-slate-100"
                   onClick={() => handleQuickAction(action.value)}
                 >
+                  {action.icon}
+                  <span className="ml-0.5">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {supplementalActions && (
+          <div className="mt-3 pt-3 border-t-2 border-slate-200">
+            <div className="flex flex-wrap gap-1">
+              {supplementalActions.map((action, idx) => (
+                <Button key={idx} variant="ghost" size="sm" className="h-4 px-1 text-xs text-slate-500 hover:text-slate-700 hover:bg-slate-100" onClick={() => handleQuickAction(action.value)}>
                   {action.icon}
                   <span className="ml-0.5">{action.label}</span>
                 </Button>
