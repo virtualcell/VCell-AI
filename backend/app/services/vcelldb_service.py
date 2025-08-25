@@ -13,28 +13,28 @@ logger = get_logger("vcelldb_service")
 
 def sanitize_vcml_content(vcml_content: str) -> str:
     """
-    Sanitizes VCML content by removing all Image tags and their content.
+    Sanitizes VCML content by removing only ImageData tags and their content.
     
     Args:
         vcml_content (str): Raw VCML content as string.
         
     Returns:
-        str: Sanitized VCML content with all Image tags removed.
+        str: Sanitized VCML content with ImageData tags removed.
     """
-    # Remove all Image tags and their content using regex
-    # This pattern matches <Image ...> ... </Image> including nested content
+    # Remove only ImageData tags and their content using regex
+    # This pattern matches <ImageData ...> ... </ImageData> including nested content
     # The pattern handles multiline content and preserves the rest of the XML structure
     sanitized_content = re.sub(
-        r'<Image[^>]*>.*?</Image>',
+        r'<ImageData[^>]*>.*?</ImageData>',
         '',
         vcml_content,
         flags=re.DOTALL | re.MULTILINE
     )
     
-    # Clean up any extra whitespace that might be left after removing images
+    # Clean up any extra whitespace that might be left after removing ImageData
     sanitized_content = re.sub(r'\n\s*\n', '\n', sanitized_content)
     
-    logger.info("VCML content sanitized: Image tags removed")
+    logger.info("VCML content sanitized: ImageData tags removed")
     return sanitized_content
 
 
