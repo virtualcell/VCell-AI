@@ -10,6 +10,7 @@ import {
   FileText,
   BarChart3Icon as Diagram3,
   HelpCircle,
+  FlaskConical,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -41,7 +42,7 @@ export default function ChatPage() {
       value: "List all tutorial models",
     },
     {
-      label: "List all Calcium models",
+      label: "List Calcium models",
       icon: <FileText className="h-3 w-3 mr-2" />,
       value: "List all Calcium models",
     },
@@ -55,19 +56,38 @@ export default function ChatPage() {
       icon: <Diagram3 className="h-3 w-3 mr-2" />,
       value: "What solvers are used in tutorial models",
     },
-    {
+/*     {
       label:
         "What are different types of VCell applications used in Tutorial models",
       icon: <MessageSquare className="h-3 w-3 mr-2" />,
       value:
         "What are different types of VCell applications used in Tutorial models",
-    },
+    }, */
     {
       label: "What Tutorial models use Spatial Stochastic applications?",
       icon: <Bot className="h-3 w-3 mr-2" />,
       value: "What Tutorial models use Spatial Stochastic applications?",
     },
   ];
+
+  const supplementalActions = [
+    {
+      label: "How to create an account on VCell Software?",
+      icon: <User className="h-3 w-3 mr-2" />,
+      value: "How to create an account on VCell Software?",
+    },
+    {
+      label: "How to model FrapBindings in VCell Software?",
+      icon: <FileText className="h-3 w-3 mr-2" />,
+      value: "How to model FragBindings in VCell Software?",
+    },
+    {
+      label: "How to model Moving Boundaries in VCell Software?",
+      icon: <FlaskConical className="h-3 w-3 mr-2" />,
+      value: "How to model Moving Boundaries in VCell Software?",
+    },
+  ];
+
   const cardTitle = "VCell AI Assistant";
 
   return (
@@ -102,6 +122,7 @@ export default function ChatPage() {
           <ChatBox
             startMessage={[startMessage]}
             quickActions={quickActions}
+            supplementalActions={supplementalActions}
             cardTitle={cardTitle}
           />
         </div>
