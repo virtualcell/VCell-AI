@@ -209,7 +209,7 @@ export default function BiomodelDetailPage() {
                   >
                     <FileText className="h-4 w-4" /> Download VCML
                   </button>
-                  <button
+                  {/* <button
                     onClick={() => {
                       window.open(
                         `/analyze/${data?.bmKey}?prompt=Describe%20model`,
@@ -219,7 +219,7 @@ export default function BiomodelDetailPage() {
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-yellow-500 text-yellow-700 bg-white font-semibold shadow-sm transition-colors hover:bg-yellow-50 text-sm"
                   >
                     <FlaskConical className="h-4 w-4" /> AI Analysis
-                  </button>
+                  </button> */}
                 </div>
               </div>
               <div className="flex flex-wrap gap-3 mt-2 text-sm text-slate-600">
