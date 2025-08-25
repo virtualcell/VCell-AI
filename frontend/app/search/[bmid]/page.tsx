@@ -260,11 +260,11 @@ export default function BiomodelDetailPage() {
           <CardContent className="p-6 bg-white">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-6">
-                <TabsTrigger value="overview" className="flex items-center gap-2">
+                <TabsTrigger value="overview" className="flex items-center gap-2 font-bold text-white">
                   <FileText className="h-4 w-4" />
                   Overview
                 </TabsTrigger>
-                <TabsTrigger value="analysis" className="flex items-center gap-2">
+                <TabsTrigger value="analysis" className="flex items-center gap-2 font-bold text-white">
                   <Search className="h-4 w-4" />
                   AI Analysis
                 </TabsTrigger>
