@@ -334,18 +334,18 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
 
         {/* Quick Actions - positioned directly under search bar */}
         {!isInitialLoading && (
-          <div className="mt-3 pt-3 border-t border-slate-100">
-            <div className="flex flex-wrap gap-1.5">
+          <div className="mt-2 pt-2 border-t border-slate-100">
+            <div className="flex flex-wrap gap-1">
               {quickActions.map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   size="sm"
-                  className="h-6 px-2 text-xs text-slate-500 hover:text-slate-700 hover:bg-slate-100"
+                  className="h-4 px-1 text-xs text-slate-500 hover:text-slate-700 hover:bg-slate-100"
                   onClick={() => handleQuickAction(action.value)}
                 >
                   {action.icon}
-                  <span className="ml-1">{action.label}</span>
+                  <span className="ml-0.5">{action.label}</span>
                 </Button>
               ))}
             </div>
