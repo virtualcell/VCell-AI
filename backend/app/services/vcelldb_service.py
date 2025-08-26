@@ -5,6 +5,7 @@ import re
 from app.schemas.vcelldb_schema import BiomodelRequestParams, SimulationRequestParams
 from urllib.parse import urlencode, quote
 from langfuse import observe
+from typing import List
 
 VCELL_API_BASE_URL = "https://vcell.cam.uchc.edu/api/v0"
 
@@ -313,3 +314,41 @@ async def fetch_biomodel_applications_files(biomodel_id: str) -> dict:
         "applications": applications_with_files,
         "total_applications": len(applications_with_files),
     }
+
+
+@observe(name="FETCH_PUBLICATIONS")
+async def fetch_publications() -> List[dict]:
+    """
+    Fetch a list of publications from the VCell API.
+
+    Returns:
+        List[dict]: A list of publication dictionaries.
+    """
+    url = f"{VCELL_API_BASE_URL}/publication?submitLow=&submitHigh=&startRow=1&maxRows=1000&hasData=all&waiting=on&queued=on&dispatched=on&running=on"
+    
+    logger.info(f"Fetching publications from URL: {url}")
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url)
+            response.raise_for_status()
+            publications = response.json()
+            
+            # Ensure we return a list of dictionaries
+            if isinstance(publications, list):
+                logger.info(f"Successfully fetched {len(publications)} publications")
+                return publications
+            else:
+                logger.warning(f"Unexpected response format: {type(publications)}")
+                return []
+                
+    except httpx.HTTPStatusError as e:
+        logger.error(f"HTTP error fetching publications: {e.response.status_code} - {e.response.text}")
+        raise e
+    except httpx.RequestError as e:
+        logger.error(f"Request error fetching publications: {str(e)}")
+        raise e
+    except Exception as e:
+        logger.error(f"Unexpected error fetching publications: {str(e)}")
+        raise e
+
