@@ -9,6 +9,7 @@ from app.controllers.vcelldb_controller import (
     get_diagram_url_controller,
     get_diagram_image_controller,
     get_biomodel_applications_files_controller,
+    get_publications_controller,
 )
 
 router = APIRouter()
@@ -87,5 +88,16 @@ async def get_biomodel_applications_files(biomodel_id: str):
     """
     try:
         return await get_biomodel_applications_files_controller(biomodel_id)
+    except HTTPException as e:
+        raise e
+
+
+@router.get("/publications", response_model=List[dict])
+async def get_publications():
+    """
+    Endpoint to retrieve publications from the VCell API.
+    """
+    try:
+        return await get_publications_controller()
     except HTTPException as e:
         raise e

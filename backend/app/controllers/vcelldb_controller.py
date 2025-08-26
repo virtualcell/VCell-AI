@@ -10,6 +10,7 @@ from app.services.vcelldb_service import (
     get_diagram_url,
     get_diagram_image,
     fetch_biomodel_applications_files,
+    fetch_publications,
 )
 
 
@@ -129,6 +130,27 @@ async def get_biomodel_applications_files_controller(biomodel_id: str) -> dict:
     except httpx.RequestError as e:
         raise HTTPException(
             status_code=500, detail="Error communicating with VCell API. " + str(e)
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+async def get_publications_controller() -> List[dict]:
+    """
+    Controller function to fetch publications from the VCell API.
+    Raises:
+        HTTPException: If the VCell API request fails.
+    """
+    try:
+        publications = await fetch_publications()
+        return publications
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(
+            status_code=e.response.status_code, detail="Error fetching publications."
+        )
+    except httpx.RequestError as e:
+        raise HTTPException(
+            status_code=500, detail="Error communicating with VCell API."
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
