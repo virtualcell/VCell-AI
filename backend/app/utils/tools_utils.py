@@ -3,6 +3,7 @@ from app.services.vcelldb_service import (
     fetch_biomodels,
     fetch_simulation_details,
     get_vcml_file,
+    fetch_publications,
 )
 from app.services.knowledge_base_service import get_similar_chunks
 from app.schemas.vcelldb_schema import BiomodelRequestParams, SimulationRequestParams
@@ -162,12 +163,28 @@ search_vcell_knowledge_base_tool = ToolDefinition(
     ),
 )
 
+fetch_publications_tool = ToolDefinition(
+    type="function",
+    function=FunctionDefinition(
+        name="fetch_publications",
+        description="Retrieves a list of publications from the VCell database. This function fetches all available publications including their metadata, status information, and associated data. Publications represent research papers, models, and other scientific content available in the VCell system. If asked for publications, research papers, pubmed articles, etc. use this tool. Retrieve publications then use what you need on the user's query.",
+        parameters=ParameterSchema(
+            type="object",
+            properties={},
+            required=[],
+            additionalProperties=False,
+        ),
+        strict=True,
+    ),
+)
+
 # List of all tool definitions
 ToolsDefinitions = [
     fetch_biomodels_tool,
     fetch_simulation_details_tool,
     get_vcml_file_tool,
     search_vcell_knowledge_base_tool,
+    fetch_publications_tool,
 ]
 
 
@@ -205,6 +222,9 @@ async def execute_tool(name, args):
             limit = args.get("limit", 5)
             logger.info(f"Executing tool: {name} with query {query}")
             return get_similar_chunks(query=query, limit=limit)
+
+        elif name == "fetch_publications":
+            return await fetch_publications()
 
         else:
             return {}
