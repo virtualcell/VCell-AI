@@ -1,0 +1,65 @@
+name: Create AI Website Images
+on:
+  push:
+    tags:
+      - "*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Repository tag (e.g., v1.2.3)"
+        required: true
+
+env:
+  python-version: "3.10"
+
+jobs:
+  CD:
+    name: CD
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set ENV Variables
+        run: | 
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "TAG_NAME=${{ github.event.inputs.tag }}" >> $GITHUB_ENV
+          else
+            echo "TAG_NAME=${GITHUB_REF##*/}" >> $GITHUB_ENV
+          fi
+          echo "CREATED=$(date --rfc-3339=seconds | sed 's/ /T/')" >> $GITHUB_ENV
+
+      - name: build fastapi backend
+        run: |
+          set -ux
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          pushd backend
+          docker build \
+          --no-cache \
+          --file Dockerfile \
+          --tag ghcr.io/virtualcell/vcell-ai-backend:${TAG_NAME} \
+          --label org.opencontainers.image.created=${CREATED} \
+          --label org.opencontainers.image.license=MIT \
+          .
+          docker push --all-tags ghcr.io/virtualcell/vcell-ai-backend
+          popd
+
+      - name: build react frontend
+        run: |
+          set -ux
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          pushd frontend
+          docker build \
+          --no-cache \
+          --file Dockerfile \
+          --tag ghcr.io/virtualcell/vcell-ai-website:${TAG_NAME} \
+          --label org.opencontainers.image.created=${CREATED} \
+          --label org.opencontainers.image.license=MIT \
+          .
+          docker push --all-tags ghcr.io/virtualcell/vcell-ai-website
+          popd
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ failure() }}
+
