@@ -52,11 +52,11 @@ jobs:
           docker build \
           --no-cache \
           --file Dockerfile \
-          --tag ghcr.io/virtualcell/vcell-ai-website:${TAG_NAME} \
+          --tag ghcr.io/virtualcell/vcell-ai-frontend:${TAG_NAME} \
           --label org.opencontainers.image.created=${CREATED} \
           --label org.opencontainers.image.license=MIT \
           .
-          docker push --all-tags ghcr.io/virtualcell/vcell-ai-website
+          docker push --all-tags ghcr.io/virtualcell/vcell-ai-frontend
           popd
 
       - name: Setup tmate session

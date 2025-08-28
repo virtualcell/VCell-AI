@@ -18,9 +18,6 @@ COPY pyproject.toml poetry.lock* ./
 # 6. Install dependencies (without virtualenvs, no-root to skip package install)
 RUN poetry install --no-interaction --no-ansi --no-root
 
-# 7. Copy .env file
-COPY .env ./
-
 # 8. Now copy the full project
 COPY . .
 
