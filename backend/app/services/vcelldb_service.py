@@ -345,7 +345,16 @@ async def fetch_publications() -> List[dict]:
                         sanitized_pub.pop('wittid', None)
                         sanitized_pub.pop('date', None)
                         sanitized_pub.pop('url', None)
+                        sanitized_pub.pop('pubKey', None)
                         sanitized_pub.pop('endnoteid', None)
+                        
+                        # Clean up author arrays - remove empty strings and combine
+                        authors = pub.get('authors', [])
+                        if authors:
+                            # Remove empty strings and separators, combine into single string
+                            clean_authors = [a.strip() for a in authors if a.strip() and a.strip() not in ['&', ',']]
+                            sanitized_pub['authors'] = ', '.join(clean_authors)
+                        
                         sanitized_publications.append(sanitized_pub)
                     else:
                         # If not a dict, keep as is but log warning
