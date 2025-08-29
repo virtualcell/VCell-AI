@@ -24,9 +24,4 @@ class Settings(BaseSettings):
     LANGFUSE_PUBLIC_KEY: str
     LANGFUSE_HOST: str
 
-    class Config:
-        env_file = ".env"
-        cache_on_load = False
-
-
 settings = Settings()
