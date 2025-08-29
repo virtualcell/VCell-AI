@@ -5,6 +5,9 @@ class Settings(BaseSettings):
     # Frontend Config
     FRONTEND_URL: str
 
+    # LLM Provider
+    PROVIDER: str
+
     # Azure OpenAI Config
     AZURE_API_VERSION: str
     AZURE_ENDPOINT: str

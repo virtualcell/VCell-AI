@@ -1,4 +1,4 @@
-from langfuse.openai import AzureOpenAI
+from langfuse.openai import AzureOpenAI, OpenAI
 from qdrant_client import QdrantClient
 from app.core.config import settings
 
@@ -10,11 +10,18 @@ qdrant_client = None
 def connect_openai():
     global openai_client
     if openai_client is None:
-        openai_client = AzureOpenAI(
-            api_key=settings.AZURE_API_KEY,
-            api_version=settings.AZURE_API_VERSION,
-            azure_endpoint=settings.AZURE_ENDPOINT,
-        )
+        if settings.PROVIDER == "azure":
+            openai_client = AzureOpenAI(
+                api_key=settings.AZURE_API_KEY,
+                api_version=settings.AZURE_API_VERSION,
+                azure_endpoint=settings.AZURE_ENDPOINT,
+            )
+        else:
+            ## THIS IS FOR LOCAL LLM ONLY
+            openai_client = OpenAI(
+                api_key=settings.AZURE_API_KEY,
+                azure_endpoint=settings.AZURE_ENDPOINT,
+            )
     return openai_client
 
 
