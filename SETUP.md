@@ -1,15 +1,7 @@
 # VCell AI Platform Setup Guide
 
-This guide will walk you through setting up the VCell AI Platform for development, including environment configuration, Langfuse integration, and local LLM setup.
+This guide will walk you through setting up the VCell AI Platform for development or simply running locally, including environment configuration, Langfuse integration, and local LLM setup.
 
-## Table of Contents
-- [Prerequisites](#prerequisites)
-- [Initial Setup](#initial-setup)
-- [Environment Configuration](#environment-configuration)
-- [Langfuse Integration](#langfuse-integration)
-- [Local LLM Setup](#local-llm-setup)
-- [Running the Application](#running-the-application)
-- [Troubleshooting](#troubleshooting)
 
 ## Prerequisites
 
@@ -23,32 +15,70 @@ Before you begin, ensure you have the following installed:
 
 ## Initial Setup
 
-### 1. Clone the Repository
+## 1. Clone the Repository
+
+Clone the repo **with submodules** (important for Langfuse):
 
 ```bash
-git clone https://github.com/virtualcell/VCell-AI.git
+git clone --recurse-submodules https://github.com/virtualcell/VCell-AI.git
 cd VCell-AI
 ```
 
-### 2. Install Dependencies
+---
 
-#### Backend Dependencies
-```bash
-cd backend
-poetry install --no-root
+## 2. Setup Langfuse
+
+Langfuse is used for LLM observability, tracing, and analytics.
+
+### 2.1 Run Langfuse
+
+You can use either Langfuse Cloud or self-hosted:
+
+* **Option A – Langfuse Cloud**: [Sign up here](https://cloud.langfuse.com)
+* **Option B – Self-hosted Langfuse**:
+
+  ```bash
+  cd langfuse
+  docker compose up
+  ```
+
+### 2.2 Get Langfuse Credentials
+
+1. Go to your Langfuse Cloud project or your self-hosted instance (`http://localhost:3000`).
+2. Create a new project.
+3. Copy your API keys from Project Settings.
+
+Example `.env` values:
+
+```env
+LANGFUSE_SECRET_KEY=sk-lf-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+LANGFUSE_PUBLIC_KEY=pk-lf-yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy
+LANGFUSE_HOST="http://localhost:3000"
 ```
 
-#### Frontend Dependencies
-```bash
-cd frontend
-npm install
-# or
-pnpm install
-```
+When these environment variables are set, the backend automatically integrates with Langfuse. It will track:
 
-## Environment Configuration
+* LLM API calls and responses
+* Token usage and costs
+* Response times and quality metrics
+* Tool usage patterns
 
-### 1. Backend Environment Setup
+### 2.3 View Langfuse Dashboard
+
+Open your Langfuse dashboard at your hosted URL or `http://localhost:6333`.
+
+You can monitor:
+
+* **Traces**: Individual LLM interactions
+* **Scores**: Quality metrics and feedback
+* **Costs**: Token usage and API expenses
+* **Analytics**: Usage patterns and performance
+
+---
+
+## 3. Environment Configuration
+
+### 3.1 Backend Environment Setup
 
 Create and configure the backend environment file:
 
@@ -57,58 +87,9 @@ cd backend
 cp .env.example .env
 ```
 
-Edit `backend/.env` with your configuration:
+Edit `backend/.env` with your configuration
 
-```env
-# Application Settings
-APP_NAME=VCell AI Platform
-DEBUG=true
-ENVIRONMENT=development
-
-# Server Configuration
-HOST=0.0.0.0
-PORT=8000
-CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
-
-# Database Configuration
-QDRANT_HOST=localhost
-QDRANT_PORT=6333
-QDRANT_COLLECTION_NAME=vcell_knowledge_base
-
-# LLM Configuration
-LLM_PROVIDER=openai  # or 'local' for local LLMs
-OPENAI_API_KEY=your_openai_api_key_here
-OPENAI_MODEL=gpt-4-turbo-preview
-
-# Local LLM Configuration (when using local LLMs)
-LOCAL_LLM_URL=http://localhost:11434  # Ollama default
-LOCAL_LLM_MODEL=llama2:13b
-LOCAL_LLM_TEMPERATURE=0.7
-LOCAL_LLM_MAX_TOKENS=4096
-
-# VCell API Configuration
-VCELL_API_BASE_URL=https://vcell.org/rest
-VCELL_API_TIMEOUT=30
-
-# Langfuse Configuration
-LANGFUSE_SECRET_KEY=your_langfuse_secret_key
-LANGFUSE_PUBLIC_KEY=your_langfuse_public_key
-LANGFUSE_HOST=https://cloud.langfuse.com
-# or for self-hosted: LANGFUSE_HOST=http://localhost:3000
-
-# Authentication (if using Auth0)
-AUTH0_DOMAIN=your_domain.auth0.com
-AUTH0_CLIENT_ID=your_client_id
-AUTH0_CLIENT_SECRET=your_client_secret
-AUTH0_AUDIENCE=your_api_audience
-
-# File Upload Configuration
-MAX_FILE_SIZE=10485760  # 10MB in bytes
-ALLOWED_FILE_TYPES=pdf,txt,md
-UPLOAD_DIR=./uploads
-```
-
-### 2. Frontend Environment Setup
+### 3.2. Frontend Environment Setup
 
 Create and configure the frontend environment file:
 
@@ -117,139 +98,99 @@ cd frontend
 cp .env.example .env.local
 ```
 
-Edit `frontend/.env.local` with your configuration:
+Edit `frontend/.env.local` with your configuration
 
-```env
-# API Configuration
-NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
-NEXT_PUBLIC_VCELL_API_BASE_URL=https://vcell.org/rest
+---
 
-# Authentication
-NEXT_PUBLIC_AUTH0_DOMAIN=your_domain.auth0.com
-NEXT_PUBLIC_AUTH0_CLIENT_ID=your_client_id
-NEXT_PUBLIC_AUTH0_AUDIENCE=your_api_audience
 
-# Langfuse Configuration
-NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY=your_langfuse_public_key
-NEXT_PUBLIC_LANGFUSE_HOST=https://cloud.langfuse.com
 
-# Feature Flags
-NEXT_PUBLIC_ENABLE_CHAT=true
-NEXT_PUBLIC_ENABLE_SEARCH=true
-NEXT_PUBLIC_ENABLE_ANALYSIS=true
-```
+## 4. Using Local LLMs (Without Azure/OpenAI Keys)
 
-## Langfuse Integration
+### Ollama (Recommended)
 
-Langfuse is used for LLM observability, tracing, and analytics. Here's how to set it up:
+Ollama is the easiest way to run local LLMs on your machine. It exposes an **OpenAI-compatible API** that the backend can connect to.
 
-### 1. Get Langfuse Credentials
 
-1. Go to [Langfuse Cloud](https://cloud.langfuse.com) or set up self-hosted Langfuse
-2. Create a new project
-3. Copy your API keys from the project settings
 
-### 2. Configure Langfuse in Backend
+### 4.1 Install Ollama
 
-The backend automatically integrates with Langfuse when the environment variables are set. Langfuse will track:
+**macOS / Linux:**
 
-- LLM API calls and responses
-- Token usage and costs
-- Response times and quality metrics
-- Tool usage patterns
-
-### 3. View Langfuse Dashboard
-
-Access your Langfuse dashboard to monitor:
-- **Traces**: Individual LLM interactions
-- **Scores**: Quality metrics and feedback
-- **Costs**: Token usage and API costs
-- **Analytics**: Usage patterns and performance
-
-## Local LLM Setup
-
-### Option 1: Ollama (Recommended)
-
-Ollama is the easiest way to run local LLMs on your machine.
-
-#### 1. Install Ollama
-
-**macOS/Linux:**
 ```bash
 curl -fsSL https://ollama.ai/install.sh | sh
 ```
 
 **Windows:**
-Download from [ollama.ai](https://ollama.ai/download)
+Download from [Ollama Downloads](https://ollama.ai/download)
 
-#### 2. Pull and Run a Model
+
+
+### 4.2 Pull Required Models
+
+You will need **two models** to run the app properly:
+
+1. A **chat LLM** (for conversations and reasoning)
+2. An **embedding model** (for knowledge base search and retrieval)
+
+Examples:
 
 ```bash
-# Pull a model (this may take a while depending on your internet)
-ollama pull llama2:13b
+# Pull a chat model (choose one depending on your system resources)
+ollama pull deepseek-r1:8b
+# or smaller / lighter
+ollama pull deepseek-r1:1.5b
 
-# Or try a smaller model for faster setup
-ollama pull llama2:7b
+# Pull an embedding model
+ollama pull nomic-embed-text
+```
 
-# Start the Ollama service
+### 4.3 Run Ollama Service
+
+Start the Ollama background service:
+
+```bash
 ollama serve
 ```
 
-#### 3. Test the Model
+### 4.4 Test the Model
+
+Open a new terminal and run:
 
 ```bash
-# In a new terminal
-ollama run llama2:13b "Hello, how are you?"
+ollama run deepseek-r1:1.5b "Hello, how are you?"
 ```
 
-#### 4. Configure Backend for Local LLM
+If this works, Ollama is running correctly.
 
-Update your `backend/.env`:
+### 4.5 Configure Backend for Local LLM
+
+Edit `backend/.env` to point to your local models:
 
 ```env
-LLM_PROVIDER=local
-LOCAL_LLM_URL=http://localhost:11434
-LOCAL_LLM_MODEL=llama2:13b
-LOCAL_LLM_TEMPERATURE=0.7
-LOCAL_LLM_MAX_TOKENS=4096
+# Switch provider to local
+PROVIDER=local
+
+# Generic OpenAI-compatible settings
+AZURE_API_KEY=ollama
+AZURE_ENDPOINT=http://localhost:11434/v1
+
+...
+
+# Models: one LLM + one embedding model
+AZURE_DEPLOYMENT_NAME=deepseek-r1:1.5b
+AZURE_EMBEDDING_DEPLOYMENT_NAME=nomic-embed-text
 ```
 
-### Option 2: LM Studio
+### 4.6 Backend Behavior
 
-LM Studio provides a GUI for running local models.
+* When `PROVIDER=azure`, the backend uses Azure OpenAI (default).
+* When `PROVIDER=local`, the backend connects to the **Ollama server** and uses the models you specify in `.env`.
 
-1. Download from [lmstudio.ai](https://lmstudio.ai)
-2. Download a model (e.g., Llama 2, Mistral)
-3. Start the local server
-4. Update your `.env` with the local server URL
+---
 
-### Option 3: Custom Local Server
+## 5. Running the Application
 
-If you have a custom LLM server, configure it in your `.env`:
-
-```env
-LLM_PROVIDER=local
-LOCAL_LLM_URL=http://localhost:your_port
-LOCAL_LLM_MODEL=your_model_name
-LOCAL_LLM_TEMPERATURE=0.7
-LOCAL_LLM_MAX_TOKENS=4096
-```
-
-### 4. Modify Code for Local LLM Usage
-
-The backend automatically detects the `LLM_PROVIDER` environment variable. When set to `local`, it will use the local LLM configuration.
-
-#### Backend Code Changes
-
-The LLM service automatically switches between providers. No code changes needed if using the environment variable approach.
-
-#### Frontend Code Changes
-
-No frontend changes are required - the backend handles the LLM provider selection transparently.
-
-## Running the Application
-
-### 1. Start Qdrant Vector Database
+### 5.1 Start Qdrant Vector Database
 
 ```bash
 docker run -d \
@@ -260,23 +201,26 @@ docker run -d \
   qdrant/qdrant
 ```
 
-### 2. Start Backend
+### 5.2 Start Backend
 
 ```bash
 cd backend
+poetry install --no-root
 poetry run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### 3. Start Frontend
+### 5.3 Start Frontend
 
 ```bash
 cd frontend
+npm install
 npm run dev
 # or
+pnpm install
 pnpm dev
 ```
 
-### 4. Using Docker Compose (Alternative)
+### 5.4 Using Docker Compose (Alternative)
 
 ```bash
 # From project root
@@ -312,7 +256,7 @@ kill -9 <PID>
 
 ```bash
 # Check if Ollama is running
-curl http://localhost:11434/api/tags
+curl http://localhost:11434/v1
 
 # Restart Ollama
 ollama serve
@@ -323,10 +267,10 @@ ollama serve
 ```bash
 # Verify .env files exist
 ls -la backend/.env
-ls -la frontend/.env.local
+ls -la frontend/.env
 
 # Check if variables are loaded
-echo $LLM_PROVIDER
+echo $PROVIDER
 ```
 
 #### 4. Qdrant Connection Issues
@@ -347,18 +291,6 @@ docker restart qdrant
 1. **Use smaller models** for development (e.g., llama2:7b instead of llama2:13b)
 2. **Enable GPU acceleration** if available (Ollama automatically detects CUDA)
 3. **Monitor memory usage** - local LLMs can be memory-intensive
-4. **Use Docker volumes** for persistent data storage
-
-### Debug Mode
-
-Enable debug logging in your backend `.env`:
-
-```env
-DEBUG=true
-LOG_LEVEL=DEBUG
-```
-
-This will provide detailed logs for troubleshooting LLM interactions and API calls.
 
 ## Next Steps
 
@@ -369,14 +301,5 @@ After successful setup:
 3. **Upload Documents**: Test the knowledge base functionality
 4. **Monitor with Langfuse**: Check your Langfuse dashboard for traces
 5. **Explore Biomodels**: Use the search functionality to find VCell models
-
-## Support
-
-If you encounter issues:
-
-1. Check the [troubleshooting section](#troubleshooting)
-2. Review the [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines
-3. Search existing [GitHub issues](https://github.com/virtualcell/VCell-AI/issues)
-4. Create a new issue with detailed error information
 
 Happy coding! 🚀
