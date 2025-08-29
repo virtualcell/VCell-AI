@@ -322,7 +322,7 @@ async def fetch_publications() -> List[dict]:
     Fetch a list of publications from the VCell API.
 
     Returns:
-        List[dict]: A list of publication dictionaries.
+        List[dict]: A list of publication dictionaries with sanitized data.
     """
     url = f"{VCELL_API_BASE_URL}/publication?submitLow=&submitHigh=&startRow=1&maxRows=1000&hasData=all&waiting=on&queued=on&dispatched=on&running=on"
     
@@ -336,8 +336,23 @@ async def fetch_publications() -> List[dict]:
             
             # Ensure we return a list of dictionaries
             if isinstance(publications, list):
-                logger.info(f"Successfully fetched {len(publications)} publications")
-                return publications
+                # Sanitize publications by removing unwanted fields
+                sanitized_publications = []
+                for pub in publications:
+                    if isinstance(pub, dict):
+                        # Create a copy and remove unwanted fields
+                        sanitized_pub = pub.copy()
+                        sanitized_pub.pop('wittid', None)
+                        sanitized_pub.pop('date', None)
+                        sanitized_pub.pop('endnoteid', None)
+                        sanitized_publications.append(sanitized_pub)
+                    else:
+                        # If not a dict, keep as is but log warning
+                        logger.warning(f"Publication is not a dictionary: {type(pub)}")
+                        sanitized_publications.append(pub)
+                
+                logger.info(f"Successfully fetched and sanitized {len(sanitized_publications)} publications")
+                return sanitized_publications
             else:
                 logger.warning(f"Unexpected response format: {type(publications)}")
                 return []
