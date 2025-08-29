@@ -344,6 +344,7 @@ async def fetch_publications() -> List[dict]:
                         sanitized_pub = pub.copy()
                         sanitized_pub.pop('wittid', None)
                         sanitized_pub.pop('date', None)
+                        sanitized_pub.pop('url', None)
                         sanitized_pub.pop('endnoteid', None)
                         sanitized_publications.append(sanitized_pub)
                     else:
