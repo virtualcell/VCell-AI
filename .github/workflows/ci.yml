@@ -37,6 +37,9 @@ jobs:
     - name: Create .env file with GitHub Secrets
       run: |
         echo "FRONTEND_URL=${{ secrets.FRONTEND_URL }}" >> backend/app/.env
+
+        # LLM Provider
+        echo "PROVIDER=${{ secrets.PROVIDER }}" >> backend/app/.env
     
         # Azure OpenAI Configuration
         echo "AZURE_API_VERSION=${{ secrets.AZURE_API_VERSION }}" >> backend/app/.env
