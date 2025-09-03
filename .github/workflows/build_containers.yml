@@ -49,6 +49,7 @@ jobs:
           set -ux
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           pushd frontend
+          echo "NEXT_PUBLIC_API_URL=http://k8s-wn-01.cam.uchc.edu:30001" > .env
           docker build \
           --no-cache \
           --file Dockerfile \
