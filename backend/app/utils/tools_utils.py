@@ -46,18 +46,18 @@ fetch_biomodels_tool = ToolDefinition(
                     "default": "",
                     "description": "The owner of the biomodel. This filter allows users to search for biomodels owned by a specific user.",
                 },
-                "savedLow": {
-                    "type": "string",
-                    "default": "",
-                    "format": "date",
-                    "description": "The lower bound of the saved date range for biomodels. Only biomodels saved after this date will be included in the results (format: YYYY-MM-DD).",
-                },
-                "savedHigh": {
-                    "type": "string",
-                    "default": "",
-                    "format": "date",
-                    "description": "The upper bound of the saved date range for biomodels. Only biomodels saved before this date will be included in the results (format: YYYY-MM-DD).",
-                },
+                # "savedLow": {
+                #     "type": "string",
+                #     "default": "",
+                #     "format": "date",
+                #     "description": "The lower bound of the saved date range for biomodels. Only biomodels saved after this date will be included in the results (format: YYYY-MM-DD).",
+                # },
+                # "savedHigh": {
+                #     "type": "string",
+                #     "default": "",
+                #     "format": "date",
+                #     "description": "The upper bound of the saved date range for biomodels. Only biomodels saved before this date will be included in the results (format: YYYY-MM-DD).",
+                # },
                 "startRow": {
                     "type": "integer",
                     "default": 1,
@@ -80,8 +80,8 @@ fetch_biomodels_tool = ToolDefinition(
                 "bmName",
                 "category",
                 "owner",
-                "savedLow",
-                "savedHigh",
+                # "savedLow",
+                # "savedHigh",
                 "startRow",
                 "maxRows",
                 "orderBy",
@@ -202,10 +202,10 @@ async def execute_tool(name, args):
         if name == "fetch_biomodels":
             logger.info(f"Executing tool: {name}")
             # Handle empty fields and validate
-            if args.get("savedLow") == "":
-                args["savedLow"] = None
-            if args.get("savedHigh") == "":
-                args["savedHigh"] = None
+            # if args.get("savedLow") == "":
+            #     args["savedLow"] = None
+            # if args.get("savedHigh") == "":
+            #     args["savedHigh"] = None
             args["maxRows"] = 1000
             params = BiomodelRequestParams(**args)
             return await fetch_biomodels(params)
