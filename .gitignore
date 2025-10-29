@@ -10,3 +10,4 @@ backend/app.log
 backend/Downloads
 backend/.ipynb_checkpoints
 backend/.venv
+.idea

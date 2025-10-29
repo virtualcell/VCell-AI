@@ -20,7 +20,9 @@ def connect_openai():
             ## THIS IS FOR LOCAL LLM ONLY
             openai_client = OpenAI(
                 api_key=settings.AZURE_API_KEY,
-                azure_endpoint=settings.AZURE_ENDPOINT,
+                base_url=settings.AZURE_ENDPOINT,
+                project=None,
+                organization=None
             )
     return openai_client
 
