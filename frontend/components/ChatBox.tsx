@@ -35,6 +35,7 @@ interface ChatBoxProps {
   startMessage: string | string[];
   quickActions: QuickAction[];
   supplementalActions?: QuickAction[];
+  moreActions?: QuickAction[];
   cardTitle: string;
   promptPrefix?: string;
   isLoading?: boolean;
@@ -45,6 +46,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
   startMessage,
   quickActions,
   supplementalActions,
+  moreActions,
   cardTitle,
   promptPrefix,
   isLoading: isInitialLoading = false,
@@ -72,10 +74,22 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
     return [];
   };
 
-  const [messages, setMessages] = useState<Message[]>(
-    createInitialMessages(startMessage),
-  );
+  const [messages, setMessages] = useState<Message[]>(() => {
+  //const saved = localStorage.getItem("chat_history");
+  //return saved ? JSON.parse(saved) : createInitialMessages(startMessage);
+    return createInitialMessages(startMessage);
+});
+
+  const STORAGE_KEY = null;
+
+  // const [messages, setMessages] = useState<Message[]>(() => {
+  //   if (typeof window === "undefined") return [];
+  //   const saved = localStorage.getItem(STORAGE_KEY);
+  //   return saved ? JSON.parse(saved) : [];
+  // });
+
   const [inputMessage, setInputMessage] = useState("");
+  const [inputMessage2, setInputMessage2] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -88,12 +102,27 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
     scrollToBottom();
   }, [messages]);
 
-  // Update messages when startMessage changes (when analysis completes)
-  useEffect(() => {
-    if (startMessage && !isInitialLoading) {
-      setMessages(createInitialMessages(startMessage));
-    }
-  }, [startMessage, isInitialLoading]);
+  // useEffect(() => {
+  // const handleUnload = () => {
+  //   localStorage.removeItem("chat_history");
+  // };
+
+  // window.addEventListener("beforeunload", handleUnload);
+
+  // return () => {
+  //   window.removeEventListener("beforeunload", handleUnload);
+  // };
+  // }, []);
+
+  // Update messages when startMessage changes (when analysis completes
+    // useEffect(() => {
+    //   localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+    // }, [messages]);
+
+
+    useEffect(() => {
+    setMessages(createInitialMessages(startMessage));
+  }, [startMessage]);
 
   // Helper function to format biomodel IDs as hyperlinks
   const formatBiomodelIds = (content: string, bmkeys: string[]): string => {
@@ -109,9 +138,10 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
       const db_link = `[Database](/search/${bmId})`;
       const replacementString = `**${bmId}** -- ${ai_link} &nbsp;|&nbsp; ${db_link}`; */
       const db_link = `[Database Details](/search/${bmId})`;
-      const replacementString = `**${bmId}** || ${db_link}`;
+      const replacementString = `${bmId} || ${db_link}`;
+      const match_IDs_Not_in_URLs = new RegExp(`(?<!\\()(${searchString})(?!\\))`, "g");
       formattedContent = formattedContent.replaceAll(
-        searchString,
+        match_IDs_Not_in_URLs,
         replacementString,
       );
     });
@@ -162,12 +192,14 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
       }
     }
 
+    console.log("PPPPPP: " + "This is the msg: " + msg);
     const userMessage: Message = {
       id: Date.now().toString(),
       role: "user",
       content: msg,
       timestamp: new Date(),
     };
+    console.log("QQQQQQ: " + "This is the userMessage: " + JSON.stringify(userMessage));
     setMessages((prev) => [...prev, userMessage]);
     setInputMessage("");
     setIsLoading(true);
@@ -175,6 +207,9 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
       const finalPrompt = promptPrefix
         ? `${promptPrefix} ${msg}${parameterContext}`
         : `${msg}${parameterContext}`;
+      console.log("RRRRRR: " + "This is the promptPrefix: " + promptPrefix);
+      console.log("RRRRRR: " + "This is the finalPrompt sent to backend: " + finalPrompt);
+
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/query`,
         {
@@ -194,6 +229,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
           }),
         },
       );
+      console.log("AAAAAA API query sent to backend: " + finalPrompt);
       const data = await res.json();
       const aiResponse =
         data.response || "Sorry, I didn't get a response from the server.";
@@ -223,7 +259,111 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
     } finally {
       setIsLoading(false);
     }
-  };
+  }; // End of handleSendMessage
+
+// 
+const handleSendMessage2 = async (overrideMessage?: string) => {
+    const msg = overrideMessage ?? inputMessage2;
+    if (!msg.trim()) return;
+    // Build parameter context string
+    let parameterContext = "";
+    if (parameters) {
+      const contextParts = [];
+
+      if (parameters.biomodelId) {
+        contextParts.push(`biomodel ID: ${parameters.biomodelId}`);
+      }
+      if (parameters.bmName) {
+        contextParts.push(`model name: ${parameters.bmName}`);
+      }
+      if (parameters.owner) {
+        contextParts.push(`authored by: ${parameters.owner}`);
+      }
+      if (parameters.category && parameters.category !== "all") {
+        contextParts.push(`category: ${parameters.category}`);
+      }
+      if (parameters.savedLow) {
+        contextParts.push(`saved after: ${parameters.savedLow}`);
+      }
+      if (parameters.savedHigh) {
+        contextParts.push(`saved before: ${parameters.savedHigh}`);
+      }
+      if (parameters.maxRows && parameters.maxRows !== 1000) {
+        contextParts.push(`max results: ${parameters.maxRows}`);
+      }
+      if (parameters.orderBy && parameters.orderBy !== "date_desc") {
+        contextParts.push(`sort by: ${parameters.orderBy}`);
+      }
+
+      if (contextParts.length > 0) {
+        parameterContext = `\n\nHere are some specifics that I want: ${contextParts.join(", ")}`;
+      }
+    }
+
+    console.log("PPPPPP: " + "This is the msg: " + msg);
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: "user",
+      content: msg,
+      timestamp: new Date(),
+    };
+    console.log("QQQQQQ: " + "This is the userMessage: " + JSON.stringify(userMessage));
+    setMessages((prev) => [...prev, userMessage]);
+    setInputMessage("");
+    setIsLoading(true);
+    try {
+      const finalPrompt = promptPrefix
+        ? `${promptPrefix} ${msg}${parameterContext}`
+        : `${msg}${parameterContext}`;
+    
+      // const res = await fetch(
+      //   `${process.env.NEXT_PUBLIC_API_URL2}/search?query=${encodeURIComponent(msg)}&format=json`);
+      
+      // console.log("DEBUG: This is the raw response from the backend: " + JSON.stringify(res));
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/biomodels-search?query=${encodeURIComponent(msg)}`,
+        {   
+          headers: {
+            "Content-Type": "application/json",
+            accept: "application/json",
+          },
+        },
+      );
+      console.log("AAAAAA API query sent to backend: " + finalPrompt);
+      const data = await res.json();
+      console.log("BBBBBB API response from backend: " + JSON.stringify(data));
+      const aiResponse =
+        data.response || "Sorry, I didn't get a response from the server.";
+      const bmkeys = data.bmkeys || [];
+
+      // Format the response to include hyperlinks for biomodel IDs
+      const formattedResponse = formatBiomodelIds(aiResponse, bmkeys);
+
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: formattedResponse,
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, assistantMessage]);
+    } catch (error) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 2).toString(),
+          role: "assistant",
+          content:
+            "There was an error connecting to the backend. Please try again.",
+          timestamp: new Date(),
+        },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  }; // End of handleSendMessage2
+
+
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -246,11 +386,14 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
             {messages.map((message) => (
               <div
                 key={message.id}
+                // User messages are right-aligned, assistant messages are left-aligned
                 className={`flex gap-3 ${message.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`flex gap-3 max-w-[80%] ${
-                    message.role === "user" ? "flex-row-reverse" : "flex-row"
+                  className={`flex gap-3 ${
+                    // User messages are right-aligned and take up to 80% width
+                    // assistant messages are left-aligned and take full width
+                    message.role === "user" ? "flex-row-reverse max-w-[80%]" : "flex-row w-full"
                   }`}
                 >
                   <div
@@ -321,13 +464,32 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Ask any questions about VCell biomodels..."
+            placeholder="Ask any questions about VCell2 biomodels..."
             className="flex-1 border-slate-300 focus:border-blue-500"
             disabled={isLoading || isInitialLoading}
           />
           <Button
-            onClick={() => handleSendMessage()}
+            onClick={() => handleSendMessage(inputMessage)}
             disabled={isLoading || isInitialLoading || !inputMessage.trim()}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4"
+          >
+            <Send className="h-4 w-4" />
+          </Button>
+        </div>
+
+        <div className="flex gap-2">
+          <Input
+            ref={inputRef}
+            value={inputMessage2}
+            onChange={(e) => setInputMessage2(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="Ask any questions about BMDB biomodels..."
+            className="flex-1 border-slate-300 focus:border-blue-500"
+            disabled={isLoading || isInitialLoading}
+          />
+          <Button
+            onClick={() => handleSendMessage2(inputMessage2)}
+            disabled={isLoading || isInitialLoading || !inputMessage2.trim()}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4"
           >
             <Send className="h-4 w-4" />
@@ -366,6 +528,20 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
             </div>
           </div>
         )}
+
+        {moreActions && (
+          <div className="mt-3 pt-3 border-t-2 border-slate-200">
+            <div className="flex flex-wrap gap-1">
+              {moreActions.map((action, idx) => (
+                <Button key={idx} variant="ghost" size="sm" className="h-4 px-1 text-xs text-blue-600 hover:text-blue-800 hover:bg-slate-100 underline" onClick={() => handleQuickAction(action.value)}>
+                  {action.icon}
+                  <span className="ml-0.5">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
+
       </div>
     </Card>
   );
