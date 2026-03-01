@@ -13,6 +13,7 @@ import {
   Briefcase,
   Cog,
   Sparkles,
+  LibraryBig,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,11 +25,14 @@ interface PromptTemplate {
   prompt: string;
   icon: React.ReactElement<any>;
   color: string;
+  text_color?: string;
 }
 
 export default function AnalyzePage() {
   const router = useRouter();
-  const [biomodelId, setBiomodelId] = useState("");
+  //const searchParams = useSearchParams();
+  //const defaultbiomodelId = searchParams.get("bmId") ?? "270051643";
+  const [biomodelId, setBiomodelId] = useState("270051643");
   const [prompt, setPrompt] = useState("");
 
   const promptTemplates: PromptTemplate[] = [
@@ -68,6 +72,13 @@ export default function AnalyzePage() {
       icon: <Cog className="h-4 w-4" />,
       color: "text-slate-700",
     },
+    {
+      title: "Provide History of Model Changes",
+      prompt: "Provide History of Model Changes",
+      icon: <LibraryBig className="h-4 w-4" />,
+      color: "text-fuchsia-700",
+      text_color: "blue",
+    }
   ];
 
   const handlePromptTemplateClick = (prompt: string) => {
@@ -154,7 +165,12 @@ export default function AnalyzePage() {
                     variant="outline"
                     size="sm"
                     onClick={() => handlePromptTemplateClick(template.prompt)}
-                    className="flex items-center gap-2 h-9 px-3 border-slate-300 hover:border-blue-500 hover:bg-blue-50 transition-colors justify-start"
+                    //className="flex items-center gap-2 h-9 px-3 border-slate-300 hover:border-blue-500 hover:bg-blue-50 transition-colors justify-start"
+                    className={`flex items-center gap-2 h-9 px-3 transition-colors justify-start
+                              ${template.text_color === "blue"
+                                ? "text-blue-600 border-slate-300 hover:border-blue-500 hover:bg-blue-50 underline"
+                                : "border-slate-300 hover:border-blue-500 hover:bg-blue-50"}
+                            `}
                   >
                     <div className={`${template.color}`}>{template.icon}</div>
                     <span className="text-xs font-medium">
