@@ -53,8 +53,11 @@ async def get_response_with_tools(conversation_history: list[dict]):
     ]
 
     messages = messages + conversation_history
+    print("BBBBBBB" + str(messages))
 
     user_prompt = conversation_history[-1]["content"]
+    print("CCCCCCC" + str(user_prompt))
+
 
     logger.info(f"User prompt: {user_prompt}")
 
@@ -68,6 +71,8 @@ async def get_response_with_tools(conversation_history: list[dict]):
 
     # Handle the tool calls
     tool_calls = response.choices[0].message.tool_calls
+    # tool_calls_descriptions = tool_call.function.description for tool_call in tool_calls
+    # logger.info(f"DEBUG1: Tool descript: {tool_calls_descriptions}")
 
     messages.append(response.choices[0].message)
 
