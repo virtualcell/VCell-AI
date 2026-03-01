@@ -8,6 +8,7 @@ import {
   User,
   Search,
   FileText,
+  FileSearch,
   BarChart3Icon as Diagram3,
   HelpCircle,
   FlaskConical,
@@ -19,6 +20,7 @@ import { ChatBox } from "@/components/ChatBox";
 
 export default function ChatPage() {
   const [showOnboarding, setShowOnboarding] = useState(false);
+  
 
   useEffect(() => {
     // Check if user has seen onboarding before
@@ -88,6 +90,14 @@ export default function ChatPage() {
     },
   ];
 
+  const moreActions = [
+    {
+      label: "Search BioModels database",
+      icon: <FileSearch className="h-3 w-3 mr-2" />,
+      value: "Search BioModels database",
+    }
+  ];
+
   const cardTitle = "VCell AI Assistant";
 
   return (
@@ -123,6 +133,7 @@ export default function ChatPage() {
             startMessage={[startMessage]}
             quickActions={quickActions}
             supplementalActions={supplementalActions}
+            moreActions={moreActions}
             cardTitle={cardTitle}
           />
         </div>
