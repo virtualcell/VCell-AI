@@ -1,4 +1,8 @@
-from fastapi import APIRouter
+from multiprocessing import process
+
+from fastapi import APIRouter, Request
+import httpx
+import requests
 from app.controllers.llms_controller import (
     get_llm_response,
     analyse_biomodel_controller,
@@ -23,6 +27,22 @@ async def query_llm(conversation_history: dict):
     )
     return {"response": result, "bmkeys": bmkeys}
 
+# # For BioModelsDB search using BioModelsDB API 
+# @router.post("/search")
+# async def search_llm(conversation_history: dict):
+#     result, bmkeys = await get_llm_response(
+#         conversation_history.get("conversation_history", [])
+#     )
+#     return {"response": result, "bmkeys": bmkeys}
+
+@router.get("/biomodels-search")
+async def biomodels_search(query: str):
+    async with httpx.AsyncClient() as client:
+        response = await client.get(
+            "https://www.biomodels.org/search",
+            params={"query": query, "format": "json"}
+        )
+        return response.json()
 
 @router.post("/analyse/{biomodel_id}")
 async def analyse_biomodel(biomodel_id: str, user_prompt: str):
