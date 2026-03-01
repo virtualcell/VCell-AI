@@ -8,8 +8,10 @@ from langfuse import observe
 from typing import List
 
 VCELL_API_BASE_URL = "https://vcell.cam.uchc.edu/api/v0"
+BIOMODELS_API_URL = "https://biomodels.org/search?query="
 
 logger = get_logger("vcelldb_service")
+print("CHECK: in VCELL_DB_SERVICE")
 
 
 def sanitize_vcml_content(vcml_content: str) -> str:
@@ -75,8 +77,11 @@ async def fetch_biomodels(params: BiomodelRequestParams) -> dict:
     Returns:
         dict: A dictionary containing a list of biomodels with metadata.
     """
+
+    print("CHECK: in VCELL_DB_SERVICE")
     # Transform None to "" (optional, only if needed for empty fields)
     params_dict = {k: (v if v is not None else "") for k, v in params.dict().items()}
+    print("DEBUG: " + str(params_dict))
 
     logger.info(f"Fetching biomodels with parameters: {params_dict}")
 
@@ -85,6 +90,9 @@ async def fetch_biomodels(params: BiomodelRequestParams) -> dict:
 
     # Construct the full URL
     url = f"{VCELL_API_BASE_URL}/biomodel?{query_string}"
+    # elif source == "search":
+    #     bm_name = params_dict.get("bmName", "")
+    #     url = f"{BIOMODELS_API_URL}/{quote(bm_name)}"
 
     # Log the URL being queried
     logger.info(f"Querying URL: {url}")
@@ -120,6 +128,7 @@ async def fetch_simulation_details(params: SimulationRequestParams) -> dict:
     Returns:
         Simulation: A Simulation object containing simulation details.
     """
+    print("CHECK: in VCELL_DB_SERVICE")
     async with httpx.AsyncClient() as client:
         response = await client.get(
             f"{VCELL_API_BASE_URL}/biomodel/{params.bmId}/simulation/{params.simId}"
