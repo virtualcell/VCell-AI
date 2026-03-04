@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
-import { MessageSquare, Send, Bot, User, Loader2 } from "lucide-react";
+import { MessageSquare, Send, Bot, User, Loader2, Copy, Check } from "lucide-react";
 
 interface Message {
   id: string;
@@ -94,6 +94,16 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
       setMessages(createInitialMessages(startMessage));
     }
   }, [startMessage, isInitialLoading]);
+
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const handleCopy = (id: string, content: string) => {
+    navigator.clipboard.writeText(content);
+    setCopiedId(id);
+    setTimeout(() => {
+      setCopiedId(null);
+    }, 1500);
+  };
 
   // Helper function to format biomodel IDs as hyperlinks
   const formatBiomodelIds = (content: string, bmkeys: string[]): string => {
@@ -266,8 +276,8 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
                       <Bot className="h-4 w-4" />
                     )}
                   </div>
-                  <div
-                    className={`rounded-lg p-3 ${
+                 <div
+                    className={`relative group rounded-lg p-3 ${
                       message.role === "user"
                         ? "bg-blue-600 text-white"
                         : "bg-white border border-slate-200"
@@ -278,7 +288,24 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
                         {message.content}
                       </div>
                     ) : (
-                      <MarkdownRenderer content={message.content} />
+                      <div className="pr-8">
+                        <MarkdownRenderer content={message.content} />
+                      </div>
+                    )}
+
+                    {/* hover Copy button */}
+                    {message.role === "assistant" && (
+                      <button
+                        onClick={() => handleCopy(message.id, message.content)}
+                        className="absolute top-2 right-2 p-1.5 bg-slate-50 border border-slate-200 rounded-md opacity-0 group-hover:opacity-100 transition-all hover:bg-slate-100 active:scale-95"
+                        title="Copy to clipboard"
+                      >
+                        {copiedId === message.id ? (
+                          <Check className="h-3.5 w-3.5 text-slate-500" />
+                        ) : (
+                          <Copy className="h-3.5 w-3.5 text-slate-500" />
+                        )}
+                      </button>
                     )}
                   </div>
                 </div>
