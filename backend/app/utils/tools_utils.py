@@ -1,9 +1,10 @@
 from typing import List
-from app.services.vcelldb_service import (
+from backend.app.services.databases_service import (
     fetch_biomodels,
     fetch_simulation_details,
     get_vcml_file,
     fetch_publications,
+    fetch_biomd_models,
 )
 from app.services.knowledge_base_service import get_similar_chunks
 from app.schemas.vcelldb_schema import BiomodelRequestParams, SimulationRequestParams
@@ -178,6 +179,33 @@ fetch_publications_tool = ToolDefinition(
     ),
 )
 
+
+fetch_biomd_tool = ToolDefinition(
+    type="function",
+    function=FunctionDefinition(
+        name="fetch_biomd_models",
+        description="Retrieves a list of biomodels from the BioModels database based on filtering criteria which is the biomodel name. This allows to search for specific biomodels in the BioModels database based on their attributes and retrieve the results.",
+        parameters=ParameterSchema(
+            type="object",
+            properties={
+                "bmId": {
+                    "type": "string",
+                    "default": "",
+                    "description": "The unique identifier of the biomodel. This can be used to retrieve specific biomodels directly by their ID. It is under the format BIOMD followed by 10 numbers",
+                },
+                "bmName": {
+                    "type": "string",
+                    "default": "",
+                    "description": "The name or part of the name of the biomodel you are searching for. This can be used to find biomodels that match the provided name or keyword.",
+                },},
+            required=["bmId", "bmName"],
+            additionalProperties=False,
+        ),
+        strict=True,
+    ),
+)
+
+
 # List of all tool definitions
 ToolsDefinitions = [
     fetch_biomodels_tool,
@@ -186,7 +214,7 @@ ToolsDefinitions = [
     search_vcell_knowledge_base_tool,
     fetch_publications_tool,
 ]
-
+BIOMD_TOOLS = [fetch_biomd_tool]
 
 # Tool Executor Function
 async def execute_tool(name, args):
@@ -208,6 +236,7 @@ async def execute_tool(name, args):
             #     args["savedHigh"] = None
             args["maxRows"] = 1000
             params = BiomodelRequestParams(**args)
+            print("DEBUG About to call fetch_biomodels()")
             return await fetch_biomodels(params)
 
         elif name == "fetch_simulation_details":
@@ -221,10 +250,17 @@ async def execute_tool(name, args):
             query = args["query"]
             limit = args.get("limit", 5)
             logger.info(f"Executing tool: {name} with query {query}")
+            print("DEBUG About to call search_vcell_knowledge_base")
             return get_similar_chunks(query=query, limit=limit)
 
         elif name == "fetch_publications":
             return await fetch_publications()
+        
+        elif name == "fetch_biomd_models":
+            params = BiomodelRequestParams(**args)
+            print("DEBUG About to call fetch_biomodels()")
+            return await fetch_biomd_models(params)
+
 
         else:
             return {}

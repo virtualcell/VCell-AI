@@ -1,9 +1,10 @@
 from app.utils.tools_utils import (
     ToolsDefinitions as tools,
+    BIOMD_TOOLS as biotool,
     execute_tool,
 )
 
-from app.services.vcelldb_service import (
+from backend.app.services.databases_service import (
     fetch_biomodels,
     get_vcml_file,
     get_diagram_url,
@@ -44,7 +45,7 @@ async def get_llm_response(system_prompt: str, user_prompt: str):
     return response.choices[0].message.content
 
 
-async def get_response_with_tools(conversation_history: list[dict]):
+async def get_response_with_tools(conversation_history: list[dict], use_biomd: bool):
     messages = [
         {
             "role": "system",
@@ -55,19 +56,30 @@ async def get_response_with_tools(conversation_history: list[dict]):
     messages = messages + conversation_history
     print("BBBBBBB" + str(messages))
 
-    user_prompt = conversation_history[-1]["content"]
-    print("CCCCCCC" + str(user_prompt))
+    if use_biomd:
+        print("DEBUG20: BIOMD POST: get_response_with_tools")
+        response = client.chat.completions.create(
+            model=settings.AZURE_DEPLOYMENT_NAME,
+            messages=messages,
+            tools=biotool,
+            tool_choice="auto",
+        )
+    else:
+
+        user_prompt = conversation_history[-1]["content"]
+        print("CCCCCCC" + str(user_prompt))
 
 
-    logger.info(f"User prompt: {user_prompt}")
+        logger.info(f"User prompt: {user_prompt}")
 
-    response = client.chat.completions.create(
-        name="GET_RESPONSE_WITH_TOOLS::RETRIEVE_TOOLS",
-        model=settings.AZURE_DEPLOYMENT_NAME,
-        messages=messages,
-        tools=tools,
-        tool_choice="auto",
-    )
+        print("DEBUG5: " + str(messages) + str(tools))
+        response = client.chat.completions.create(
+            name="GET_RESPONSE_WITH_TOOLS::RETRIEVE_TOOLS",
+            model=settings.AZURE_DEPLOYMENT_NAME,
+            messages=messages,
+            tools=tools,
+            tool_choice="auto",
+        )
 
     # Handle the tool calls
     tool_calls = response.choices[0].message.tool_calls
@@ -100,6 +112,12 @@ async def get_response_with_tools(conversation_history: list[dict]):
                 {"role": "tool", "tool_call_id": tool_call.id, "content": str(result)}
             )
 
+    print("AAAAAA")
+    with open ("output.txt", "w") as f:
+        print("BBBBBB")
+        print("DEBUG1: " + str(messages), file=f)
+
+    print("DEBUG2")
     logger.info(str(messages))
 
     # Send back the final response incorporating the tool result
