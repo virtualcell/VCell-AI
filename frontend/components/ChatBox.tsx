@@ -322,17 +322,25 @@ const handleSendMessage2 = async (overrideMessage?: string) => {
       // console.log("DEBUG: This is the raw response from the backend: " + JSON.stringify(res));
 
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/biomodels-search?query=${encodeURIComponent(msg)}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/biomd-search`,
         {   
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
             accept: "application/json",
           },
+          body: JSON.stringify({
+            conversation_history: [
+              ...messages,
+              { role: "user", content: finalPrompt },
+            ].map(msg => ({
+              role: msg.role,
+              content: msg.content,
+            })),
+          }),
         },
       );
-      console.log("AAAAAA API query sent to backend: " + finalPrompt);
       const data = await res.json();
-      console.log("BBBBBB API response from backend: " + JSON.stringify(data));
       const aiResponse =
         data.response || "Sorry, I didn't get a response from the server.";
       const bmkeys = data.bmkeys || [];

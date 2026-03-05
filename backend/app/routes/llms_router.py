@@ -23,26 +23,29 @@ async def query_llm(conversation_history: dict):
         dict: The final response after processing the prompt with the tools.
     """
     result, bmkeys = await get_llm_response(
-        conversation_history.get("conversation_history", [])
+        conversation_history.get("conversation_history", []), use_biomd=False
     )
     return {"response": result, "bmkeys": bmkeys}
 
-# # For BioModelsDB search using BioModelsDB API 
-# @router.post("/search")
-# async def search_llm(conversation_history: dict):
-#     result, bmkeys = await get_llm_response(
-#         conversation_history.get("conversation_history", [])
-#     )
-#     return {"response": result, "bmkeys": bmkeys}
+# For BioModelsDB search using BioModelsDB API 
+@router.post("/biomd-search")
+async def search_llm(conversation_history: dict):
+    print("DEBUG20: BIOMD POST: ROUTER")
+    result, bmkeys = await get_llm_response(
+        conversation_history.get("conversation_history", []), use_biomd=True
+    )
+    return {"response": result, "bmkeys": bmkeys}
 
-@router.get("/biomodels-search")
-async def biomodels_search(query: str):
-    async with httpx.AsyncClient() as client:
-        response = await client.get(
-            "https://www.biomodels.org/search",
-            params={"query": query, "format": "json"}
-        )
-        return response.json()
+
+
+# @router.get("/biomodels-search")
+# async def biomodels_search(query: str):
+#     async with httpx.AsyncClient() as client:
+#         response = await client.get(
+#             "https://www.biomodels.org/search",
+#             params={"query": query, "format": "json"}
+#         )
+#         return response.json()
 
 @router.post("/analyse/{biomodel_id}")
 async def analyse_biomodel(biomodel_id: str, user_prompt: str):

@@ -7,7 +7,7 @@ from app.services.llms_service import (
 )
 
 
-async def get_llm_response(conversation_history: list[dict]) -> tuple[str, list]:
+async def get_llm_response(conversation_history: list[dict], use_biomd: bool) -> tuple[str, list]:
     """
     Controller function to interact with the LLM service.
     Args:
@@ -16,7 +16,8 @@ async def get_llm_response(conversation_history: list[dict]) -> tuple[str, list]
         tuple[str, list]: A tuple containing the final response and bmkeys list.
     """
     try:
-        result, bmkeys = await get_response_with_tools(conversation_history)
+        print("DEBUG20: BIOMD POST: get_llm_response")
+        result, bmkeys = await get_response_with_tools(conversation_history, use_biomd)
         return result, bmkeys
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
