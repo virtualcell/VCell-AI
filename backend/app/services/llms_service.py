@@ -103,9 +103,14 @@ async def get_response_with_tools(conversation_history: list[dict], database: st
 
             logger.info(f"Tool Result: {str(result)[:500]}")
 
+            bmkeys = []
             # Extract bmkeys only if result is a dictionary and contains the expected key
             if isinstance(result, dict):
-                bmkeys = result.get("unique_model_keys (bmkey)", [])
+                if database == "vcdb":
+                    bmkeys = result.get("unique_model_keys (bmkey)", [])
+                elif database == "bmdb":
+                    biomd_models = result.get("data", [])
+                    bmkeys = [model.get("id") for model in biomd_models if model.get("id")]
 
             # Send the result back to the model
             messages.append(

@@ -345,6 +345,7 @@ const handleSendMessage2 = async (overrideMessage?: string) => {
         data.response || "Sorry, I didn't get a response from the server.";
       const bmkeys = data.bmkeys || [];
 
+      console.log(bmkeys)
       // Format the response to include hyperlinks for biomodel IDs
       const formattedResponse = formatBiomodelIds(aiResponse, bmkeys);
 
