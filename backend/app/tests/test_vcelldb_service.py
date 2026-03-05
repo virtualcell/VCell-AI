@@ -7,7 +7,7 @@ pytestmark = pytest.mark.asyncio
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
-from app.services.vcelldb_service import (
+from backend.app.services.databases_service import (
     fetch_biomodels,
     fetch_simulation_details,
     get_vcml_file,

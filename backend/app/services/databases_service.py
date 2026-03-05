@@ -136,6 +136,44 @@ async def fetch_simulation_details(params: SimulationRequestParams) -> dict:
         response.raise_for_status()
         return response.json()
 
+@observe(name="FETCH_BIOMD_MODELS")
+async def fetch_biomd_models(params: BiomodelRequestParams) -> dict:
+    print("DEBUG20: BIOMD POST: in tool FETCH_BIOMD_MODELS")
+    # Transform None to "" (optional, only if needed for empty fields)
+    params_dict = {k: (v if v is not None else "") for k, v in params.dict().items()}
+
+    # Construct the query string using urlencoded parameters (params_dict)
+    query_string = params.bmName if params.bmName else params.bmId
+
+    # Construct the full URL
+    url = f"{BIOMODELS_API_URL}{query_string}&format=json"
+
+    # Log the URL being queried
+    logger.info(f"Querying URL: {url}")
+
+    # Perform the API request
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url)
+        response.raise_for_status()
+        raw_data = response.json()
+    
+    print("FINAL URL:", response.request.url)
+    print("STATUS CODE:", response.status_code)
+    print("RAW JSON:", raw_data)
+
+    # Extract list
+    biomodels = raw_data.get("models", [])
+
+    # Build response with metadata
+    return {
+        "search_params": {
+            "bmId": params.bmId,
+            "bmName": params.bmName
+        },
+        "models_count": len(biomodels),
+        "data": biomodels
+    }
+
 
 @observe(name="GET_VCML_FILE")
 async def get_vcml_file(
