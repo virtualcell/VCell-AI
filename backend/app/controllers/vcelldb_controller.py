@@ -2,7 +2,7 @@ import httpx
 from typing import List
 from fastapi import HTTPException, Response
 from app.schemas.vcelldb_schema import BiomodelRequestParams, SimulationRequestParams
-from backend.app.services.databases_service import (
+from app.services.databases_service import (
     fetch_biomodels,
     fetch_simulation_details,
     get_vcml_file,

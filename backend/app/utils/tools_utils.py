@@ -1,5 +1,5 @@
 from typing import List
-from backend.app.services.databases_service import (
+from app.services.databases_service import (
     fetch_biomodels,
     fetch_simulation_details,
     get_vcml_file,

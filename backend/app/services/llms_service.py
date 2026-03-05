@@ -4,7 +4,7 @@ from app.utils.tools_utils import (
     execute_tool,
 )
 
-from backend.app.services.databases_service import (
+from app.services.databases_service import (
     fetch_biomodels,
     get_vcml_file,
     get_diagram_url,
@@ -45,7 +45,7 @@ async def get_llm_response(system_prompt: str, user_prompt: str):
     return response.choices[0].message.content
 
 
-async def get_response_with_tools(conversation_history: list[dict], use_biomd: bool):
+async def get_response_with_tools(conversation_history: list[dict], database: str):
     messages = [
         {
             "role": "system",
@@ -56,7 +56,7 @@ async def get_response_with_tools(conversation_history: list[dict], use_biomd: b
     messages = messages + conversation_history
     print("BBBBBBB" + str(messages))
 
-    if use_biomd:
+    if database == "bmdb":
         print("DEBUG20: BIOMD POST: get_response_with_tools")
         response = client.chat.completions.create(
             model=settings.AZURE_DEPLOYMENT_NAME,
@@ -64,7 +64,7 @@ async def get_response_with_tools(conversation_history: list[dict], use_biomd: b
             tools=biotool,
             tool_choice="auto",
         )
-    else:
+    elif database == "vcdb":
 
         user_prompt = conversation_history[-1]["content"]
         print("CCCCCCC" + str(user_prompt))

@@ -23,7 +23,7 @@ async def query_llm(conversation_history: dict):
         dict: The final response after processing the prompt with the tools.
     """
     result, bmkeys = await get_llm_response(
-        conversation_history.get("conversation_history", []), use_biomd=False
+        conversation_history.get("conversation_history", []), database="vcdb"
     )
     return {"response": result, "bmkeys": bmkeys}
 
@@ -32,7 +32,7 @@ async def query_llm(conversation_history: dict):
 async def search_llm(conversation_history: dict):
     print("DEBUG20: BIOMD POST: ROUTER")
     result, bmkeys = await get_llm_response(
-        conversation_history.get("conversation_history", []), use_biomd=True
+        conversation_history.get("conversation_history", []), database="bmdb"
     )
     return {"response": result, "bmkeys": bmkeys}
 
