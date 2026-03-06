@@ -14,25 +14,22 @@ jobs:
 
     steps:
     - name: Checkout Repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
+      with:
+        enable-cache: true
+        cache-dependency-glob: "backend/uv.lock"
 
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
         python-version: '3.12'
 
-    - name: Install Poetry
-      run: |
-        curl -sSL https://install.python-poetry.org | python3 -
-        export PATH="$HOME/.poetry/bin:$PATH"  # Ensure Poetry is in the PATH
-
-    - name: Change to Backend Directory
-      run: cd backend  # Change to the backend folder
-
-    - name: Install dependencies with Poetry
-      run: |
-        cd backend  # Change to the backend folder again if needed
-        poetry install --no-root # Install the dependencies using Poetry
+    - name: Install dependencies
+      working-directory: backend
+      run: uv sync --frozen
 
     - name: Create .env file with GitHub Secrets
       run: |
@@ -56,7 +53,7 @@ jobs:
         echo "LANGFUSE_SECRET_KEY=${{ secrets.LANGFUSE_SECRET_KEY }}" >> backend/app/.env
         echo "LANGFUSE_PUBLIC_KEY=${{ secrets.LANGFUSE_PUBLIC_KEY }}" >> backend/app/.env
         echo "LANGFUSE_HOST=${{ secrets.LANGFUSE_HOST }}" >> backend/app/.env
-    - name: Run Tests with Poetry
-      run: |
-        cd backend/app
-        poetry run pytest tests/ --maxfail=1 --disable-warnings -q
+
+    - name: Run Tests
+      working-directory: backend
+      run: uv run pytest app/tests/ --maxfail=1 --disable-warnings -q

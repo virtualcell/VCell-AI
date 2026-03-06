@@ -12,7 +12,7 @@ An AI-powered platform for discovering, analyzing, and exploring biomodels from 
 ## Architecture
 This is a monolithic repository containing both frontend and backend services:
 - **Frontend**: Next.js 15 with TypeScript, Tailwind CSS, and Radix UI components
-- **Backend**: FastAPI with Python 3.12+, Poetry for dependency management
+- **Backend**: FastAPI with Python 3.12+, uv for dependency management
 - **Vector Database**: Qdrant for knowledge base storage and retrieval
 - **Containerization**: Docker and Docker Compose
 
@@ -45,7 +45,7 @@ VCell-GSoC/
 ### Backend
 - **Framework**: FastAPI
 - **Language**: Python 3.12+
-- **Dependency Management**: Poetry
+- **Dependency Management**: uv
 - **Database**: Qdrant Vector Database
 - **AI/ML**: OpenAI API, LangChain
 - **File Processing**: PyPDF, Markitdown
@@ -95,9 +95,9 @@ VCell-GSoC/
 #### Backend Setup
 ```bash
 cd backend
-poetry install --no-root
-poetry run uvicorn app.main:app --port 8000
-# poetry run uvicorn app.main:app --reload
+uv sync
+uv run uvicorn app.main:app --port 8000
+# uv run uvicorn app.main:app --reload
 ```
 
 #### Frontend Setup

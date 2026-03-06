@@ -11,7 +11,7 @@ Before you begin, ensure you have the following installed:
 - **Node.js 18+** - For frontend development
 - **Python 3.12+** - For backend development
 - **Git** - For version control
-- **Poetry** - For Python dependency management (install via `pip install poetry`)
+- **[uv](https://docs.astral.sh/uv/)** - For Python dependency management (install via `curl -LsSf https://astral.sh/uv/install.sh | sh`)
 
 ## Initial Setup
 
@@ -205,8 +205,8 @@ docker run -d \
 
 ```bash
 cd backend
-poetry install --no-root
-poetry run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+uv sync
+uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 ### 5.3 Start Frontend
