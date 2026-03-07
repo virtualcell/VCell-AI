@@ -32,9 +32,10 @@ def create_knowledge_base_collection_if_not_exists():
         collection_names = [col.name for col in collections.collections]
 
         if KB_COLLECTION_NAME not in collection_names:
-            # Create collection with 1536 dimensions (Azure OpenAI text-embedding-ada-002)
+            # Create collection with Azure OpenAI text-embedding-ada-002 = 1536 / nomic-embed-text (Ollama) = 768
+            vector_size = 768 if settings.PROVIDER == "local" else 1536
             result = create_qdrant_collection(
-                collection_name=KB_COLLECTION_NAME, vector_size=1536, distance="cosine"
+                collection_name=KB_COLLECTION_NAME, vector_size=vector_size, distance="cosine"
             )
             return {"status": "success", "message": result}
         else:
