@@ -11,3 +11,4 @@ backend/Downloads
 backend/.ipynb_checkpoints
 backend/.venv
 .idea
+qdrant_storage/
