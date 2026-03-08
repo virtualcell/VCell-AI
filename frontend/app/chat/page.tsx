@@ -77,9 +77,9 @@ export default function ChatPage() {
       value: "How to create an account on VCell Software?",
     },
     {
-      label: "How to model FrapBindings in VCell Software?",
+      label: "How to model FRAP Bindings in VCell Software?",
       icon: <FileText className="h-3 w-3 mr-2" />,
-      value: "How to model FragBindings in VCell Software?",
+      value: "How to model FRAP Bindings in VCell Software?",
     },
     {
       label: "How to model Moving Boundaries in VCell Software?",
