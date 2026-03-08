@@ -132,17 +132,28 @@ You will need **two models** to run the app properly:
 1. A **chat LLM** (for conversations and reasoning)
 2. An **embedding model** (for knowledge base search and retrieval)
 
-Examples:
+**Recommended (supports tool calling):**
 
 ```bash
-# Pull a chat model (choose one depending on your system resources)
-ollama pull deepseek-r1:8b
-# or smaller / lighter
-ollama pull deepseek-r1:1.5b
+# Pull a chat model that supports tool/function calling
+ollama pull llama3.1:8b
 
 # Pull an embedding model
 ollama pull nomic-embed-text
 ```
+
+**Alternative chat models (with limitations):**
+
+```bash
+# These models do NOT support tool calling — the backend will
+# automatically fall back to a prompt-based approach, which may
+# be less accurate for biomodel searches and knowledge base queries.
+ollama pull deepseek-r1:8b
+# smaller / lighter
+ollama pull deepseek-r1:1.5b
+```
+
+> **Note:** The backend uses [tool/function calling](https://platform.openai.com/docs/guides/function-calling) to interact with the VCell API and knowledge base. Models that support this feature (like `llama3.1`) will provide the best experience. Models without tool calling support (like `deepseek-r1`) will still work, but with a prompt-based fallback.
 
 ### 4.3 Run Ollama Service
 
@@ -157,7 +168,7 @@ ollama serve
 Open a new terminal and run:
 
 ```bash
-ollama run deepseek-r1:1.5b "Hello, how are you?"
+ollama run llama3.1:8b "Hello, how are you?"
 ```
 
 If this works, Ollama is running correctly.
@@ -177,7 +188,7 @@ AZURE_ENDPOINT=http://localhost:11434/v1
 ...
 
 # Models: one LLM + one embedding model
-AZURE_DEPLOYMENT_NAME=deepseek-r1:1.5b
+AZURE_DEPLOYMENT_NAME=llama3.1:8b
 AZURE_EMBEDDING_DEPLOYMENT_NAME=nomic-embed-text
 ```
 
@@ -185,6 +196,7 @@ AZURE_EMBEDDING_DEPLOYMENT_NAME=nomic-embed-text
 
 * When `PROVIDER=azure`, the backend uses Azure OpenAI (default).
 * When `PROVIDER=local`, the backend connects to the **Ollama server** and uses the models you specify in `.env`.
+* If the selected model does not support tool calling, the backend **automatically falls back** to a prompt-based approach and logs a warning.
 
 ---
 

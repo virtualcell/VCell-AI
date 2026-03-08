@@ -10,6 +10,7 @@ from app.services.vcelldb_service import (
 )
 
 from app.utils.system_prompt import SYSTEM_PROMPT
+from app.utils.tool_selection_prompt import TOOL_SELECTION_PROMPT
 
 from app.schemas.vcelldb_schema import BiomodelRequestParams
 from app.core.singleton import get_openai_client
@@ -58,6 +59,28 @@ async def get_response_with_tools(conversation_history: list[dict]):
 
     logger.info(f"User prompt: {user_prompt}")
 
+    # Try native tool calling first; fall back to prompt-based approach if not supported
+    try:
+        final_response, bmkeys = await _get_response_with_native_tools(messages)
+    except Exception as e:
+        error_str = str(e).lower()
+        if "does not support tools" in error_str or "tool" in error_str and "400" in error_str:
+            logger.warning(
+                f"Model '{settings.AZURE_DEPLOYMENT_NAME}' does not support native tool calling. "
+                "Falling back to prompt-based tool selection. For best results, use a model that "
+                "supports tool calling (e.g., llama3.1:8b)."
+            )
+            final_response, bmkeys = await _get_response_with_prompt_tools(messages, user_prompt)
+        else:
+            raise
+
+    logger.info(f"LLM Response: {final_response}")
+
+    return final_response, bmkeys
+
+
+async def _get_response_with_native_tools(messages: list[dict]):
+    """Use native OpenAI/Azure tool calling API."""
     response = client.chat.completions.create(
         name="GET_RESPONSE_WITH_TOOLS::RETRIEVE_TOOLS",
         model=settings.AZURE_DEPLOYMENT_NAME,
@@ -107,11 +130,70 @@ async def get_response_with_tools(conversation_history: list[dict]):
         },
     )
 
-    final_response = completion.choices[0].message.content
+    return completion.choices[0].message.content, bmkeys
 
-    logger.info(f"LLM Response: {final_response}")
 
-    return final_response, bmkeys
+async def _get_response_with_prompt_tools(messages: list[dict], user_prompt: str):
+    """Fallback for local LLMs that don't support native tool calling.
+    Uses a two-step prompt approach: first ask LLM which tool to use, then
+    call the tool and ask LLM to generate a final response with the tool result."""
+
+    bmkeys = []
+
+    # Step 1: Ask the LLM which tool to call
+    tool_selection_messages = [
+        {"role": "system", "content": TOOL_SELECTION_PROMPT},
+        {"role": "user", "content": user_prompt},
+    ]
+
+    tool_response = client.chat.completions.create(
+        name="GET_RESPONSE_WITH_TOOLS::PROMPT_TOOL_SELECTION",
+        model=settings.AZURE_DEPLOYMENT_NAME,
+        messages=tool_selection_messages,
+    )
+
+    tool_decision_raw = tool_response.choices[0].message.content.strip()
+    logger.info(f"Tool decision (raw): {tool_decision_raw}")
+
+    # Try to parse the tool decision
+    tool_result = None
+    tool_name = None
+    try:
+        # Extract JSON from the response (handle models that add extra text)
+        json_start = tool_decision_raw.find("{")
+        json_end = tool_decision_raw.rfind("}") + 1
+        if json_start != -1 and json_end > json_start:
+            tool_decision = json.loads(tool_decision_raw[json_start:json_end])
+            tool_name = tool_decision.get("tool", "none")
+
+            if tool_name and tool_name != "none":
+                args = tool_decision.get("args", {})
+                logger.info(f"Prompt-based Tool Call: {tool_name} with args: {args}")
+
+                tool_result = await execute_tool(tool_name, args)
+                logger.info(f"Tool Result: {str(tool_result)[:500]}")
+
+                if isinstance(tool_result, dict):
+                    bmkeys = tool_result.get("unique_model_keys (bmkey)", [])
+    except (json.JSONDecodeError, KeyError, TypeError) as e:
+        logger.warning(f"Failed to parse tool decision: {e}. Proceeding without tools.")
+
+    # Step 2: Generate final response with or without tool results
+    if tool_result is not None:
+        messages.append(
+            {
+                "role": "user",
+                "content": f"[Tool '{tool_name}' returned the following data]\n{str(tool_result)}\n\n[Now answer the original question using this data]",
+            }
+        )
+
+    completion = client.chat.completions.create(
+        name="GET_RESPONSE_WITH_TOOLS::PROMPT_FINAL_RESPONSE",
+        model=settings.AZURE_DEPLOYMENT_NAME,
+        messages=messages,
+    )
+
+    return completion.choices[0].message.content, bmkeys
 
 
 async def analyse_vcml(biomodel_id: str):
