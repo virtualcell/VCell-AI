@@ -427,17 +427,11 @@ export default function BiomodelDetailPage() {
               <TabsContent value="analysis" className="space-y-6">
                 {/* AI Analysis Section */}
                 <div className="mb-6">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Search className="h-4 w-4 text-blue-400" />
-                    <span className="font-semibold text-slate-800 text-sm">
-                      AI Analysis Assistant
-                    </span>
-                  </div>
                   <div className="bg-slate-50 border border-slate-200 rounded shadow-sm h-[600px] overflow-hidden">
                     <ChatBox
                       startMessage={combinedMessages}
                       quickActions={quickActions}
-                      cardTitle="VCell AI Assistant"
+                      cardTitle=""
                       promptPrefix={`Analyze the biomodel with the bmId ${data.bmKey}`}
                       isLoading={false}
                     />
