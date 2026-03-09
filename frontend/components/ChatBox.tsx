@@ -8,7 +8,7 @@ import { MessageSquare, Send, Bot, User, Loader2 } from "lucide-react";
 
 interface Message {
   id: string;
-  role: "user" | "assistant";
+  role: "user" | "assistant" | "system";
   content: string;
   timestamp: Date;
 }
@@ -32,7 +32,7 @@ interface ChatParameters {
 }
 
 interface ChatBoxProps {
-  database: "vcdb" | "bmdb";
+  database?: "vcdb" | "bmdb";
   startMessage: string | string[];
   quickActions: QuickAction[];
   supplementalActions?: QuickAction[];
@@ -91,10 +91,12 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
   // });
 
   const [inputMessage, setInputMessage] = useState("");
-  const [inputMessage2, setInputMessage2] = useState("");
+  const [dbSource, setDbSource] = useState<"vcdb" | "bmdb">(database ?? "vcdb");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const abortController = useRef<AbortController | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -160,9 +162,23 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
     }
   };
 
+  const handleSend = (inputMessage: string) => {
+  if (!inputMessage.trim()) return;
+
+  if (dbSource === "vcdb") {
+    handleSendMessage(inputMessage);
+  } else if (dbSource === "bmdb"){
+    handleSendMessage2(inputMessage);
+  }
+};
+
   const handleSendMessage = async (overrideMessage?: string) => {
     const msg = overrideMessage ?? inputMessage;
     if (!msg.trim()) return;
+
+    const controller = new AbortController();
+    abortController.current = controller;
+
     // Build parameter context string
     let parameterContext = "";
     if (parameters) {
@@ -233,6 +249,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
               content: msg.content,
             })),
           }),
+          signal: controller.signal,
         },
       );
       console.log("AAAAAA API query sent to backend: " + finalPrompt);
@@ -269,8 +286,10 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
 
 // 
 const handleSendMessage2 = async (overrideMessage?: string) => {
-    const msg = overrideMessage ?? inputMessage2;
+    const msg = overrideMessage ?? inputMessage;
     if (!msg.trim()) return;
+    const controller = new AbortController();
+    abortController.current = controller;
     // Build parameter context string
     let parameterContext = "";
     if (parameters) {
@@ -344,6 +363,7 @@ const handleSendMessage2 = async (overrideMessage?: string) => {
               content: msg.content,
             })),
           }),
+          signal: controller.signal,
         },
       );
       const data = await res.json();
@@ -383,9 +403,29 @@ const handleSendMessage2 = async (overrideMessage?: string) => {
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      handleSendMessage();
+      handleSend(inputMessage);
     }
   };
+
+  const handleStop = () => {
+    if (abortController.current) {
+      abortController.current.abort();
+      abortController.current = null;
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          role: "system",
+          content: "Response stopped by user.",
+          timestamp: new Date(),
+        },
+      ]);
+
+      setIsLoading(false);
+    }
+  };
+
 
   return (
     <Card className="h-full flex flex-col shadow-sm border-slate-200">
@@ -473,41 +513,52 @@ const handleSendMessage2 = async (overrideMessage?: string) => {
         </ScrollArea>
       </CardContent>
       <div className="border-t border-slate-200 p-4 flex-shrink-0">
+        <div className="flex gap-4 mb-2">
+          <label className="flex items-center gap-2">
+            <input
+              type="radio"
+              name="db"
+              checked={dbSource === "vcdb"}
+              onChange={() => setDbSource("vcdb")}
+            />
+            VCell DB
+          </label>
+
+          <label className="flex items-center gap-2">
+            <input
+              type="radio"
+              name="db"
+              checked={dbSource === "bmdb"}
+              onChange={() => setDbSource("bmdb")}
+            />
+            BioModels DB
+          </label>
+        </div>
         <div className="flex gap-2">
           <Input
             ref={inputRef}
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Ask any questions about VCell biomodels..."
+            placeholder={dbSource === "vcdb"
+                          ? "Ask about VCell biomodels..."
+                          : "Ask about BioModels biomodels..."}
             className="flex-1 border-slate-300 focus:border-blue-500"
             disabled={isLoading || isInitialLoading}
           />
           <Button
-            onClick={() => handleSendMessage(inputMessage)}
+            onClick={() => handleSend(inputMessage)}
             disabled={isLoading || isInitialLoading || !inputMessage.trim()}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4"
           >
             <Send className="h-4 w-4" />
           </Button>
-        </div>
 
-        <div className="flex gap-2">
-          <Input
-            ref={inputRef}
-            value={inputMessage2}
-            onChange={(e) => setInputMessage2(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Ask any questions about BMDB biomodels..."
-            className="flex-1 border-slate-300 focus:border-blue-500"
-            disabled={isLoading || isInitialLoading}
-          />
           <Button
-            onClick={() => handleSendMessage2(inputMessage2)}
-            disabled={isLoading || isInitialLoading || !inputMessage2.trim()}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4"
+            onClick={handleStop}
+            className="bg-blue-500 hover:bg-gray-600 text-white"
           >
-            <Send className="h-4 w-4" />
+            Stop
           </Button>
         </div>
 
