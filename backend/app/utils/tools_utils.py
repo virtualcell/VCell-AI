@@ -5,6 +5,7 @@ from app.services.databases_service import (
     get_vcml_file,
     fetch_publications,
     fetch_biomd_models,
+    get_xml_file
 )
 from app.services.knowledge_base_service import get_similar_chunks
 from app.schemas.vcelldb_schema import BiomodelRequestParams, SimulationRequestParams
@@ -205,6 +206,25 @@ fetch_biomd_tool = ToolDefinition(
     ),
 )
 
+get_xml_file_tool = ToolDefinition(
+    type="function",
+    function=FunctionDefinition(
+        name="get_xml_file",
+        description="Retrieves the SBML XML (eXtensible Markup Language) file content for a specified BioModels model (BIOMD ID). SBML (Systems Biology Markup Language) files provide a detailed, machine-readable representation of a biomodel's structure and behavior, which is used for simulation and model analysis. This function downloads the XML representation of a biomodel for further analysis.",
+        parameters=ParameterSchema(
+            type="object",
+            properties={
+                "bmId": {
+                    "type": "string",
+                    "description": "ID of the biomodel to retrieve VCML",
+                }
+            },
+            required=["bmId"],
+            additionalProperties=False,
+        ),
+        strict=True,
+    ),
+)
 
 # List of all tool definitions
 ToolsDefinitions = [
@@ -214,7 +234,8 @@ ToolsDefinitions = [
     search_vcell_knowledge_base_tool,
     fetch_publications_tool,
 ]
-BIOMD_TOOLS = [fetch_biomd_tool]
+BIOMD_TOOLS = [fetch_biomd_tool,
+               get_xml_file_tool]
 
 # Tool Executor Function
 async def execute_tool(name, args):
@@ -260,7 +281,8 @@ async def execute_tool(name, args):
             params = BiomodelRequestParams(**args)
             print("DEBUG About to call fetch_biomodels()")
             return await fetch_biomd_models(params)
-
+        elif name == "get_xml_file":
+            return await get_xml_file(args["bmId"])
 
         else:
             return {}

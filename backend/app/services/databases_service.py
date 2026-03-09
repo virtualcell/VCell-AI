@@ -8,7 +8,7 @@ from langfuse import observe
 from typing import List
 
 VCELL_API_BASE_URL = "https://vcell.cam.uchc.edu/api/v0"
-BIOMODELS_API_URL = "https://biomodels.org/search?query="
+BIOMODELS_API_URL = "https://biomodels.org/"
 
 logger = get_logger("vcelldb_service")
 print("CHECK: in VCELL_DB_SERVICE")
@@ -39,6 +39,10 @@ def sanitize_vcml_content(vcml_content: str) -> str:
     
     logger.info("VCML content sanitized: ImageData tags removed")
     return sanitized_content
+
+# def sanitize_xml_content(vcml_content: str) -> str:
+
+#     return sanitized_content
 
 
 async def check_vcell_connectivity() -> bool:
@@ -139,14 +143,12 @@ async def fetch_simulation_details(params: SimulationRequestParams) -> dict:
 @observe(name="FETCH_BIOMD_MODELS")
 async def fetch_biomd_models(params: BiomodelRequestParams) -> dict:
     print("DEBUG20: BIOMD POST: in tool FETCH_BIOMD_MODELS")
-    # Transform None to "" (optional, only if needed for empty fields)
-    params_dict = {k: (v if v is not None else "") for k, v in params.dict().items()}
 
     # Construct the query string using urlencoded parameters (params_dict)
     query_string = params.bmName if params.bmName else params.bmId
 
     # Construct the full URL
-    url = f"{BIOMODELS_API_URL}{query_string}&format=json"
+    url = f"{BIOMODELS_API_URL}search?query={query_string}&format=json"
 
     # Log the URL being queried
     logger.info(f"Querying URL: {url}")
@@ -173,6 +175,72 @@ async def fetch_biomd_models(params: BiomodelRequestParams) -> dict:
         "models_count": len(biomodels),
         "data": biomodels
     }
+
+
+@observe(name="GET_XML_FILE")
+async def get_xml_file(bmId: str, truncate: bool = False, max_retries: int = 3) -> str:
+    
+    logger.info(f"Fetching XML file for biomodel: {bmId}")    
+
+    # Check connectivity first
+    if not await check_vcell_connectivity():
+        logger.error(
+            "BioMD API is not reachable. Please check your network connection and DNS settings."
+        )
+        raise Exception(
+            "BioMD API is not reachable. Please check your network connection and DNS settings."
+        )
+
+    for attempt in range(max_retries + 1):
+        try:
+            url = f"{BIOMODELS_API_URL}model/download/{bmId}?filename={bmId}_url.xml"
+            logger.info(
+                f"Requesting URL: {url} (attempt {attempt + 1}/{max_retries + 1})"
+            )
+
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.get(url)
+                logger.info(f"Response status: {response.status_code}")
+                logger.info(f"Response headers: {dict(response.headers)}")
+                response.raise_for_status()
+
+                return response.text
+                # if truncate:
+                #     return sanitize_vcml_content(response.text[:500])
+                # else:
+                #     return sanitize_vcml_content(response.text)
+
+        except httpx.HTTPStatusError as e:
+            logger.error(
+                f"HTTP error fetching XML file for biomodel {bmId}: {e.response.status_code} - {e.response.text}"
+            )
+            if attempt == max_retries:
+                raise e
+            logger.warning(f"Retrying in {2 ** attempt} seconds...")
+            await asyncio.sleep(2**attempt)
+
+        except httpx.RequestError as e:
+            logger.error(
+                f"Request error fetching XML file for biomodel {bmId}: {str(e)}"
+            )
+            if attempt == max_retries:
+                raise e
+            logger.warning(f"Retrying in {2 ** attempt} seconds...")
+            await asyncio.sleep(2**attempt)
+
+        except Exception as e:
+            logger.error(
+                f"Unexpected error fetching XML file for biomodel {bmId}: {str(e)}"
+            )
+            if attempt == max_retries:
+                raise e
+            logger.warning(f"Retrying in {2 ** attempt} seconds...")
+            await asyncio.sleep(2**attempt)
+
+    # This should never be reached, but just in case
+    raise Exception(
+        f"Failed to fetch XML file for biomodel {bmId} after {max_retries + 1} attempts"
+    )
 
 
 @observe(name="GET_VCML_FILE")
