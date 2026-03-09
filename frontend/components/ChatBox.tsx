@@ -32,6 +32,7 @@ interface ChatParameters {
 }
 
 interface ChatBoxProps {
+  database: "vcdb" | "bmdb";
   startMessage: string | string[];
   quickActions: QuickAction[];
   supplementalActions?: QuickAction[];
@@ -43,6 +44,7 @@ interface ChatBoxProps {
 }
 
 export const ChatBox: React.FC<ChatBoxProps> = ({
+  database,
   startMessage,
   quickActions,
   supplementalActions,
@@ -151,7 +153,11 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
 
   const handleQuickAction = (message: string) => {
     setInputMessage("");
-    handleSendMessage(message);
+    if (database == "vcdb") {
+      handleSendMessage(message);
+    } else if (database == "bmdb") {
+      handleSendMessage2(message);
+    }
   };
 
   const handleSendMessage = async (overrideMessage?: string) => {
@@ -473,7 +479,7 @@ const handleSendMessage2 = async (overrideMessage?: string) => {
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Ask any questions about VCell2 biomodels..."
+            placeholder="Ask any questions about VCell biomodels..."
             className="flex-1 border-slate-300 focus:border-blue-500"
             disabled={isLoading || isInitialLoading}
           />

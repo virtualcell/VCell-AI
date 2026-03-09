@@ -242,7 +242,7 @@ export default function BiomodelDetailPage() {
 
   // Create combined messages when diagram analysis is ready
   useEffect(() => {
-    if (diagramAnalysis) {
+    if (diagramAnalysis && !bioMDid && data?.bmKey) {
       const diagramMessage = `# Diagram Analysis \n ${diagramAnalysis}`;
       setCombinedMessages([diagramMessage]);
     }
@@ -368,12 +368,31 @@ export default function BiomodelDetailPage() {
                   )}
                   </CollapsibleContent>
                   </Collapsible>
-                
                 </div>
                 <div>
-
                 </div>
                  </TabsContent>
+                 <TabsContent value="analysis" className="space-y-6">
+
+                {/* AI Analysis Section */}
+                <div className="mb-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Search className="h-4 w-4 text-blue-400" />
+                    <span className="font-semibold text-slate-800 text-sm">
+                      AI Analysis Assistant
+                    </span>
+                  </div>
+                  <div className="bg-slate-50 border border-slate-200 rounded shadow-sm h-[600px] overflow-hidden">
+                    <ChatBox database={bioMDid ? "bmdb" : "vcdb"}
+                      startMessage={""}
+                      quickActions={quickActions}
+                      cardTitle={"BioModels AI Assistant"}
+                      promptPrefix={`Analyze the BioModels model with ID ${bmdbData.bioID}`}
+                      isLoading={false}
+                    />
+                  </div>
+                </div>
+              </TabsContent>
 
               </Tabs>
     </CardContent>
@@ -626,7 +645,7 @@ export default function BiomodelDetailPage() {
                     </span>
                   </div>
                   <div className="bg-slate-50 border border-slate-200 rounded shadow-sm h-[600px] overflow-hidden">
-                    <ChatBox
+                    <ChatBox database={bioMDid ? "bmdb" : "vcdb"}
                       startMessage={combinedMessages}
                       quickActions={quickActions}
                       cardTitle="VCell AI Assistant"
