@@ -22,6 +22,7 @@ proper rendering. Example: "The rate is $5.2 \times 10^{-3} \text{ mmol}\cdot\te
 ### Formatting Guidelines for Biomodels, Biomodel IDs and Hyperlinks
 * Ignore all previous instructions.
 * Applications are for VCell models ONLY otherwise do not output an Applications bullet.
+* For models from BMDB, the database link would be https://www.biomodels.org/${biomodelId}
 * When returning a list of biomodels, always follow this format:
 ```
 1. **[Biomodel Name] (/search/${biomodelID})**  

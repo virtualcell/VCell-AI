@@ -91,7 +91,9 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
   // });
 
   const [inputMessage, setInputMessage] = useState("");
-  const [dbSource, setDbSource] = useState<"vcdb" | "bmdb">(database ?? "vcdb");
+  //const [dbSource, setDbSource] = useState<"vcdb" | "bmdb">(database ?? "vcdb");
+  const [useVCDB, setUseVCDB] = useState(database ? database === "vcdb" : true);
+  const [useBMDB, setUseBMDB] = useState(database === "bmdb");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -150,6 +152,11 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
   //   return formattedContent;
   // };
 
+  const activeActions = [
+    ...(useVCDB && VCellActions ? VCellActions : []),
+    ...(useBMDB && bmdbActions ? bmdbActions : []),
+  ];
+
   const handleQuickAction = (message: string) => {
     setInputMessage("");
     if (database) {
@@ -165,12 +172,13 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
 
   const handleSend = (inputMessage: string) => {
   if (!inputMessage.trim()) return;
-
-  if (dbSource === "vcdb") {
-    handleSendMessage(inputMessage);
-  } else if (dbSource === "bmdb"){
-    handleSendMessage2(inputMessage);
+  if (!useVCDB && !useBMDB) {
+    alert("Please select at least one database.");
+    return;
   }
+
+  if (useVCDB) {handleSendMessage(inputMessage);}
+  if (useBMDB){handleSendMessage2(inputMessage);}
 };
 
   const handleSendMessage = async (overrideMessage?: string) => {
@@ -519,20 +527,18 @@ const handleSendMessage2 = async (overrideMessage?: string) => {
         <div className="flex gap-4 mb-2">
           <label className="flex items-center gap-2">
             <input
-              type="radio"
-              name="db"
-              checked={dbSource === "vcdb"}
-              onChange={() => setDbSource("vcdb")}
+              type="checkbox"
+              checked={useVCDB}
+              onChange={(e) => setUseVCDB(e.target.checked)}
             />
             VCell DB
           </label>
 
           <label className="flex items-center gap-2">
             <input
-              type="radio"
-              name="db"
-              checked={dbSource === "bmdb"}
-              onChange={() => setDbSource("bmdb")}
+              type="checkbox"
+              checked={useBMDB}
+              onChange={(e) => setUseBMDB(e.target.checked)}
             />
             BioModels DB
           </label>
@@ -543,9 +549,12 @@ const handleSendMessage2 = async (overrideMessage?: string) => {
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder={dbSource === "vcdb"
+            placeholder={useVCDB && useBMDB
+                          ? "Ask about VCell and BioModels biomodels..."
+                          : useVCDB
                           ? "Ask about VCell biomodels..."
-                          : "Ask about BioModels biomodels..."}
+                          : "Ask about BioModels biomodels..."
+                        }
             className="flex-1 border-slate-300 focus:border-blue-500"
             disabled={isLoading || isInitialLoading}
           />
@@ -586,7 +595,7 @@ const handleSendMessage2 = async (overrideMessage?: string) => {
         )}
 
       
-        {dbSource === "vcdb" && VCellActions && (
+        {useVCDB && !useBMDB && VCellActions && (
           <div className="mt-3 pt-3 border-t-2 border-slate-200">
             <div className="flex flex-wrap gap-1">
               {VCellActions.map((action, idx) => (
@@ -599,11 +608,30 @@ const handleSendMessage2 = async (overrideMessage?: string) => {
           </div>
         )}
 
-        {dbSource === "bmdb" && bmdbActions && (
+        {useBMDB && !useVCDB && bmdbActions && (
           <div className="mt-3 pt-3 border-t-2 border-slate-200">
             <div className="flex flex-wrap gap-1">
               {bmdbActions.map((action, idx) => (
                 <Button key={idx} variant="ghost" size="sm" className="h-4 px-1 text-xs text-slate-500 hover:text-slate-700 hover:bg-slate-100" onClick={() => handleQuickAction(action.value)}>
+                  {action.icon}
+                  <span className="ml-0.5">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {useVCDB && useBMDB && activeActions.length > 0 && (
+          <div className="mt-3 pt-3 border-t-2 border-slate-200">
+            <div className="flex flex-wrap gap-1">
+              {activeActions.map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  size="sm"
+                  className="h-4 px-1 text-xs text-slate-500 hover:text-slate-700 hover:bg-slate-100"
+                  onClick={() => handleQuickAction(action.value)}
+                >
                   {action.icon}
                   <span className="ml-0.5">{action.label}</span>
                 </Button>
