@@ -127,29 +127,26 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
   }, [startMessage]);
 
   // Helper function to format biomodel IDs as hyperlinks
-  const formatBiomodelIds = (content: string, bmkeys: string[]): string => {
-    if (!bmkeys || bmkeys.length === 0) return content;
+  // const formatBiomodelIds = (content: string, bmkeys: string[]): string => {
+  //   if (!bmkeys || bmkeys.length === 0) return content;
 
-    let formattedContent = content;
+  //   let formattedContent = content;
 
-    // Replace biomodel IDs with hyperlinks
-    bmkeys.forEach((bmId) => {
-      const searchString = `${bmId}`;
-      const encodedPrompt = encodeURIComponent(`Describe model`);
-      /* const ai_link = `[AI Analysis](/analyze/${bmId}?prompt=${encodedPrompt})`;
-      const db_link = `[Database](/search/${bmId})`;
-      const replacementString = `**${bmId}** -- ${ai_link} &nbsp;|&nbsp; ${db_link}`; */
-      const db_link = `[Database Details](/search/${bmId})`;
-      const replacementString = `${bmId} || ${db_link}`;
-      const match_IDs_Not_in_URLs = new RegExp(`(?<!\\()(${searchString})(?!\\))`, "g");
-      formattedContent = formattedContent.replaceAll(
-        match_IDs_Not_in_URLs,
-        replacementString,
-      );
-    });
+  //   // Replace biomodel IDs with hyperlinks
+  //   bmkeys.forEach((bmId) => {
+  //     const searchString = `${bmId}`;
+  //     const encodedPrompt = encodeURIComponent(`Describe model`);
+  //     const db_link = `[Database Details](/search/${bmId})`;
+  //     const replacementString = `${bmId} || ${db_link}`;
+  //     const match_IDs_Not_in_URLs = new RegExp(`(?<!\\()(${searchString})(?!\\))`, "g");
+  //     formattedContent = formattedContent.replaceAll(
+  //       match_IDs_Not_in_URLs,
+  //       replacementString,
+  //     );
+  //   });
 
-    return formattedContent;
-  };
+  //   return formattedContent;
+  // };
 
   const handleQuickAction = (message: string) => {
     setInputMessage("");
@@ -257,7 +254,8 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
       const bmkeys = data.bmkeys || [];
 
       // Format the response to include hyperlinks for biomodel IDs
-      const formattedResponse = formatBiomodelIds(aiResponse, bmkeys);
+      //const formattedResponse = formatBiomodelIds(aiResponse, bmkeys);
+      const formattedResponse = aiResponse
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -371,7 +369,8 @@ const handleSendMessage2 = async (overrideMessage?: string) => {
 
       console.log(bmkeys)
       // Format the response to include hyperlinks for biomodel IDs
-      const formattedResponse = formatBiomodelIds(aiResponse, bmkeys);
+      //const formattedResponse = formatBiomodelIds(aiResponse, bmkeys);
+      const formattedResponse = aiResponse
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
