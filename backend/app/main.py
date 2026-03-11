@@ -25,8 +25,10 @@ ascii_art = """
 
 app = FastAPI()
 
-logger.info(f"Starting App : \n {ascii_art}")
-logger.info("App Ready")
+# Improved startup log formatting: Adding separating lines and clear status messages makes the startup sequence significantly easier to read and distinguish from other log noise in the terminal.
+logger.info(
+    f"Starting App : \n {ascii_art}\n=======\n>>> App Initialization Complete - Ready to accept connections <<<\n======="
+)
 
 
 @app.on_event("startup")

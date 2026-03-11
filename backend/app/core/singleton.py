@@ -22,7 +22,7 @@ def connect_openai():
                 api_key=settings.AZURE_API_KEY,
                 base_url=settings.AZURE_ENDPOINT,
                 project=None,
-                organization=None
+                organization=None,
             )
     return openai_client
 

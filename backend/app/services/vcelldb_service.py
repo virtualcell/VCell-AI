@@ -15,10 +15,10 @@ logger = get_logger("vcelldb_service")
 def sanitize_vcml_content(vcml_content: str) -> str:
     """
     Sanitizes VCML content by removing only ImageData tags and their content.
-    
+
     Args:
         vcml_content (str): Raw VCML content as string.
-        
+
     Returns:
         str: Sanitized VCML content with ImageData tags removed.
     """
@@ -26,15 +26,15 @@ def sanitize_vcml_content(vcml_content: str) -> str:
     # This pattern matches <ImageData ...> ... </ImageData> including nested content
     # The pattern handles multiline content and preserves the rest of the XML structure
     sanitized_content = re.sub(
-        r'<ImageData[^>]*>.*?</ImageData>',
-        '',
+        r"<ImageData[^>]*>.*?</ImageData>",
+        "",
         vcml_content,
-        flags=re.DOTALL | re.MULTILINE
+        flags=re.DOTALL | re.MULTILINE,
     )
-    
+
     # Clean up any extra whitespace that might be left after removing ImageData
-    sanitized_content = re.sub(r'\n\s*\n', '\n', sanitized_content)
-    
+    sanitized_content = re.sub(r"\n\s*\n", "\n", sanitized_content)
+
     logger.info("VCML content sanitized: ImageData tags removed")
     return sanitized_content
 
@@ -325,15 +325,15 @@ async def fetch_publications() -> List[dict]:
         List[dict]: A list of publication dictionaries with sanitized data.
     """
     url = f"{VCELL_API_BASE_URL}/publication?submitLow=&submitHigh=&startRow=1&maxRows=1000&hasData=all&waiting=on&queued=on&dispatched=on&running=on"
-    
+
     logger.info(f"Fetching publications from URL: {url}")
-    
+
     try:
         async with httpx.AsyncClient() as client:
             response = await client.get(url)
             response.raise_for_status()
             publications = response.json()
-            
+
             # Ensure we return a list of dictionaries
             if isinstance(publications, list):
                 # Sanitize publications by removing unwanted fields
@@ -342,33 +342,41 @@ async def fetch_publications() -> List[dict]:
                     if isinstance(pub, dict):
                         # Create a copy and remove unwanted fields
                         sanitized_pub = pub.copy()
-                        sanitized_pub.pop('wittid', None)
-                        sanitized_pub.pop('date', None)
-                        sanitized_pub.pop('url', None)
-                        sanitized_pub.pop('pubKey', None)
-                        sanitized_pub.pop('endnoteid', None)
-                        
+                        sanitized_pub.pop("wittid", None)
+                        sanitized_pub.pop("date", None)
+                        sanitized_pub.pop("url", None)
+                        sanitized_pub.pop("pubKey", None)
+                        sanitized_pub.pop("endnoteid", None)
+
                         # Clean up author arrays - remove empty strings and combine
-                        authors = pub.get('authors', [])
+                        authors = pub.get("authors", [])
                         if authors:
                             # Remove empty strings and separators, combine into single string
-                            clean_authors = [a.strip() for a in authors if a.strip() and a.strip() not in ['&', ',']]
-                            sanitized_pub['authors'] = ', '.join(clean_authors)
-                        
+                            clean_authors = [
+                                a.strip()
+                                for a in authors
+                                if a.strip() and a.strip() not in ["&", ","]
+                            ]
+                            sanitized_pub["authors"] = ", ".join(clean_authors)
+
                         sanitized_publications.append(sanitized_pub)
                     else:
                         # If not a dict, keep as is but log warning
                         logger.warning(f"Publication is not a dictionary: {type(pub)}")
                         sanitized_publications.append(pub)
-                
-                logger.info(f"Successfully fetched and sanitized {len(sanitized_publications)} publications")
+
+                logger.info(
+                    f"Successfully fetched and sanitized {len(sanitized_publications)} publications"
+                )
                 return sanitized_publications
             else:
                 logger.warning(f"Unexpected response format: {type(publications)}")
                 return []
-                
+
     except httpx.HTTPStatusError as e:
-        logger.error(f"HTTP error fetching publications: {e.response.status_code} - {e.response.text}")
+        logger.error(
+            f"HTTP error fetching publications: {e.response.status_code} - {e.response.text}"
+        )
         raise e
     except httpx.RequestError as e:
         logger.error(f"Request error fetching publications: {str(e)}")
@@ -376,4 +384,3 @@ async def fetch_publications() -> List[dict]:
     except Exception as e:
         logger.error(f"Unexpected error fetching publications: {str(e)}")
         raise e
-
