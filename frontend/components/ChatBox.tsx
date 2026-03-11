@@ -150,10 +150,14 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
 
   const handleQuickAction = (message: string) => {
     setInputMessage("");
-    if (database == "vcdb") {
-      handleSendMessage(message);
-    } else if (database == "bmdb") {
-      handleSendMessage2(message);
+    if (database) {
+      if (database == "vcdb") {
+        handleSendMessage(message);
+      } else if (database == "bmdb") {
+        handleSendMessage2(message);
+      }
+    } else {
+      handleSend(message)
     }
   };
 
