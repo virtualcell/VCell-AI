@@ -195,9 +195,15 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
         },
       );
       const data = await res.json();
-      const aiResponse =
-        data.response || "Sorry, I didn't get a response from the server.";
-      const bmkeys = data.bmkeys || [];
+      
+      // Handle new standardized response format
+      if (!data.success) {
+        throw new Error(data.message || "API request failed");
+      }
+      
+      // Extract response text (check both new and legacy formats for backward compatibility)
+      const aiResponse = data.data?.response || data.data?.text || data.response || "Sorry, I didn't get a response from the server.";
+      const bmkeys = data.meta?.bmkeys || data.bmkeys || [];
 
       // Format the response to include hyperlinks for biomodel IDs
       const formattedResponse = formatBiomodelIds(aiResponse, bmkeys);
@@ -210,13 +216,21 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
       };
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
+      console.error("Chat error:", error);
+      
+      // Extract error message from standardized error response or use default
+      let errorMessage = "There was an error connecting to the backend. Please try again.";
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
       setMessages((prev) => [
         ...prev,
         {
           id: (Date.now() + 2).toString(),
           role: "assistant",
-          content:
-            "There was an error connecting to the backend. Please try again.",
+          content: errorMessage,
           timestamp: new Date(),
         },
       ]);

@@ -16,12 +16,11 @@ async def query_llm(conversation_history: dict):
     Args:
         conversation_history (dict): The conversation history containing user prompts and responses.
     Returns:
-        dict: The final response after processing the prompt with the tools.
+        JSONResponse: Standardized response with LLM output and metadata.
     """
-    result, bmkeys = await get_llm_response(
+    return await get_llm_response(
         conversation_history.get("conversation_history", [])
     )
-    return {"response": result, "bmkeys": bmkeys}
 
 
 @router.post("/analyse/{biomodel_id}")
@@ -32,10 +31,9 @@ async def analyse_biomodel(biomodel_id: str, user_prompt: str):
         biomodel_id (str): The ID of the biomodel to be analyzed.
         user_prompt (str): The prompt entered by the user.
     Returns:
-        dict: The analysis result from the LLM service.
+        JSONResponse: Standardized response with biomodel analysis.
     """
-    result = await analyse_biomodel_controller(biomodel_id, user_prompt)
-    return {"response": result}
+    return await analyse_biomodel_controller(biomodel_id, user_prompt)
 
 
 @router.post("/analyse/{biomodel_id}/vcml")
@@ -45,10 +43,9 @@ async def analyse_vcml(biomodel_id: str):
     Args:
         biomodel_id (str): The ID of the biomodel to analyze.
     Returns:
-        dict: The VCML analysis response.
+        JSONResponse: Standardized response with VCML analysis.
     """
-    result = await analyse_vcml_controller(biomodel_id)
-    return {"response": result}
+    return await analyse_vcml_controller(biomodel_id)
 
 
 @router.post("/analyse/{biomodel_id}/diagram")
@@ -58,7 +55,6 @@ async def analyse_diagram(biomodel_id: str):
     Args:
         biomodel_id (str): The ID of the biomodel to analyze.
     Returns:
-        dict: The diagram analysis response.
+        JSONResponse: Standardized response with diagram analysis.
     """
-    result = await analyse_diagram_controller(biomodel_id)
-    return {"response": result}
+    return await analyse_diagram_controller(biomodel_id)
