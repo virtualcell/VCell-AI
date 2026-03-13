@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -21,8 +21,8 @@ export function JsonViewer({ data }: JsonViewerProps) {
     }
   };
 
-  const formatJson = (obj: any, indent = 0): JSX.Element[] => {
-    const elements: JSX.Element[] = [];
+  const formatJson = (obj: any, indent = 0): React.JSX.Element[] => {
+    const elements: React.JSX.Element[] = [];
     const indentStr = "  ".repeat(indent);
 
     if (Array.isArray(obj)) {
