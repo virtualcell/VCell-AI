@@ -4,7 +4,7 @@ from markitdown import MarkItDown
 from typing import List, Dict, Any, Optional
 from app.core.config import settings
 from app.core.singleton import get_openai_client, get_qdrant_client
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from app.services.qdrant_service import (
     create_qdrant_collection,
     insert_qdrant_points,
