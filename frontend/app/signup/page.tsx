@@ -187,6 +187,7 @@ export default function SignUpPage() {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Create a password"
+                  autoComplete="new-password"
                   value={formData.password}
                   onChange={(e) =>
                     handleInputChange("password", e.target.value)
@@ -219,6 +220,7 @@ export default function SignUpPage() {
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="Confirm your password"
+                  autoComplete="new-password"
                   value={formData.confirmPassword}
                   onChange={(e) =>
                     handleInputChange("confirmPassword", e.target.value)
