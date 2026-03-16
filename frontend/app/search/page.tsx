@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import {
   Collapsible,
@@ -63,10 +64,12 @@ export default function BiomodelSearchPage() {
 
   const [results, setResults] = useState<BiomodelResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [isAdvancedSearchOpen, setIsAdvancedSearchOpen] = useState(false);
 
   const handleSearch = async () => {
     setIsLoading(true);
+    setError(null);
     try {
       // Build query params from filters, omitting empty bmName
       const params = new URLSearchParams();
@@ -103,6 +106,7 @@ export default function BiomodelSearchPage() {
       );
       setResults(mappedResults);
     } catch (err) {
+      setError("Failed to search biomodels. Please try again.");
       setResults([]);
     } finally {
       setIsLoading(false);
@@ -381,6 +385,12 @@ export default function BiomodelSearchPage() {
             </div>
           </CardContent>
         </Card>
+
+        {error && (
+          <Alert className="mb-8 border-red-200 bg-red-50">
+            <AlertDescription className="text-red-700">{error}</AlertDescription>
+          </Alert>
+        )}
 
         {/* Results Section */}
         {results.length > 0 && (
