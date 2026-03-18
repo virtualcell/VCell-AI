@@ -118,28 +118,25 @@ export default function AdminSettingsPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="container mx-auto p-8 max-w-6xl">
+      <div className="container mx-auto p-4 sm:p-6 md:p-8 max-w-6xl">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-extrabold text-blue-900 flex items-center gap-3">
-                <Settings className="h-8 w-8 text-blue-500" />
-                Admin Settings
-              </h1>
-              <p className="text-slate-600 mt-2">
-                Configure LLM settings and preferences
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <Button
-                onClick={() => window.open("/admin", "_blank")}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded border border-blue-600 text-blue-700 bg-white font-semibold shadow-sm transition-colors hover:bg-blue-50"
-              >
-                <ArrowLeft className="h-4 w-4" /> Back to Dashboard
-              </Button>
-            </div>
+        <div className="mb-6 sm:mb-8">
+          <div className="flex items-center gap-2 sm:gap-3 mb-2">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-blue-900 flex items-center gap-2 sm:gap-3">
+              <Settings className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 flex-shrink-0" />
+              <span className="break-words">Admin Settings</span>
+            </h1>
+            <Button
+              onClick={() => window.open("/admin", "_blank")}
+              className="inline-flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 rounded border border-blue-600 text-blue-700 bg-white font-semibold shadow-sm transition-colors hover:bg-blue-50 text-sm flex-shrink-0"
+            >
+              <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4" /> 
+              <span className="whitespace-nowrap">Back to Dashboard</span>
+            </Button>
           </div>
+          <p className="text-slate-600 text-sm sm:text-base">
+            Configure LLM settings and preferences
+          </p>
         </div>
 
         {/* Success/Error Messages */}
@@ -158,14 +155,16 @@ export default function AdminSettingsPage() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="hosted" className="flex items-center gap-2">
-              <Server className="h-4 w-4" />
-              Hosted Settings
+          <TabsList className="grid w-full grid-cols-2 mb-4 sm:mb-6">
+            <TabsTrigger value="hosted" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+              <Server className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Hosted Settings</span>
+              <span className="sm:hidden">Hosted</span>
             </TabsTrigger>
-            <TabsTrigger value="local" className="flex items-center gap-2">
-              <Monitor className="h-4 w-4" />
-              Local Settings
+            <TabsTrigger value="local" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+              <Monitor className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Local Settings</span>
+              <span className="sm:hidden">Local</span>
             </TabsTrigger>
           </TabsList>
 
@@ -256,54 +255,55 @@ export default function AdminSettingsPage() {
 
           {/* Local Settings Tab */}
           <TabsContent value="local">
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {/* Setup Guide */}
               <Card className="shadow-lg border-slate-200 w-full">
-                <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-50 border-b border-slate-200 px-6 py-5">
-                  <CardTitle className="text-xl font-extrabold text-blue-900 flex items-center gap-3">
-                    <Monitor className="h-6 w-6 text-blue-500" />
-                    Local Setup Guide
+                <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-50 border-b border-slate-200 px-4 sm:px-5 md:px-6 py-4 sm:py-5">
+                  <CardTitle className="text-lg sm:text-xl font-extrabold text-blue-900 flex items-center gap-2 sm:gap-3">
+                    <Monitor className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500 flex-shrink-0" />
+                    <span>Local Setup Guide</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6 space-y-4">
+                <CardContent className="p-4 sm:p-5 md:p-6 space-y-4">
                   <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                     <div className="flex items-start gap-3">
                       <svg className="h-6 w-6 text-slate-700 mt-0.5 flex-shrink-0" viewBox="0 0 16 16" fill="currentColor">
                         <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
                       </svg>
-                      <div className="text-blue-800 text-sm leading-relaxed">
+                      <div className="text-blue-800 text-xs sm:text-sm leading-relaxed">
                         <p>
                           This is a guide to setup this platform locally on your machine and use your own LLM for unlimited usage. 
-                          <br/>Follow the steps below to get started with your local deployment.
+                          Follow the steps below to get started with your local deployment.
                         </p>
                         <p className="mt-2">
-                          For more details, check <a href="https://github.com/KacemMathlouthi/VCell-GSoC" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 underline font-medium">https://github.com/KacemMathlouthi/VCell-GSoC</a>
+                          For more details, check <a href="https://github.com/KacemMathlouthi/VCell-GSoC" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 underline font-medium break-all">https://github.com/KacemMathlouthi/VCell-GSoC</a>
                         </p>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="bg-slate-50 p-4 rounded-lg space-y-3">
-                    <h3 className="font-semibold text-slate-800">Step 1: Clone the Repository</h3>
-                    <div className="flex items-center gap-2">
-                      <code className="bg-slate-800 text-green-400 px-3 py-2 rounded flex-1">
+                  <div className="bg-slate-50 p-3 sm:p-4 rounded-lg space-y-2 sm:space-y-3">
+                    <h3 className="font-semibold text-slate-800 text-sm sm:text-base">Step 1: Clone the Repository</h3>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <code className="bg-slate-800 text-green-400 px-2 sm:px-3 py-2 rounded flex-1 text-xs sm:text-sm break-all">
                         git clone https://github.com/KacemMathlouthi/VCell-GSoC.git
                       </code>
                       <Button
                         onClick={() => copyToClipboard("git clone https://github.com/KacemMathlouthi/VCell-GSoC.git")}
                         size="sm"
                         variant="outline"
+                        className="flex-shrink-0 px-3 py-2"
                       >
-                        <Copy className="h-4 w-4" />
+                        <Copy className="h-3 w-3 sm:h-4 sm:w-4" />
                       </Button>
                     </div>
                   </div>
 
-                  <div className="bg-slate-50 p-4 rounded-lg space-y-3">
-                    <h3 className="font-semibold text-slate-800">Step 2: Configure Environment Variables</h3>
-                    <p className="text-slate-600">Configure the .env files following the .env.example in both frontend and backend folders</p>
-                    <div className="flex items-start gap-2">
-                      <pre className="bg-slate-800 text-green-400 px-3 py-2 rounded flex-1 text-sm whitespace-pre-wrap">
+                  <div className="bg-slate-50 p-3 sm:p-4 rounded-lg space-y-2 sm:space-y-3">
+                    <h3 className="font-semibold text-slate-800 text-sm sm:text-base">Step 2: Configure Environment Variables</h3>
+                    <p className="text-slate-600 text-xs sm:text-sm">Configure the .env files following the .env.example in both frontend and backend folders</p>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <pre className="bg-slate-800 text-green-400 px-2 sm:px-3 py-2 rounded flex-1 text-xs overflow-x-auto whitespace-pre-wrap">
 {`# Frontend .env
 cp frontend/.env.example frontend/.env
 # Backend .env  
@@ -313,41 +313,44 @@ cp backend/.env.example backend/.env`}
                         onClick={() => copyToClipboard("cp frontend/.env.example frontend/.env && cp backend/.env.example backend/.env")}
                         size="sm"
                         variant="outline"
+                        className="flex-shrink-0 px-3 py-2"
                       >
-                        <Copy className="h-4 w-4" />
+                        <Copy className="h-3 w-3 sm:h-4 sm:w-4" />
                       </Button>
                     </div>
                   </div>
 
-                  <div className="bg-slate-50 p-4 rounded-lg space-y-3">
-                    <h3 className="font-semibold text-slate-800">Step 3: Start the Application</h3>
-                    <div className="flex items-center gap-2">
-                      <code className="bg-slate-800 text-green-400 px-3 py-2 rounded flex-1">
+                  <div className="bg-slate-50 p-3 sm:p-4 rounded-lg space-y-2 sm:space-y-3">
+                    <h3 className="font-semibold text-slate-800 text-sm sm:text-base">Step 3: Start the Application</h3>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <code className="bg-slate-800 text-green-400 px-2 sm:px-3 py-2 rounded flex-1 text-xs sm:text-sm break-all">
                         docker compose up --build -d
                       </code>
                       <Button
                         onClick={() => copyToClipboard("docker compose up --build -d")}
                         size="sm"
                         variant="outline"
+                        className="flex-shrink-0 px-3 py-2"
                       >
-                        <Copy className="h-4 w-4" />
+                        <Copy className="h-3 w-3 sm:h-4 sm:w-4" />
                       </Button>
                     </div>
                   </div>
 
-                  <div className="bg-slate-50 p-4 rounded-lg space-y-3">
-                    <h3 className="font-semibold text-slate-800">Step 4: Access the Application</h3>
-                    <p className="text-slate-600">Once running, access this page at:</p>
-                    <div className="flex items-center gap-2">
-                      <code className="bg-slate-800 text-green-400 px-3 py-2 rounded flex-1">
+                  <div className="bg-slate-50 p-3 sm:p-4 rounded-lg space-y-2 sm:space-y-3">
+                    <h3 className="font-semibold text-slate-800 text-sm sm:text-base">Step 4: Access the Application</h3>
+                    <p className="text-slate-600 text-xs sm:text-sm">Once running, access this page at:</p>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <code className="bg-slate-800 text-green-400 px-2 sm:px-3 py-2 rounded flex-1 text-xs sm:text-sm break-all">
                         http://localhost:3000/admin/settings
                       </code>
                       <Button
                         onClick={() => window.open("http://localhost:3000/admin/settings", "_blank")}
                         size="sm"
                         variant="outline"
+                        className="flex-shrink-0 px-3 py-2"
                       >
-                        <ExternalLink className="h-4 w-4" />
+                        <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4" />
                       </Button>
                     </div>
                   </div>
@@ -356,13 +359,13 @@ cp backend/.env.example backend/.env`}
 
               {/* Local Settings Form */}
               <Card className="shadow-lg border-slate-200 w-full">
-                <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-50 border-b border-slate-200 px-6 py-5">
-                  <CardTitle className="text-xl font-extrabold text-blue-900 flex items-center gap-3">
-                    <Monitor className="h-6 w-6 text-blue-500" />
-                    Local LLM Configuration
+                <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-50 border-b border-slate-200 px-4 sm:px-5 md:px-6 py-4 sm:py-5">
+                  <CardTitle className="text-lg sm:text-xl font-extrabold text-blue-900 flex items-center gap-2 sm:gap-3">
+                    <Monitor className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500 flex-shrink-0" />
+                    <span>Local LLM Configuration</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6 space-y-6">
+                <CardContent className="p-4 sm:p-5 md:p-6 space-y-4 sm:space-y-6">
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">
                       Base URL
@@ -435,14 +438,14 @@ cp backend/.env.example backend/.env`}
                     </p>
                   </div>
 
-                  <div className="pt-4">
+                  <div className="pt-2 sm:pt-4">
                     <Button
                       onClick={handleSaveLocalSettings}
                       disabled={saving}
-                      className="inline-flex items-center gap-2 px-6 py-2 rounded border border-blue-600 text-blue-700 bg-white font-semibold shadow-sm transition-colors hover:bg-blue-50"
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-1 sm:gap-2 px-4 sm:px-6 py-2 rounded border border-blue-600 text-blue-700 bg-white font-semibold shadow-sm transition-colors hover:bg-blue-50 text-sm"
                     >
-                      <Save className="h-4 w-4" />{" "}
-                      {saving ? "Saving..." : "Save Local Settings"}
+                      <Save className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <span>{saving ? "Saving..." : "Save Local Settings"}</span>
                     </Button>
                   </div>
                 </CardContent>
