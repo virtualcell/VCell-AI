@@ -18,10 +18,13 @@ import {
   Calendar,
   Hash,
   Users,
+  Menu,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ChatBox } from "@/components/ChatBox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useSidebar } from "@/components/ui/sidebar";
+import Image from "next/image";
 
 interface AnalysisResults {
   title: string;
@@ -47,6 +50,7 @@ export default function AnalysisResultsPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const { toggleSidebar, isMobile } = useSidebar();
   const router = useRouter();
   const searchParams = useSearchParams();
   const prompt = searchParams.get("prompt") || "";
@@ -242,32 +246,58 @@ export default function AnalysisResultsPage({
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="container mx-auto p-8 max-w-6xl">
-        <Card className="mb-10 shadow-lg border-slate-200">
-          <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-50 border-b border-slate-200 px-6 py-5 flex flex-col md:flex-row md:items-center md:justify-between">
-            <div className="flex flex-col gap-2 w-full">
-              <div className="flex items-center justify-between w-full">
-                <CardTitle className="text-3xl font-extrabold text-blue-900 flex items-center gap-3">
-                  <FlaskConical className="h-8 w-8 text-blue-500" />
-                  {biomodelData?.name || `Biomodel ${id}`}
+      {/* Mobile Header */}
+      {isMobile && (
+        <header className="bg-white border-b border-slate-200 px-4 py-3 flex items-center gap-3 flex-shrink-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleSidebar}
+            className="md:hidden"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+          <div className="flex items-center gap-2">
+            <Image
+              src="/VCellLogo.png"
+              alt="VCell Logo"
+              width={40}
+              height={40}
+              className="rounded w-10 h-10 object-contain"
+            />
+            <span className="text-lg font-semibold text-slate-900">
+              Analysis Results
+            </span>
+          </div>
+        </header>
+      )}
+      
+      <div className="container mx-auto p-4 sm:p-6 md:p-8 max-w-6xl">
+        <Card className="mb-6 sm:mb-8 md:mb-10 shadow-lg border-slate-200">
+          <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-50 border-b border-slate-200 px-4 sm:px-5 md:px-6 py-4 sm:py-5">
+            <div className="flex flex-col gap-3 w-full">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <CardTitle className="text-xl sm:text-2xl md:text-3xl font-extrabold text-blue-900 flex items-center gap-2 sm:gap-3">
+                  <FlaskConical className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-blue-500 flex-shrink-0" />
+                  <span className="break-words">{biomodelData?.name || `Biomodel ${id}`}</span>
                 </CardTitle>
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                   <button
                     onClick={handleDownloadVCML}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded border border-blue-600 text-blue-700 bg-white font-semibold shadow-sm transition-colors hover:bg-blue-50"
+                    className="inline-flex items-center justify-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 rounded border border-blue-600 text-blue-700 bg-white font-semibold shadow-sm transition-colors hover:bg-blue-50 text-sm whitespace-nowrap"
                   >
-                    <FileText className="h-4 w-4" /> Download VCML
+                    <FileText className="h-4 w-4 flex-shrink-0" /> Download VCML
                   </button>
                   <button
                     onClick={handleGoToBiomodel}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded border border-yellow-500 text-yellow-700 bg-white font-semibold shadow-sm transition-colors hover:bg-yellow-50"
+                    className="inline-flex items-center justify-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 rounded border border-yellow-500 text-yellow-700 bg-white font-semibold shadow-sm transition-colors hover:bg-yellow-50 text-sm whitespace-nowrap"
                   >
-                    <FlaskConical className="h-4 w-4" /> Biomodel Page
+                    <FlaskConical className="h-4 w-4 flex-shrink-0" /> Biomodel Page
                   </button>
                 </div>
               </div>
               {biomodelData && (
-                <div className="flex flex-wrap gap-4 mt-3 text-base text-slate-600">
+                <div className="flex flex-wrap gap-2 sm:gap-3 md:gap-4 mt-2 sm:mt-3 text-sm sm:text-base text-slate-600">
                   <span className="flex items-center gap-1">
                     <Hash className="h-4 w-4 text-blue-400" />{" "}
                     <span className="font-mono text-blue-700">{biomodelData.bmKey}</span>
@@ -303,33 +333,35 @@ export default function AnalysisResultsPage({
               )}
             </div>
           </CardHeader>
-          <CardContent className="p-8 bg-white">
+          <CardContent className="p-4 sm:p-6 md:p-8 bg-white">
             {/* Biomodel Diagram block */}
-            <div className="mb-8">
-              <div className="flex items-center gap-2 mb-2">
-                <FlaskConical className="h-5 w-5 text-blue-400" />
-                <span className="font-semibold text-slate-800">
+            <div className="mb-6 sm:mb-8">
+              <div className="flex items-center gap-2 mb-3 sm:mb-4">
+                <FlaskConical className="h-4 w-4 sm:h-5 sm:w-5 text-blue-400" />
+                <span className="font-semibold text-slate-800 text-sm sm:text-base">
                   Biomodel Diagram
                 </span>
               </div>
-              <img
-                src={biomodelDiagramUrl || "/placeholder.svg"}
-                alt="Biomodel Diagram"
-                className="max-w-2xl h-auto mx-auto border border-slate-200 rounded shadow"
-                onError={() => setError("Failed to load diagram image.")}
-                onLoad={() => setError("")}
-              />
+              <div className="w-full overflow-x-auto">
+                <img
+                  src={biomodelDiagramUrl || "/placeholder.svg"}
+                  alt="Biomodel Diagram"
+                  className="max-w-full sm:max-w-2xl h-auto mx-auto border border-slate-200 rounded shadow"
+                  onError={() => setError("Failed to load diagram image.")}
+                  onLoad={() => setError("")}
+                />
+              </div>
             </div>
 
             {/* Chat Box */}
-            <div className="mb-8">
-              <div className="flex items-center gap-2 mb-2">
-                <FileText className="h-5 w-5 text-blue-400" />
-                <span className="font-semibold text-slate-800">
+            <div className="mb-6 sm:mb-8">
+              <div className="flex items-center gap-2 mb-3 sm:mb-4">
+                <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-blue-400" />
+                <span className="font-semibold text-slate-800 text-sm sm:text-base">
                   AI Analysis Assistant
                 </span>
               </div>
-              <div className="bg-slate-50 border border-slate-200 rounded shadow-sm h-[900px] overflow-hidden">
+              <div className="bg-slate-50 border border-slate-200 rounded shadow-sm h-[500px] sm:h-[700px] md:h-[900px] overflow-hidden">
                 <ChatBox
                   startMessage={combinedMessages}
                   quickActions={quickActions}

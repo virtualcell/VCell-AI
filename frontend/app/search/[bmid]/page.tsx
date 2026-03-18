@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   Collapsible,
   CollapsibleContent,
@@ -27,7 +28,10 @@ import {
   Atom,
   Briefcase,
   Cog,
+  Menu,
 } from "lucide-react";
+import { useSidebar } from "@/components/ui/sidebar";
+import Image from "next/image";
 
 interface Simulation {
   key: string;
@@ -79,6 +83,7 @@ interface BiomodelDetail {
 }
 
 export default function BiomodelDetailPage() {
+  const { toggleSidebar, isMobile } = useSidebar();
   const params = useParams<{ bmid: string }>();
   const bmid = params?.bmid;
   const [data, setData] = useState<BiomodelDetail | null>(null);
@@ -190,24 +195,51 @@ export default function BiomodelDetailPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="container mx-auto p-8 max-w-6xl">
+      {/* Mobile Header */}
+      {isMobile && (
+        <header className="bg-white border-b border-slate-200 px-4 py-3 flex items-center gap-3 flex-shrink-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleSidebar}
+            className="md:hidden"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+          <div className="flex items-center gap-2">
+            <Image
+              src="/VCellLogo.png"
+              alt="VCell Logo"
+              width={40}
+              height={40}
+              className="rounded w-10 h-10 object-contain"
+            />
+            <span className="text-lg font-semibold text-slate-900">
+              Biomodel Details
+            </span>
+          </div>
+        </header>
+      )}
+      
+      <div className="container mx-auto p-4 sm:p-6 md:p-8 max-w-6xl">
         <Card className="mb-8 shadow-lg border-slate-200">
-          <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-50 border-b border-slate-200 px-5 py-4 flex flex-col md:flex-row md:items-center md:justify-between">
-            <div className="flex flex-col gap-1.5 w-full">
-              <div className="flex items-center justify-between w-full">
-                <CardTitle className="text-2xl font-extrabold text-blue-900 flex items-center gap-2.5">
-                  <FlaskConical className="h-7 w-7 text-blue-500" />
-                  {data.name}
+          <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-50 border-b border-slate-200 px-4 sm:px-5 py-4">
+            <div className="flex flex-col gap-3 w-full">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <CardTitle className="text-xl sm:text-2xl font-extrabold text-blue-900 flex items-center gap-2 sm:gap-2.5">
+                  <FlaskConical className="h-6 w-6 sm:h-7 sm:w-7 text-blue-500" />
+                  <span className="break-words">{data.name}</span>
                 </CardTitle>
-                <div className="flex gap-2.5">
+                <div className="flex gap-2 sm:gap-2.5 flex-shrink-0">
                   <button
                     onClick={() => {
                       const vcellUrl = `https://vcell.cam.uchc.edu/api/v0/biomodel/${data?.bmKey}/biomodel.vcml`;
                       window.open(vcellUrl, "_blank");
                     }}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-blue-600 text-blue-700 bg-white font-semibold shadow-sm transition-colors hover:bg-blue-50 text-sm"
+                    className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded border border-blue-600 text-blue-700 bg-white font-semibold shadow-sm transition-colors hover:bg-blue-50 text-xs sm:text-sm flex-shrink-0"
                   >
-                    <FileText className="h-4 w-4" /> Download VCML
+                    <FileText className="h-3 w-3 sm:h-4 sm:w-4" /> 
+                    <span className="whitespace-nowrap">Download VCML</span>
                   </button>
                   {/* <button
                     onClick={() => {

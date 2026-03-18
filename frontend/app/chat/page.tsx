@@ -11,14 +11,18 @@ import {
   BarChart3Icon as Diagram3,
   HelpCircle,
   FlaskConical,
+  Menu,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { OnboardingModal } from "@/components/onboarding-modal";
 import { ChatBox } from "@/components/ChatBox";
+import { useSidebar } from "@/components/ui/sidebar";
+import Image from "next/image";
 
 export default function ChatPage() {
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const { toggleSidebar, isMobile } = useSidebar();
 
   useEffect(() => {
     // Check if user has seen onboarding before
@@ -92,14 +96,40 @@ export default function ChatPage() {
 
   return (
     <div className="h-screen bg-slate-50 flex flex-col">
-      <div className="container mx-auto p-6 max-w-7xl flex-1 flex flex-col min-h-0">
+      {/* Mobile Header */}
+      {isMobile && (
+        <header className="bg-white border-b border-slate-200 px-4 py-3 flex items-center gap-3 flex-shrink-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleSidebar}
+            className="md:hidden"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+          <div className="flex items-center gap-3">
+            <Image
+              src="/VCellLogo.png"
+              alt="VCell Logo"
+              width={48}
+              height={48}
+              className="rounded w-12 h-12 object-contain"
+            />
+            <span className="text-lg font-semibold text-slate-900">
+              VCell AI Chat
+            </span>
+          </div>
+        </header>
+      )}
+      
+      <div className="container mx-auto p-4 sm:p-6 max-w-7xl flex-1 flex flex-col min-h-0">
         {/* Header */}
         <div className="mb-4 flex-shrink-0">
           <div className="flex items-center justify-between mb-1">
-            <div className="flex items-center gap-4 w-full">
+            <div className="flex items-center gap-2 sm:gap-4 w-full">
               {/* Warning Alert - takes most of the space */}
               <Alert className="border-amber-200 bg-amber-50 py-2 flex-1">
-                <AlertDescription className="text-amber-800 text-sm">
+                <AlertDescription className="text-amber-800 text-xs sm:text-sm">
                   <strong>⚠️ Important:</strong> Responses are AI generated and may contain errors, or hallucinations.
                 </AlertDescription>
               </Alert>
@@ -108,10 +138,11 @@ export default function ChatPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => setShowOnboarding(true)}
-                className="flex items-center gap-2 flex-shrink-0"
+                className="flex items-center gap-1 sm:gap-2 flex-shrink-0 px-2 sm:px-3"
               >
-                <HelpCircle className="h-4 w-4" />
-                How to Use
+                <HelpCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">How to Use</span>
+                <span className="sm:hidden text-xs">Help</span>
               </Button>
             </div>
           </div>

@@ -14,7 +14,10 @@ import {
   Trash2,
   Save,
   X,
+  Menu,
 } from "lucide-react";
+import { useSidebar } from "@/components/ui/sidebar";
+import Image from "next/image";
 
 interface User {
   id: string;
@@ -40,6 +43,7 @@ interface DashboardStats {
 }
 
 export default function AdminDashboard() {
+  const { toggleSidebar, isMobile } = useSidebar();
   const [stats, setStats] = useState<DashboardStats>({
     totalUsers: 0,
     totalConversations: 0,
@@ -272,31 +276,57 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="container mx-auto p-8 max-w-7xl">
+      {/* Mobile Header */}
+      {isMobile && (
+        <header className="bg-white border-b border-slate-200 px-4 py-3 flex items-center gap-3 flex-shrink-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleSidebar}
+            className="md:hidden"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+          <div className="flex items-center gap-2">
+            <Image
+              src="/VCellLogo.png"
+              alt="VCell Logo"
+              width={40}
+              height={40}
+              className="rounded w-10 h-10 object-contain"
+            />
+            <span className="text-lg font-semibold text-slate-900">
+              Admin Dashboard
+            </span>
+          </div>
+        </header>
+      )}
+      
+      <div className="container mx-auto p-4 sm:p-6 md:p-8 max-w-7xl">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-extrabold text-blue-900 flex items-center gap-3">
-                <Shield className="h-8 w-8 text-blue-500" />
-                Admin Dashboard
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex-1">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-blue-900 flex items-center gap-2 sm:gap-3">
+                <Shield className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 flex-shrink-0" />
+                <span className="break-words">Admin Dashboard</span>
               </h1>
-              <p className="text-slate-600 mt-2">
+              <p className="text-slate-600 mt-1 sm:mt-2 text-sm sm:text-base">
                 Manage users, conversations, and system resources
               </p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               <Button
                 onClick={() => window.open("/admin/knowledge-base", "_blank")}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded border border-green-600 text-green-700 bg-white font-semibold shadow-sm transition-colors hover:bg-green-50"
+                className="inline-flex items-center justify-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 rounded border border-green-600 text-green-700 bg-white font-semibold shadow-sm transition-colors hover:bg-green-50 text-sm whitespace-nowrap"
               >
-                <FileText className="h-4 w-4" /> Knowledge Base
+                <FileText className="h-3 w-3 sm:h-4 sm:w-4" /> Knowledge Base
               </Button>
               <Button
                 onClick={() => window.open("/admin/settings", "_blank")}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded border border-blue-600 text-blue-700 bg-white font-semibold shadow-sm transition-colors hover:bg-blue-50"
+                className="inline-flex items-center justify-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 rounded border border-blue-600 text-blue-700 bg-white font-semibold shadow-sm transition-colors hover:bg-blue-50 text-sm whitespace-nowrap"
               >
-                <Settings className="h-4 w-4" /> Settings
+                <Settings className="h-3 w-3 sm:h-4 sm:w-4" /> Settings
               </Button>
             </div>
           </div>
