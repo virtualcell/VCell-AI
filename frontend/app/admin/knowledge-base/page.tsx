@@ -190,39 +190,39 @@ export default function KnowledgeBasePage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="container mx-auto p-8 max-w-7xl">
+      <div className="container mx-auto p-4 sm:p-6 md:p-8 max-w-7xl">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-extrabold text-blue-900 flex items-center gap-3">
-                <FolderOpen className="h-8 w-8 text-blue-500" />
-                Knowledge Base Management
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex-1">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-blue-900 flex items-center gap-2 sm:gap-3">
+                <FolderOpen className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 flex-shrink-0" />
+                <span className="break-words">Knowledge Base Management</span>
               </h1>
-              <p className="text-slate-600 mt-2">
+              <p className="text-slate-600 mt-1 sm:mt-2 text-sm sm:text-base">
                 Upload, manage, and organize knowledge base files
               </p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               <Button
                 onClick={() => setShowUploadModal(true)}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded border border-green-600 text-green-700 bg-white font-semibold shadow-sm transition-colors hover:bg-green-50"
+                className="inline-flex items-center justify-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 rounded border border-green-600 text-green-700 bg-white font-semibold shadow-sm transition-colors hover:bg-green-50 text-sm whitespace-nowrap"
               >
-                <Plus className="h-4 w-4" /> Upload File
+                <Plus className="h-3 w-3 sm:h-4 sm:w-4" /> Upload File
               </Button>
               <Button
                 onClick={() => window.open("/admin", "_blank")}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded border border-blue-600 text-blue-700 bg-white font-semibold shadow-sm transition-colors hover:bg-blue-50"
+                className="inline-flex items-center justify-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 rounded border border-blue-600 text-blue-700 bg-white font-semibold shadow-sm transition-colors hover:bg-blue-50 text-sm whitespace-nowrap"
               >
-                <FileText className="h-4 w-4" /> Back to Dashboard
+                <FileText className="h-3 w-3 sm:h-4 sm:w-4" /> Back to Dashboard
               </Button>
             </div>
           </div>
         </div>
 
         {/* Search and Filters */}
-        <Card className="shadow-lg border-slate-200 mb-8">
-          <CardContent className="p-6">
+        <Card className="shadow-lg border-slate-200 mb-6 sm:mb-8">
+          <CardContent className="p-4 sm:p-5 md:p-6">
             <div className="flex items-center gap-4">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
@@ -239,11 +239,13 @@ export default function KnowledgeBasePage() {
 
         {/* Files Table */}
         <Card className="shadow-lg border-slate-200">
-          <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-50 border-b border-slate-200 px-6 py-5">
-            <CardTitle className="text-2xl font-extrabold text-blue-900 flex items-center gap-3">
-              <FileText className="h-6 w-6 text-blue-500" />
-              Knowledge Base Files
-              <Badge className="ml-2 bg-blue-600 text-white">
+          <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-50 border-b border-slate-200 px-4 sm:px-5 md:px-6 py-4 sm:py-5">
+            <CardTitle className="text-lg sm:text-xl md:text-2xl font-extrabold text-blue-900 flex flex-wrap items-center justify-between gap-2 sm:gap-3">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500 flex-shrink-0" />
+                <span>Knowledge Base Files</span>
+              </div>
+              <Badge className="bg-blue-600 text-white px-3 py-1.5 text-sm font-semibold rounded-md">
                 {files.length} files
               </Badge>
             </CardTitle>
