@@ -266,20 +266,50 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
                       <Bot className="h-4 w-4" />
                     )}
                   </div>
-                  <div
-                    className={`rounded-lg p-3 ${
-                      message.role === "user"
-                        ? "bg-blue-600 text-white"
-                        : "bg-white border border-slate-200"
-                    }`}
-                  >
-                    {message.role === "user" ? (
-                      <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                        {message.content}
-                      </div>
-                    ) : (
-                      <MarkdownRenderer content={message.content} />
-                    )}
+                  {/*
+                   * Message bubble wrapper: combines the chat bubble with a
+                   * timestamp displayed beneath it. Previously the timestamp
+                   * field was stored in every Message object but never
+                   * rendered, so users had no sense of when each message was
+                   * sent. Wrapping in a flex column lets us add the timestamp
+                   * without touching the bubble's own layout.
+                   */}
+                  <div className="flex flex-col gap-1">
+                    <div
+                      className={`rounded-lg p-3 ${
+                        message.role === "user"
+                          ? "bg-blue-600 text-white"
+                          : "bg-white border border-slate-200"
+                      }`}
+                    >
+                      {message.role === "user" ? (
+                        <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                          {message.content}
+                        </div>
+                      ) : (
+                        <MarkdownRenderer content={message.content} />
+                      )}
+                    </div>
+
+                    {/*
+                     * Timestamp: shown in muted text below the bubble,
+                     * aligned to match the bubble's side (right for user,
+                     * left for assistant). Uses toLocaleTimeString so the
+                     * format respects the user's locale (e.g. 2:34 PM vs
+                     * 14:34). The "opacity-0 group-hover:opacity-100"
+                     * approach was considered but a persistent low-opacity
+                     * display is friendlier for accessibility.
+                     */}
+                    <span
+                      className={`text-[10px] text-slate-400 px-1 ${
+                        message.role === "user" ? "text-right" : "text-left"
+                      }`}
+                    >
+                      {message.timestamp.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
                   </div>
                 </div>
               </div>

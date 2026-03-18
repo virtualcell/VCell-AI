@@ -15,6 +15,7 @@ from app.schemas.vcelldb_schema import BiomodelRequestParams
 from app.core.singleton import get_openai_client
 from app.core.config import settings
 import json
+import re
 from app.core.logger import get_logger
 
 logger = get_logger("llm_service")
@@ -107,7 +108,33 @@ async def get_response_with_tools(conversation_history: list[dict]):
         },
     )
 
-    final_response = completion.choices[0].message.content
+    raw_response = completion.choices[0].message.content
+
+    # ---------------------------------------------------------------------------
+    # Output normalisation
+    #
+    # The LLM sometimes returns responses with inconsistent whitespace: leading/
+    # trailing blank lines, or runs of three or more consecutive newlines between
+    # paragraphs. This is especially common when tool results are pasted verbatim
+    # into the context, causing the model to mirror that extra spacing.
+    #
+    # We apply two lightweight fixes here rather than in the frontend so that
+    # every consumer of this function (REST API, tests, future streaming) gets
+    # the same clean text:
+    #
+    #   1. Strip leading and trailing whitespace from the entire response.
+    #   2. Collapse any run of 3+ consecutive newlines down to exactly two
+    #      newlines (one blank line), which is the standard Markdown paragraph
+    #      separator. Two-newline sequences (intentional paragraph breaks) are
+    #      left untouched.
+    # ---------------------------------------------------------------------------
+    final_response = raw_response.strip() if raw_response else raw_response
+    if final_response:
+        # Replace 3 or more consecutive newlines with exactly 2 newlines.
+        # The `\n{3,}` pattern matches any run of 3+ newlines (including
+        # Windows-style \r\n sequences that were already normalised to \n by
+        # the OpenAI SDK).
+        final_response = re.sub(r"\n{3,}", "\n\n", final_response)
 
     logger.info(f"LLM Response: {final_response}")
 
