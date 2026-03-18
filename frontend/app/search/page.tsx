@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Filter, ChevronsUpDown } from "lucide-react";
+import { Search, Filter, ChevronsUpDown, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,6 +20,8 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { useSidebar } from "@/components/ui/sidebar";
+import Image from "next/image";
 import Link from "next/link";
 
 interface SearchFilters {
@@ -49,6 +51,7 @@ interface BiomodelResult {
 }
 
 export default function BiomodelSearchPage() {
+  const { toggleSidebar, isMobile } = useSidebar();
   const [filters, setFilters] = useState<SearchFilters>({
     bmId: "",
     bmName: "",
@@ -121,7 +124,33 @@ export default function BiomodelSearchPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="container mx-auto p-6 max-w-7xl">
+      {/* Mobile Header */}
+      {isMobile && (
+        <header className="bg-white border-b border-slate-200 px-4 py-3 flex items-center gap-3 flex-shrink-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleSidebar}
+            className="md:hidden"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+          <div className="flex items-center gap-2">
+            <Image
+              src="/VCellLogo.png"
+              alt="VCell Logo"
+              width={40}
+              height={40}
+              className="rounded w-10 h-10 object-contain"
+            />
+            <span className="text-lg font-semibold text-slate-900">
+              Biomodel Search
+            </span>
+          </div>
+        </header>
+      )}
+      
+      <div className="container mx-auto p-4 sm:p-6 max-w-7xl">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-slate-900 mb-2">
