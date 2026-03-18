@@ -18,10 +18,13 @@ import {
   Calendar,
   Hash,
   Users,
+  Menu,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ChatBox } from "@/components/ChatBox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useSidebar } from "@/components/ui/sidebar";
+import Image from "next/image";
 
 interface AnalysisResults {
   title: string;
@@ -47,6 +50,7 @@ export default function AnalysisResultsPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const { toggleSidebar, isMobile } = useSidebar();
   const router = useRouter();
   const searchParams = useSearchParams();
   const prompt = searchParams.get("prompt") || "";
@@ -242,6 +246,32 @@ export default function AnalysisResultsPage({
 
   return (
     <div className="min-h-screen bg-slate-50">
+      {/* Mobile Header */}
+      {isMobile && (
+        <header className="bg-white border-b border-slate-200 px-4 py-3 flex items-center gap-3 flex-shrink-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleSidebar}
+            className="md:hidden"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+          <div className="flex items-center gap-2">
+            <Image
+              src="/VCellLogo.png"
+              alt="VCell Logo"
+              width={40}
+              height={40}
+              className="rounded w-10 h-10 object-contain"
+            />
+            <span className="text-lg font-semibold text-slate-900">
+              Analysis Results
+            </span>
+          </div>
+        </header>
+      )}
+      
       <div className="container mx-auto p-4 sm:p-6 md:p-8 max-w-6xl">
         <Card className="mb-6 sm:mb-8 md:mb-10 shadow-lg border-slate-200">
           <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-50 border-b border-slate-200 px-4 sm:px-5 md:px-6 py-4 sm:py-5">
