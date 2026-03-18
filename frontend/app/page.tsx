@@ -18,31 +18,31 @@ export default function LandingPage() {
     <div className="min-h-screen flex flex-col bg-white">
       {/* Header with Navigation */}
       <header className="border-b border-slate-200 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 max-w-6xl">
+        <div className="container mx-auto px-4 py-3 sm:py-4 max-w-6xl">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
               <Image
                 src="/VCellLogo.png"
                 alt="VCell Logo"
-                width={100}
-                height={100}
-                className="rounded-lg"
+                width={64}
+                height={64}
+                className="rounded-lg h-10 w-auto sm:h-14 sm:w-auto object-contain"
               />
-              <span className="text-xl font-semibold text-slate-900">
+              <span className="text-sm sm:text-lg md:text-xl font-semibold text-slate-900">
                 AI Explorer
               </span>
             </div>
-            <div className="flex items-center gap-3">
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/signin" className="flex items-center gap-2">
-                  <LogIn className="h-4 w-4" />
-                  Sign In
+            <div className="flex items-center gap-1 sm:gap-2 md:gap-3">
+              <Button variant="outline" size="sm" asChild className="px-2 sm:px-3">
+                <Link href="/signin" className="flex items-center gap-1 sm:gap-2">
+                  <LogIn className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="text-xs sm:text-sm">Sign In</span>
                 </Link>
               </Button>
-              <Button size="sm" asChild>
-                <Link href="/signup" className="flex items-center gap-2">
-                  <UserPlus className="h-4 w-4" />
-                  Sign Up
+              <Button size="sm" asChild className="px-2 sm:px-3">
+                <Link href="/signup" className="flex items-center gap-1 sm:gap-2">
+                  <UserPlus className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="text-xs sm:text-sm">Sign Up</span>
                 </Link>
               </Button>
             </div>
@@ -53,42 +53,42 @@ export default function LandingPage() {
       <main className="flex-1 flex flex-col items-center justify-center">
         <div className="container mx-auto px-4 max-w-6xl flex flex-col items-center justify-center">
           {/* Hero Section */}
-          <div className="text-center mb-16">
-            <div className="flex items-center justify-center gap-4 mb-6">
+          <div className="text-center mb-12 sm:mb-16">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mb-6">
               <Image
                 src="/VCellLogo.png"
                 alt="VCell Logo"
                 width={318}
                 height={120}
-                className="rounded-lg"
+                className="rounded-lg w-48 h-18 sm:w-56 sm:h-20 md:w-64 md:h-24 lg:w-80 lg:h-30"
               />
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-slate-900 leading-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-slate-900 leading-tight">
                 VCell Models
                 <br />
                 <span className="text-blue-600">AI Explorer</span>
               </h1>
             </div>
 
-            <p className="text-lg md:text-xl text-slate-600 mb-8 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-base sm:text-lg md:text-xl text-slate-600 mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed px-4 sm:px-0">
               Discover, analyze, and explore biomodels with the power of AI.
               Comprehensive platform for scientific model research.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link href="/chat">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center w-full px-4 sm:px-0">
+              <Link href="/chat" className="w-full sm:w-auto">
                 <Button
                   size="lg"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
+                  className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
                 >
                   Start Exploring
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
               </Link>
-              <Link href="/signup">
+              <Link href="/signup" className="w-full sm:w-auto">
                 <Button
                   variant="outline"
                   size="lg"
-                  className="border-2 border-blue-600 text-blue-600 hover:bg-blue-50 px-8 py-4 text-lg font-semibold rounded-lg transition-all duration-200"
+                  className="w-full sm:w-auto border-2 border-blue-600 text-blue-600 hover:bg-blue-50 px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold rounded-lg transition-all duration-200"
                 >
                   Join Now!
                 </Button>
@@ -97,7 +97,7 @@ export default function LandingPage() {
           </div>
 
           {/* Features Section */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16 w-full">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-12 sm:mb-16 w-full px-4 sm:px-0">
             {/* AI Chatbot Feature */}
             <Card className="border-slate-200 shadow-lg hover:shadow-xl transition-shadow duration-200">
               <CardHeader className="text-center pb-2">
