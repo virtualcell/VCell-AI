@@ -309,7 +309,7 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-xl max-h-[70vh] p-2 sm:p-3 overflow-y-auto text-xs sm:text-sm">
+      <DialogContent className="max-w-[90vw] sm:max-w-xl max-h-[85vh] sm:max-h-[70vh] p-3 sm:p-4 overflow-y-auto text-xs sm:text-sm">
         <DialogHeader className="border-b border-slate-200 pb-1 sm:pb-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1 sm:gap-2">
