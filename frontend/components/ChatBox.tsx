@@ -6,6 +6,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { MessageSquare, Send, Bot, User, Loader2 } from "lucide-react";
 
+import { useSearchParams } from "next/navigation";
+
 interface Message {
   id: string;
   role: "user" | "assistant" | "system";
@@ -77,21 +79,33 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
   };
 
   const [messages, setMessages] = useState<Message[]>(() => {
-  //const saved = localStorage.getItem("chat_history");
-  //return saved ? JSON.parse(saved) : createInitialMessages(startMessage);
     return createInitialMessages(startMessage);
 });
 
-  const STORAGE_KEY = null;
+  const searchParams = useSearchParams();
 
-  // const [messages, setMessages] = useState<Message[]>(() => {
-  //   if (typeof window === "undefined") return [];
-  //   const saved = localStorage.getItem(STORAGE_KEY);
-  //   return saved ? JSON.parse(saved) : [];
-  // });
+  useEffect(() => {
+  const id = searchParams.get("conversation");
+
+  if (id) {
+    const stored = localStorage.getItem("chat_conversations");
+    if (!stored) return;
+
+    const conversations = JSON.parse(stored);
+    const convo = conversations.find((c: any) => c.id === id);
+
+    if (convo) {
+  setMessages(convo.messages);
+  setConversationId(id); 
+}
+  } else {
+    setMessages(createInitialMessages(startMessage));
+  }
+}, [searchParams, startMessage]);
+
 
   const [inputMessage, setInputMessage] = useState("");
-  //const [dbSource, setDbSource] = useState<"vcdb" | "bmdb">(database ?? "vcdb");
+  const [conversationId, setConversationId] = useState<string | null>(null);
   const [useVCDB, setUseVCDB] = useState(database ? database === "vcdb" : true);
   const [useBMDB, setUseBMDB] = useState(database === "bmdb");
   const [isLoading, setIsLoading] = useState(false);
@@ -108,49 +122,49 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
     scrollToBottom();
   }, [messages]);
 
-  // useEffect(() => {
-  // const handleUnload = () => {
-  //   localStorage.removeItem("chat_history");
-  // };
 
-  // window.addEventListener("beforeunload", handleUnload);
+useEffect(() => {
+  if (messages.length === 0) return;
+  const hasUserMessage = messages.some((m) => m.role === "user");
+  if (!hasUserMessage) return;
 
-  // return () => {
-  //   window.removeEventListener("beforeunload", handleUnload);
-  // };
-  // }, []);
+  saveConversation(messages);
 
-  // Update messages when startMessage changes (when analysis completes
-    // useEffect(() => {
-    //   localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
-    // }, [messages]);
+  window.dispatchEvent(new Event("conversation-updated"));
+}, [messages]);
 
+const saveConversation = (messages: Message[]) => {
+  if (messages.length === 0) return;
 
-    useEffect(() => {
-    setMessages(createInitialMessages(startMessage));
-  }, [startMessage]);
+  const stored = localStorage.getItem("chat_conversations");
+  const conversations = stored ? JSON.parse(stored) : [];
 
-  // Helper function to format biomodel IDs as hyperlinks
-  // const formatBiomodelIds = (content: string, bmkeys: string[]): string => {
-  //   if (!bmkeys || bmkeys.length === 0) return content;
+  let id = conversationId;
 
-  //   let formattedContent = content;
+  // If no conversation yet then create a new one
+  if (!id) {
+    id = crypto.randomUUID();
+    setConversationId(id);
 
-  //   // Replace biomodel IDs with hyperlinks
-  //   bmkeys.forEach((bmId) => {
-  //     const searchString = `${bmId}`;
-  //     const encodedPrompt = encodeURIComponent(`Describe model`);
-  //     const db_link = `[Database Details](/search/${bmId})`;
-  //     const replacementString = `${bmId} || ${db_link}`;
-  //     const match_IDs_Not_in_URLs = new RegExp(`(?<!\\()(${searchString})(?!\\))`, "g");
-  //     formattedContent = formattedContent.replaceAll(
-  //       match_IDs_Not_in_URLs,
-  //       replacementString,
-  //     );
-  //   });
+    const firstUserMessage = messages.find((m) => m.role === "user");
 
-  //   return formattedContent;
-  // };
+    const newConversation = {
+      id,
+      title: firstUserMessage?.content.slice(0, 40) || "Chat",
+      messages,
+    };
+
+    conversations.unshift(newConversation);
+  } else {
+    // Update existing conversation
+    const index = conversations.findIndex((c: any) => c.id === id);
+    if (index !== -1) {
+      conversations[index].messages = messages;
+    }
+  }
+
+  localStorage.setItem("chat_conversations", JSON.stringify(conversations));
+};
 
   const activeActions = [
     ...(useVCDB && VCellActions ? VCellActions : []),
@@ -176,6 +190,13 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
     alert("Please select at least one database.");
     return;
   }
+  const userMessage: Message = {
+      id: Date.now().toString(),
+      role: "user",
+      content: inputMessage,
+      timestamp: new Date(),
+    };
+    setMessages((prev) => [...prev, userMessage]);
 
   if (useVCDB) {handleSendMessage(inputMessage);}
   if (useBMDB){handleSendMessage2(inputMessage);}
@@ -224,14 +245,13 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
     }
 
     console.log("PPPPPP: " + "This is the msg: " + msg);
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content: msg,
-      timestamp: new Date(),
-    };
-    console.log("QQQQQQ: " + "This is the userMessage: " + JSON.stringify(userMessage));
-    setMessages((prev) => [...prev, userMessage]);
+    // const userMessage: Message = {
+    //   id: Date.now().toString(),
+    //   role: "user",
+    //   content: msg,
+    //   timestamp: new Date(),
+    // };
+    // setMessages((prev) => [...prev, userMessage]);
     setInputMessage("");
     setIsLoading(true);
     try {
@@ -241,6 +261,16 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
       console.log("RRRRRR: " + "This is the promptPrefix: " + promptPrefix);
       console.log("RRRRRR: " + "This is the finalPrompt sent to backend: " + finalPrompt);
 
+      const systemMessages = messages.filter((m) => m.role === "system");
+      const recentNonSystem = messages.filter((m) => m.role !== "system").slice(-5);
+
+      const historyToSend = [
+      ...systemMessages,
+      ...recentNonSystem,
+      { role: "user", content: finalPrompt },
+      ].map((msg) => ({ role: msg.role, content: msg.content }));
+
+
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/query`,
         {
@@ -249,15 +279,16 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
             "Content-Type": "application/json",
             accept: "application/json",
           },
-          body: JSON.stringify({
-            conversation_history: [
-              ...messages,
-              { role: "user", content: finalPrompt },
-            ].map(msg => ({
-              role: msg.role,
-              content: msg.content,
-            })),
-          }),
+          body: JSON.stringify({ conversation_history: historyToSend }),
+//JSON.stringify({
+          //   conversation_history: [
+          //     ...messages,
+          //     { role: "user", content: finalPrompt },
+          //   ].map(msg => ({
+          //     role: msg.role,
+          //     content: msg.content,
+          //   })),
+          // }),
           signal: controller.signal,
         },
       );
@@ -274,7 +305,9 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: formattedResponse,
+        content: useVCDB && useBMDB
+                ? `**VCell Database:**\n\n${formattedResponse}`
+                : formattedResponse,
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, assistantMessage]);
@@ -336,25 +369,19 @@ const handleSendMessage2 = async (overrideMessage?: string) => {
     }
 
     console.log("PPPPPP: " + "This is the msg: " + msg);
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content: msg,
-      timestamp: new Date(),
-    };
-    console.log("QQQQQQ: " + "This is the userMessage: " + JSON.stringify(userMessage));
-    setMessages((prev) => [...prev, userMessage]);
+    // const userMessage: Message = {
+    //   id: Date.now().toString(),
+    //   role: "user",
+    //   content: msg,
+    //   timestamp: new Date(),
+    // };
+    // setMessages((prev) => [...prev, userMessage]);
     setInputMessage("");
     setIsLoading(true);
     try {
       const finalPrompt = promptPrefix
         ? `${promptPrefix} ${msg}${parameterContext}`
         : `${msg}${parameterContext}`;
-    
-      // const res = await fetch(
-      //   `${process.env.NEXT_PUBLIC_API_URL2}/search?query=${encodeURIComponent(msg)}&format=json`);
-      
-      // console.log("DEBUG: This is the raw response from the backend: " + JSON.stringify(res));
 
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/biomd-search`,
@@ -389,7 +416,9 @@ const handleSendMessage2 = async (overrideMessage?: string) => {
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: formattedResponse,
+        content: useVCDB && useBMDB
+                ? `**BIOMD Database:**\n\n${formattedResponse}`
+                : formattedResponse,
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, assistantMessage]);
