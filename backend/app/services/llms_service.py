@@ -7,6 +7,7 @@ from app.services.vcelldb_service import (
     fetch_biomodels,
     get_vcml_file,
     get_diagram_url,
+    get_diagram_image,
 )
 
 from app.utils.system_prompt import SYSTEM_PROMPT
@@ -15,6 +16,7 @@ from app.schemas.vcelldb_schema import BiomodelRequestParams
 from app.core.singleton import get_openai_client
 from app.core.config import settings
 import json
+import base64
 from app.core.logger import get_logger
 
 logger = get_logger("llm_service")
@@ -206,8 +208,10 @@ async def analyse_diagram(biomodel_id: str):
         biomodels_info = await fetch_biomodels(biomodel_params)
         biomodel_info = f"Here is some information about Biomodel {biomodel_id}: {str(biomodels_info)}"
 
-        # Fetch Diagram URL
-        diagram_url = await get_diagram_url(biomodel_id)
+        # Fetch Diagram Image as bytes and convert to base64
+        diagram_image_bytes = await get_diagram_image(biomodel_id)
+        diagram_base64 = base64.b64encode(diagram_image_bytes).decode('utf-8')
+        
         # Diagram Analysis
         diagram_analysis_prompt = (
             "You are a VCell BioModel Assistant, designed to help users understand and interact with biological models in VCell. "
@@ -216,7 +220,7 @@ async def analyse_diagram(biomodel_id: str):
         )
         diagram_analysis_prompt = [
             {"type": "text", "text": diagram_analysis_prompt},
-            {"type": "image_url", "image_url": {"url": diagram_url}},
+            {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{diagram_base64}"}},
         ]
         response = client.chat.completions.create(
             name="ANALYSE_DIAGRAM",
