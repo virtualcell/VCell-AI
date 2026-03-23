@@ -50,7 +50,9 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
   isLoading: isInitialLoading = false,
   parameters,
 }) => {
-  // Helper function to create initial messages from startMessage
+  // Helper function to create initial messages from startMessage.
+  // Accepts either a single string or an array of strings (for multi-message
+  // greetings), and wraps each in the Message shape with a fresh timestamp.
   const createInitialMessages = (startMsg: string | string[]): Message[] => {
     if (Array.isArray(startMsg)) {
       return startMsg.map((content, index) => ({
@@ -84,24 +86,28 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  // Scroll to the latest message whenever the messages array changes.
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
-  // Update messages when startMessage changes (when analysis completes)
+  // Re-initialise messages when startMessage changes (e.g. after an async
+  // analysis finishes and the parent passes in a new greeting/summary).
+  // We skip this while the initial load spinner is still showing so we don't
+  // overwrite an in-progress loading state.
   useEffect(() => {
     if (startMessage && !isInitialLoading) {
       setMessages(createInitialMessages(startMessage));
     }
   }, [startMessage, isInitialLoading]);
 
-  // Helper function to format biomodel IDs as hyperlinks
+  // Replaces raw biomodel ID strings in the AI response with a markdown link
+  // to the database details page, so users can click through directly.
   const formatBiomodelIds = (content: string, bmkeys: string[]): string => {
     if (!bmkeys || bmkeys.length === 0) return content;
 
     let formattedContent = content;
 
-    // Replace biomodel IDs with hyperlinks
     bmkeys.forEach((bmId) => {
       const searchString = `${bmId}`;
       const encodedPrompt = encodeURIComponent(`Describe model`);
@@ -119,6 +125,8 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
     return formattedContent;
   };
 
+  // Clears the controlled input then immediately fires the chosen quick-action
+  // message so there is no flash of the action text in the input box.
   const handleQuickAction = (message: string) => {
     setInputMessage("");
     handleSendMessage(message);
@@ -127,7 +135,11 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
   const handleSendMessage = async (overrideMessage?: string) => {
     const msg = overrideMessage ?? inputMessage;
     if (!msg.trim()) return;
-    // Build parameter context string
+
+    // Build an optional parameter context string that is appended to the
+    // user's prompt so the LLM knows about any active search filters
+    // (biomodel ID, owner, date range, etc.) without the user having to
+    // repeat them in every message.
     let parameterContext = "";
     if (parameters) {
       const contextParts = [];
@@ -171,10 +183,14 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
     setMessages((prev) => [...prev, userMessage]);
     setInputMessage("");
     setIsLoading(true);
+
     try {
+      // Prefix the prompt if the parent supplied one (e.g. "Analyse biomodel:")
+      // and always append the parameter context so the LLM has full context.
       const finalPrompt = promptPrefix
         ? `${promptPrefix} ${msg}${parameterContext}`
         : `${msg}${parameterContext}`;
+
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/query`,
         {
@@ -183,6 +199,8 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
             "Content-Type": "application/json",
             accept: "application/json",
           },
+          // Send only role + content to the backend — strip client-side
+          // fields like id and timestamp that the API does not expect.
           body: JSON.stringify({
             conversation_history: [
               ...messages,
@@ -194,22 +212,29 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
           }),
         },
       );
+
       const data = await res.json();
       const aiResponse =
         data.response || "Sorry, I didn't get a response from the server.";
       const bmkeys = data.bmkeys || [];
 
-      // Format the response to include hyperlinks for biomodel IDs
+      // Post-process the AI response to turn plain biomodel ID strings into
+      // clickable markdown links before storing in state.
       const formattedResponse = formatBiomodelIds(aiResponse, bmkeys);
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
         content: formattedResponse,
-        timestamp: new Date(),
+        // CHANGED: We now use the server-provided timestamp when available
+        // (data.timestamp is an ISO string returned by the /query endpoint).
+        // Falling back to new Date() keeps things working even if the backend
+        // hasn't been updated yet or returns an unexpected shape.
+        timestamp: data.timestamp ? new Date(data.timestamp) : new Date(),
       };
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
+      // Surface a user-friendly error bubble instead of a silent failure.
       setMessages((prev) => [
         ...prev,
         {
@@ -225,12 +250,20 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
     }
   };
 
+  // Send on Enter, but allow Shift+Enter for multi-line input in the future.
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
   };
+
+  // CHANGED: Helper that formats a Date object into a short "HH:MM AM/PM"
+  // string shown beneath each message bubble.
+  // Kept as a separate function so it's easy to swap the format later
+  // (e.g. add seconds, switch to 24-hour) without touching the JSX.
+  const formatTime = (date: Date): string =>
+    date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
   return (
     <Card className="h-full flex flex-col shadow-sm border-slate-200">
@@ -240,6 +273,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
           {cardTitle}
         </CardTitle>
       </CardHeader>
+
       <CardContent className="flex-1 p-0 overflow-hidden">
         <ScrollArea className="h-full p-4">
           <div className="space-y-4">
@@ -253,6 +287,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
                     message.role === "user" ? "flex-row-reverse" : "flex-row"
                   }`}
                 >
+                  {/* Avatar circle — blue for user, grey for assistant */}
                   <div
                     className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
                       message.role === "user"
@@ -266,6 +301,8 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
                       <Bot className="h-4 w-4" />
                     )}
                   </div>
+
+                  {/* Message bubble */}
                   <div
                     className={`rounded-lg p-3 ${
                       message.role === "user"
@@ -278,12 +315,36 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
                         {message.content}
                       </div>
                     ) : (
+                      // Assistant messages are rendered as Markdown so the LLM
+                      // can use headings, bullet lists, code blocks, etc.
                       <MarkdownRenderer content={message.content} />
                     )}
+
+                    {/*
+                      CHANGED: Timestamp label below every message bubble.
+                      - For user messages it sits on the right (matching the
+                        bubble alignment) using `text-right`.
+                      - For assistant messages it aligns left.
+                      - The muted colour (text-blue-200 / text-slate-400) keeps
+                        it subtle so it doesn't compete with the message text.
+                      - formatTime() produces a short locale-aware string like
+                        "02:34 PM" — readable without taking up much space.
+                    */}
+                    <p
+                      className={`text-xs mt-1 ${
+                        message.role === "user"
+                          ? "text-blue-200 text-right"
+                          : "text-slate-400 text-left"
+                      }`}
+                    >
+                      {formatTime(message.timestamp)}
+                    </p>
                   </div>
                 </div>
               </div>
             ))}
+
+            {/* Spinner shown while the parent is fetching the initial analysis */}
             {isInitialLoading && (
               <div className="flex gap-3 justify-start">
                 <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center flex-shrink-0">
@@ -297,6 +358,8 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
                 </div>
               </div>
             )}
+
+            {/* Spinner shown while waiting for the LLM response */}
             {isLoading && (
               <div className="flex gap-3 justify-start">
                 <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center flex-shrink-0">
@@ -311,9 +374,13 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
               </div>
             )}
           </div>
+
+          {/* Invisible anchor that we scroll into view after every new message */}
           <div ref={messagesEndRef} />
         </ScrollArea>
       </CardContent>
+
+      {/* Input area — always pinned to the bottom of the card */}
       <div className="border-t border-slate-200 p-4 flex-shrink-0">
         <div className="flex gap-2">
           <Input
@@ -334,7 +401,9 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
           </Button>
         </div>
 
-        {/* Quick Actions - positioned directly under search bar */}
+        {/* Quick Actions — one-tap prompts shown under the input bar.
+            Hidden while the initial loading spinner is active so the user
+            can't fire a query before the first analysis has finished. */}
         {!isInitialLoading && (
           <div className="mt-2 pt-2 border-t border-slate-100">
             <div className="flex flex-wrap gap-1">
@@ -354,11 +423,19 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
           </div>
         )}
 
+        {/* Supplemental Actions — an optional second row of actions (e.g. admin
+            shortcuts) separated by a slightly heavier border. */}
         {supplementalActions && (
           <div className="mt-3 pt-3 border-t-2 border-slate-200">
             <div className="flex flex-wrap gap-1">
               {supplementalActions.map((action, idx) => (
-                <Button key={idx} variant="ghost" size="sm" className="h-4 px-1 text-xs text-slate-500 hover:text-slate-700 hover:bg-slate-100" onClick={() => handleQuickAction(action.value)}>
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  size="sm"
+                  className="h-4 px-1 text-xs text-slate-500 hover:text-slate-700 hover:bg-slate-100"
+                  onClick={() => handleQuickAction(action.value)}
+                >
                   {action.icon}
                   <span className="ml-0.5">{action.label}</span>
                 </Button>
