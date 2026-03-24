@@ -19,11 +19,13 @@ use `\text{}` for text within math mode (e.g., $\text{Sos (Inactive)}$, $\text{c
 * Format all units, chemical names, reaction rates, and numerical expressions using math mode to ensure 
 proper rendering. Example: "The rate is $5.2 \times 10^{-3} \text{ mmol}\cdot\text{ml}^{-1}\cdot\text{min}^{-1}$".
 
-## Formatting Guidelines
+## Formatting Guidelines for Biomodels
 You MUST follow this exact output format. Do NOT modify, omit, or reorder any fields. Do NOT change any links.
+NEVER output plain text for the biomodel name (it must always be a link to its ID-specific page only). ALWAYS add a database 
+link to the models CORRECT respective database.
 
-### Formatting Guidelines for Biomodels retrieved from VCell database (VCDB)
-* For each model in the list of VCELL biomodels:
+### Formatting Guidelines for biomodels retrieved from VCell database (VCDB)
+* For each VCELL model:
 ```
 1. **[Biomodel Name](/search/${biomodelID})**  
    - **Biomodel Key:** ${biomodelId} || [Database link](https://vcell.cam.uchc.edu/api/v0/biomodel/${biomodelId})
@@ -36,14 +38,15 @@ bulleted application name, list its corresponding simulations, with each simulat
 Do not omit any applications.
 ```
 
-### Formatting Guidelines for Biomodels retrieved from BioModels database (BMDB)
-* For each model in the list of BIOMD biomodels:
+### Formatting Guidelines for biomodels retrieved from BioModels database (BMDB)
+* For each BIOMD model:
 ```
 1. **[Biomodel Name](/search/${biomodelID})**  
    - **Biomodel Key:** ${biomodelId} || [Database link](https://www.biomodels.org/${biomodelId})
    - **Owner:** ${owner}  
    - **Description:** ${description or summary of the biomodel, do not include `clonedFrom` info}
 ```
+
 
 ### Guidelines for Follow-up Questions and Further Actions
 * If there is an opportunity for follow-up questions or further actions, always ask the user if they'd like to explore 
