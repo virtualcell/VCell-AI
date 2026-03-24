@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Suspense from "react";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -49,6 +50,7 @@ export default function AnalysisResultsPage({
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const session = searchParams.get('session')
   const prompt = searchParams.get("prompt") || "";
 
   // Unwrap the params Promise

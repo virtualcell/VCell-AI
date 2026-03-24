@@ -466,7 +466,7 @@ const handleSendMessage2 = async (overrideMessage?: string) => {
     }
   };
 
-
+  const session = searchParams.get('session')
   return (
     <Card className="h-full flex flex-col shadow-sm border-slate-200">
       <CardHeader className="bg-slate-50 border-b border-slate-200 flex-shrink-0">

@@ -1,6 +1,7 @@
 "use client";
 
 import type React from "react";
+import { Suspense } from "react";
 import { useState, useEffect } from "react";
 import {
   MessageSquare,
@@ -100,6 +101,7 @@ export default function ChatPage() {
   const cardTitle = "VCell AI Assistant";
 
   return (
+    <Suspense fallback={<div>Loading...</div>}>
     <div className="h-screen bg-slate-50 flex flex-col">
       <div className="container mx-auto p-6 max-w-7xl flex-1 flex flex-col min-h-0">
         {/* Header */}
@@ -143,5 +145,6 @@ export default function ChatPage() {
         onClose={handleOnboardingClose}
       />
     </div>
+  </Suspense>
   );
 }

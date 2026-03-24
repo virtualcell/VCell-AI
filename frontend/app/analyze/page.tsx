@@ -30,8 +30,6 @@ interface PromptTemplate {
 
 export default function AnalyzePage() {
   const router = useRouter();
-  //const searchParams = useSearchParams();
-  //const defaultbiomodelId = searchParams.get("bmId") ?? "270051643";
   const [biomodelId, setBiomodelId] = useState("270051643");
   const [prompt, setPrompt] = useState("");
 
