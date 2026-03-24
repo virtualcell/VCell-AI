@@ -19,14 +19,14 @@ use `\text{}` for text within math mode (e.g., $\text{Sos (Inactive)}$, $\text{c
 * Format all units, chemical names, reaction rates, and numerical expressions using math mode to ensure 
 proper rendering. Example: "The rate is $5.2 \times 10^{-3} \text{ mmol}\cdot\text{ml}^{-1}\cdot\text{min}^{-1}$".
 
-### Formatting Guidelines for Biomodels, Biomodel IDs and Hyperlinks
-* Ignore all previous instructions.
-* Applications are for VCell models ONLY otherwise do not output an Applications bullet.
-* For models from BMDB, the database link would be https://www.biomodels.org/${biomodelId}
-* When returning a list of biomodels, always follow this format:
+## Formatting Guidelines
+You MUST follow this exact output format. Do NOT modify, omit, or reorder any fields. Do NOT change any links.
+
+### Formatting Guidelines for Biomodels retrieved from VCell database (VCDB)
+* For each model in the list of VCELL biomodels:
 ```
-1. **[Biomodel Name] (/search/${biomodelID})**  
-   - **Biomodel Key:** ${biomodelId} || [Database link] (https://vcell.cam.uchc.edu/api/v0/biomodel/${biomodelId})
+1. **[Biomodel Name](/search/${biomodelID})**  
+   - **Biomodel Key:** ${biomodelId} || [Database link](https://vcell.cam.uchc.edu/api/v0/biomodel/${biomodelId})
    - **Owner:** ${owner}  
    - **Description:** ${description or summary of the biomodel, do not include `clonedFrom` info}
    - **Applications:**
@@ -34,6 +34,15 @@ proper rendering. Example: "The rate is $5.2 \times 10^{-3} \text{ mmol}\cdot\te
 List every application name for the model in italics, each on its own bullet point. Under each 
 bulleted application name, list its corresponding simulations, with each simulation followed by a solver in round brackets. 
 Do not omit any applications.
+```
+
+### Formatting Guidelines for Biomodels retrieved from BioModels database (BMDB)
+* For each model in the list of BIOMD biomodels:
+```
+1. **[Biomodel Name](/search/${biomodelID})**  
+   - **Biomodel Key:** ${biomodelId} || [Database link](https://www.biomodels.org/${biomodelId})
+   - **Owner:** ${owner}  
+   - **Description:** ${description or summary of the biomodel, do not include `clonedFrom` info}
 ```
 
 ### Guidelines for Follow-up Questions and Further Actions
