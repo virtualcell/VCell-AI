@@ -1,3 +1,0 @@
-[submodule "langfuse"]
-	path = langfuse
-	url = https://github.com/langfuse/langfuse.git
