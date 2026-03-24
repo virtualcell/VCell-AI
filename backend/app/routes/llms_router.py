@@ -18,10 +18,29 @@ async def query_llm(conversation_history: dict):
     Returns:
         dict: The final response after processing the prompt with the tools.
     """
+    from datetime import datetime, timezone
+
+@router.post("/query")
+async def query_llm(conversation_history: dict):
+    """
+    Endpoint to query the LLM and execute the necessary tools.
+
+    CHANGED: Added 'timestamp' field to the response so clients can
+    display when the response was generated. Using timezone-aware UTC
+    datetime for consistency across deployments.
+    """
+
+    
     result, bmkeys = await get_llm_response(
         conversation_history.get("conversation_history", [])
     )
-    return {"response": result, "bmkeys": bmkeys}
+    return {
+        "response": result,
+        "bmkeys": bmkeys,
+        # Timestamp added so the frontend (or logs) can record
+        # exactly when each AI response was produced.
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
 
 
 @router.post("/analyse/{biomodel_id}")
