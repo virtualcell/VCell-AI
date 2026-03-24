@@ -34,6 +34,9 @@ services:
     container_name: frontend-vcell
     ports:
       - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+      NEXT_PUBLIC_API_URL2: https://www.biomodels.org/
     depends_on:
       - backend
     env_file:
