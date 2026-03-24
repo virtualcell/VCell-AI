@@ -42,6 +42,13 @@ async def startup_event():
         logger.error(f"Knowledge base initialization failed: {result['message']}")
 
 
+
+@app.get("/health", tags=["Health"])
+async def health_check():
+    """Health check endpoint to verify the API is running correctly."""
+    return {"status": "ok", "app": "VCell AI Backend", "version": "1.0.0"}
+
+
 # CORS setup
 app.add_middleware(
     CORSMiddleware,

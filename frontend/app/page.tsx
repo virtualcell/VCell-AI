@@ -177,7 +177,17 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="text-center border-t border-slate-200 text-sm">
-        <p className="text-slate-500 my-4">VCell AI Model Explorer</p>
+        <p className="text-slate-500 my-4">
+          © {new Date().getFullYear()} VCell AI Model Explorer ·{" "}
+          <a
+            href="https://github.com/virtualcell/VCell-AI"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:underline"
+          >
+            GitHub
+          </a>
+        </p>
       </footer>
     </div>
   );
