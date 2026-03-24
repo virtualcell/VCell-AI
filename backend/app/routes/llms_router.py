@@ -18,7 +18,7 @@ async def query_llm(conversation_history: dict):
     Returns:
         dict: The final response after processing the prompt with the tools.
     """
-    from datetime import datetime, timezone  # add this import at the top
+    from datetime import datetime, timezone
 
 @router.post("/query")
 async def query_llm(conversation_history: dict):
@@ -29,6 +29,8 @@ async def query_llm(conversation_history: dict):
     display when the response was generated. Using timezone-aware UTC
     datetime for consistency across deployments.
     """
+
+    
     result, bmkeys = await get_llm_response(
         conversation_history.get("conversation_history", [])
     )
