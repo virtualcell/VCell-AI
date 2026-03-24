@@ -21,6 +21,13 @@ from app.core.logger import get_logger
 logger = get_logger("llm_service")
 client = get_openai_client()
 
+def summarize_tool_result(result, max_chars: int = 4000) -> str:
+   text = json.dumps(result, ensure_ascii=False) if not isinstance(result, str) else result
+   if len(text) <= max_chars:
+       return text
+   return text[:max_chars] + "\n...[truncated]..."
+
+
 
 async def get_llm_response(system_prompt: str, user_prompt: str):
     """
@@ -54,7 +61,6 @@ async def get_response_with_tools(conversation_history: list[dict], database: st
     ]
 
     messages = messages + conversation_history
-    print("BBBBBBB" + str(messages))
 
     if database == "bmdb":
         print("DEBUG20: BIOMD POST: get_response_with_tools")
@@ -72,7 +78,6 @@ async def get_response_with_tools(conversation_history: list[dict], database: st
 
         logger.info(f"User prompt: {user_prompt}")
 
-        print("DEBUG5: " + str(messages) + str(tools))
         response = client.chat.completions.create(
             name="GET_RESPONSE_WITH_TOOLS::RETRIEVE_TOOLS",
             model=settings.AZURE_DEPLOYMENT_NAME,
@@ -83,57 +88,84 @@ async def get_response_with_tools(conversation_history: list[dict], database: st
 
     # Handle the tool calls
     tool_calls = response.choices[0].message.tool_calls
-    # tool_calls_descriptions = tool_call.function.description for tool_call in tool_calls
-    # logger.info(f"DEBUG1: Tool descript: {tool_calls_descriptions}")
 
     messages.append(response.choices[0].message)
 
     bmkeys = []
 
+
+
+    if not tool_calls:
+       direct_text = response.choices[0].message or ""
+       logger.info(f"LLM Response (no tools): {direct_text}")
+       return direct_text, bmkeys
+
+
     if tool_calls:
+        import asyncio
+        import json
+
+        # execute all tool calls concurrently
+        tasks = []
+        parsed_calls = []
+
         for tool_call in tool_calls:
-            # Extract the function name and arguments
             name = tool_call.function.name
             args = json.loads(tool_call.function.arguments)
+            parsed_calls.append((tool_call, name, args))
+            tasks.append(execute_tool(name, args))
 
-            logger.info(f"Tool Call: {name} with args: {args}")
+        results = await asyncio.gather(*tasks)
 
-            # Execute the tool function
-            result = await execute_tool(name, args)
+        for (tool_call, name, args), result in zip(parsed_calls, results):
+            compact_result = summarize_tool_result(result)
+            messages.append({
+                "role": "tool",
+                "tool_call_id": tool_call.id,
+                "content": str(compact_result),
+            })
+        # for tool_call in tool_calls:
+        #     # Extract the function name and arguments
+        #     name = tool_call.function.name
+        #     args = json.loads(tool_call.function.arguments)
 
-            logger.info(f"Tool Result: {str(result)[:500]}")
+        #     logger.info(f"Tool Call: {name} with args: {args}")
 
-            bmkeys = []
-            # Extract bmkeys only if result is a dictionary and contains the expected key
-            if isinstance(result, dict):
-                if database == "vcdb":
-                    bmkeys = result.get("unique_model_keys (bmkey)", [])
-                elif database == "bmdb":
-                    biomd_models = result.get("data", [])
-                    bmkeys = [model.get("id") for model in biomd_models if model.get("id")]
+        #     # Execute the tool function
+        #     result = await execute_tool(name, args)
 
-            # Send the result back to the model
-            messages.append(
-                {"role": "tool", "tool_call_id": tool_call.id, "content": str(result)}
-            )
+        #     logger.info(f"Tool Result: {str(result)[:500]}")
 
-    print("AAAAAA")
-    with open ("output.txt", "w") as f:
-        print("BBBBBB")
-        print("DEBUG1: " + str(messages), file=f)
+        #     bmkeys = []
+        #     # Extract bmkeys only if result is a dictionary and contains the expected key
+        #     if isinstance(result, dict):
+        #         if database == "vcdb":
+        #             bmkeys = result.get("unique_model_keys (bmkey)", [])
+        #         elif database == "bmdb":
+        #             biomd_models = result.get("data", [])
+        #             bmkeys = [model.get("id") for model in biomd_models if model.get("id")]
 
-    print("DEBUG2")
-    logger.info(str(messages))
+        #     compact_result = summarize_tool_result(result)
+            
+        #     # Send the result back to the model
+        #     messages.append(
+        #         {"role": "tool", "tool_call_id": tool_call.id, "content": str(compact_result)}
+        #     )
+
+            
+    logger.info("DEBUG100-START")
+    print(len(str(messages)))
 
     # Send back the final response incorporating the tool result
     completion = client.chat.completions.create(
         name="GET_RESPONSE_WITH_TOOLS::PROCESS_TOOL_RESULTS",
         model=settings.AZURE_DEPLOYMENT_NAME,
         messages=messages,
-        metadata={
-            "tool_calls": tool_calls,
-        },
+        # metadata={
+        #     "tool_calls": tool_calls,
+        # },
     )
+    logger.info("DEBUG100-END")
 
     final_response = completion.choices[0].message.content
 
