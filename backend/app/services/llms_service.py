@@ -18,14 +18,32 @@ from app.core.config import settings
 import json
 from app.core.logger import get_logger
 
+import time
+
+def log_timing(label: str, start: float):
+    duration = time.perf_counter() - start
+    logger.info(f"{label}: {duration:.3f}s")
+
 logger = get_logger("llm_service")
 client = get_openai_client()
 
-def summarize_tool_result(result, max_chars: int = 4000) -> str:
-   text = json.dumps(result, ensure_ascii=False) if not isinstance(result, str) else result
-   if len(text) <= max_chars:
-       return text
-   return text[:max_chars] + "\n...[truncated]..."
+def summarize_tool_result(result):
+    if isinstance(result, dict) and "models" in result:
+        return [
+            {
+                "id": m.get("id"),
+                "name": m.get("name"),
+                "description": m.get("description", "")[:200]
+            }
+            for m in result["models"][:5]
+        ]
+    return str(result)[:1000]
+
+async def timed_tool_call(name, args):
+    start = time.perf_counter()
+    result = await execute_tool(name, args)
+    log_timing(f"TOOL {name}", start)
+    return result
 
 
 
@@ -53,6 +71,7 @@ async def get_llm_response(system_prompt: str, user_prompt: str):
 
 
 async def get_response_with_tools(conversation_history: list[dict], database: str):
+    total_start = time.perf_counter()
     messages = [
         {
             "role": "system",
@@ -62,6 +81,7 @@ async def get_response_with_tools(conversation_history: list[dict], database: st
 
     messages = messages + conversation_history
 
+    llm1_start = time.perf_counter()
     if database == "bmdb":
         print("DEBUG20: BIOMD POST: get_response_with_tools")
         response = client.chat.completions.create(
@@ -86,6 +106,7 @@ async def get_response_with_tools(conversation_history: list[dict], database: st
             tool_choice="auto",
         )
 
+    log_timing("LLM1 (tool selection)", llm1_start)
     # Handle the tool calls
     tool_calls = response.choices[0].message.tool_calls
 
@@ -113,9 +134,11 @@ async def get_response_with_tools(conversation_history: list[dict], database: st
             name = tool_call.function.name
             args = json.loads(tool_call.function.arguments)
             parsed_calls.append((tool_call, name, args))
-            tasks.append(execute_tool(name, args))
+            tasks.append(timed_tool_call(name, args))
 
+        tools_total_start = time.perf_counter()
         results = await asyncio.gather(*tasks)
+        log_timing("ALL TOOLS (parallel total)", tools_total_start)
 
         for (tool_call, name, args), result in zip(parsed_calls, results):
             compact_result = summarize_tool_result(result)
@@ -156,6 +179,8 @@ async def get_response_with_tools(conversation_history: list[dict], database: st
     logger.info("DEBUG100-START")
     print(len(str(messages)))
 
+    llm2_start = time.perf_counter()
+
     # Send back the final response incorporating the tool result
     completion = client.chat.completions.create(
         name="GET_RESPONSE_WITH_TOOLS::PROCESS_TOOL_RESULTS",
@@ -165,11 +190,13 @@ async def get_response_with_tools(conversation_history: list[dict], database: st
         #     "tool_calls": tool_calls,
         # },
     )
+    log_timing("LLM2 (final response)", llm2_start)
     logger.info("DEBUG100-END")
 
     final_response = completion.choices[0].message.content
 
     logger.info(f"LLM Response: {final_response}")
+    log_timing("TOTAL REQUEST", total_start)
 
     return final_response, bmkeys
 
