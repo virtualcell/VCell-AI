@@ -20,7 +20,7 @@ backend/
 │   ├── schemas/               # Pydantic data models
 │   └── utils/                 # Utility functions
 ├── tests/                     # Test suite
-├── pyproject.toml            # Poetry configuration
+├── pyproject.toml            # Project configuration
 └── Dockerfile                # Container configuration
 ```
 
@@ -65,7 +65,7 @@ backend/
 ## Tech Stack
 - **Framework**: FastAPI 0.115+
 - **Language**: Python 3.12+
-- **Dependency Management**: Poetry
+- **Dependency Management**: uv
 - **Database**: Qdrant Vector Database
 - **AI/ML**: OpenAI API, LangChain
 - **File Processing**: PyPDF, Markitdown
@@ -77,7 +77,7 @@ backend/
 
 ### Prerequisites
 - Python 3.12+
-- Poetry
+- [uv](https://docs.astral.sh/uv/)
 - Docker (for Qdrant)
 
 ### Installation
@@ -89,7 +89,7 @@ backend/
 
 2. **Install dependencies**
    ```bash
-   poetry install
+   uv sync
    ```
 
 3. **Set up environment variables**
@@ -100,7 +100,7 @@ backend/
 
 4. **Start the development server**
    ```bash
-   poetry run uvicorn app.main:app --reload
+   uv run uvicorn app.main:app --reload
    ```
 
 ### Using Docker
