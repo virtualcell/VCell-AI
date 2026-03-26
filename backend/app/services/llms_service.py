@@ -20,6 +20,7 @@ from app.core.logger import get_logger
 
 import time
 
+# adding specific time logs for easier profiling
 def log_timing(label: str, start: float):
     duration = time.perf_counter() - start
     logger.info(f"{label}: {duration:.3f}s")
@@ -27,6 +28,7 @@ def log_timing(label: str, start: float):
 logger = get_logger("llm_service")
 client = get_openai_client()
 
+# shorten tool result to only key fields id, name, and short description (limited to 200 characters)
 def summarize_tool_result(result):
     if isinstance(result, dict) and "models" in result:
         return [
@@ -35,10 +37,13 @@ def summarize_tool_result(result):
                 "name": m.get("name"),
                 "description": m.get("description", "")[:200]
             }
+            # limit to 5 models
             for m in result["models"][:5]
         ]
+    # limit result to at most 1000 characters
     return str(result)[:1000]
 
+# adding specific time logs for easier profiling
 async def timed_tool_call(name, args):
     start = time.perf_counter()
     result = await execute_tool(name, args)
@@ -115,13 +120,13 @@ async def get_response_with_tools(conversation_history: list[dict], database: st
     bmkeys = []
 
 
-
+    # introduce a fast path: if no tool_calls, return immediately
     if not tool_calls:
        direct_text = response.choices[0].message or ""
        logger.info(f"LLM Response (no tools): {direct_text}")
        return direct_text, bmkeys
 
-
+    # perform tool calls concurrently rather than sequentially to reduce response time
     if tool_calls:
         import asyncio
         import json

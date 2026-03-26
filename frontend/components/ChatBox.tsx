@@ -261,6 +261,7 @@ const saveConversation = (messages: Message[]) => {
       console.log("RRRRRR: " + "This is the promptPrefix: " + promptPrefix);
       console.log("RRRRRR: " + "This is the finalPrompt sent to backend: " + finalPrompt);
 
+      // Only send system messages, last 5 non-system messages, and new user prompt to backend 
       const systemMessages = messages.filter((m) => m.role === "system");
       const recentNonSystem = messages.filter((m) => m.role !== "system").slice(-5);
 
@@ -383,6 +384,16 @@ const handleSendMessage2 = async (overrideMessage?: string) => {
         ? `${promptPrefix} ${msg}${parameterContext}`
         : `${msg}${parameterContext}`;
 
+      // Only send system messages, last 5 non-system messages, and new user prompt to backend 
+      const systemMessages = messages.filter((m) => m.role === "system");
+      const recentNonSystem = messages.filter((m) => m.role !== "system").slice(-5);
+
+      const historyToSend = [
+      ...systemMessages,
+      ...recentNonSystem,
+      { role: "user", content: finalPrompt },
+      ].map((msg) => ({ role: msg.role, content: msg.content }));
+
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/biomd-search`,
         {   
@@ -391,15 +402,16 @@ const handleSendMessage2 = async (overrideMessage?: string) => {
             "Content-Type": "application/json",
             accept: "application/json",
           },
-          body: JSON.stringify({
-            conversation_history: [
-              ...messages,
-              { role: "user", content: finalPrompt },
-            ].map(msg => ({
-              role: msg.role,
-              content: msg.content,
-            })),
-          }),
+          body: JSON.stringify({ conversation_history: historyToSend }),
+          // JSON.stringify({
+          //   conversation_history: [
+          //     ...messages,
+          //     { role: "user", content: finalPrompt },
+          //   ].map(msg => ({
+          //     role: msg.role,
+          //     content: msg.content,
+          //   })),
+          // }),
           signal: controller.signal,
         },
       );
