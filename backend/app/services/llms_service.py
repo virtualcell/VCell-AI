@@ -1,7 +1,16 @@
+# from app.utils.tools_utils import (
+#     ToolsDefinitions as tools,
+#     BIOMD_TOOLS as biotool,
+#     execute_tool,
+# )
+
+
+# IMPLEMENTATION: separating tools into subsets and sending only relevant tools to llm
 from app.utils.tools_utils import (
-    ToolsDefinitions as tools,
-    BIOMD_TOOLS as biotool,
-    execute_tool,
+   BIOMD_TOOLS as biotool,
+   execute_tool,
+   select_tools_for_prompt,
+   should_use_tools,
 )
 
 from app.services.databases_service import (
@@ -28,6 +37,23 @@ def log_timing(label: str, start: float):
 logger = get_logger("llm_service")
 client = get_openai_client()
 
+# IMPLEMENTATION: extract the last user message from the conversation history
+def _last_user_message(conversation_history: list[dict]) -> str:
+   for msg in reversed(conversation_history):
+       if msg.get("role") == "user" and msg.get("content"):
+           return str(msg["content"]).strip()
+   return ""
+
+# IMPLEMENTATION: directly call llm without any tools for simple, conversational queries
+def _direct_chat_completion(messages: list[dict]) -> str:
+   response = client.chat.completions.create(
+       name="GET_RESPONSE_DIRECT",
+       model=settings.AZURE_DEPLOYMENT_NAME,
+       messages=messages,
+   )
+   return response.choices[0].message.content or ""
+
+
 # shorten tool result to only key fields id, name, and short description (limited to 200 characters)
 def summarize_tool_result(result):
     if isinstance(result, dict) and "models" in result:
@@ -42,6 +68,7 @@ def summarize_tool_result(result):
         ]
     # limit result to at most 1000 characters
     return str(result)[:1000]
+
 
 # adding specific time logs for easier profiling
 async def timed_tool_call(name, args):
@@ -95,21 +122,54 @@ async def get_response_with_tools(conversation_history: list[dict], database: st
             tools=biotool,
             tool_choice="auto",
         )
+    # elif database == "vcdb":
+
+    #     user_prompt = conversation_history[-1]["content"]
+    #     print("CCCCCCC" + str(user_prompt))
+
+
+    #     logger.info(f"User prompt: {user_prompt}")
+
+    #     response = client.chat.completions.create(
+    #         name="GET_RESPONSE_WITH_TOOLS::RETRIEVE_TOOLS",
+    #         model=settings.AZURE_DEPLOYMENT_NAME,
+    #         messages=messages,
+    #         tools=tools,
+    #         tool_choice="auto",
+    #     )
+
+    # IMPLEMENTATION: changing the way llm sees/chooses tools
     elif database == "vcdb":
-
-        user_prompt = conversation_history[-1]["content"]
-        print("CCCCCCC" + str(user_prompt))
-
-
+        # extract last user message
+        user_prompt = _last_user_message(conversation_history)
         logger.info(f"User prompt: {user_prompt}")
 
+        # avoid the tool-calling process for simple, conversational promptsß
+        if not should_use_tools(user_prompt):
+            llm_direct_start = time.perf_counter()
+
+            # generate the response directly
+            final_response = _direct_chat_completion(messages)
+
+            # log timing for profiling
+            log_timing("LLM direct (no tools)", llm_direct_start)
+            log_timing("TOTAL REQUEST", total_start)
+
+            # return response with no tool calls
+            return final_response, []
+
+        # only include relevant tools to the llm instead of all tools
+        selected_tools = select_tools_for_prompt(user_prompt)
+
+        # first llm call to decide which tool to use from the given subset
         response = client.chat.completions.create(
             name="GET_RESPONSE_WITH_TOOLS::RETRIEVE_TOOLS",
             model=settings.AZURE_DEPLOYMENT_NAME,
             messages=messages,
-            tools=tools,
+            tools=selected_tools,
             tool_choice="auto",
         )
+    
 
     log_timing("LLM1 (tool selection)", llm1_start)
     # Handle the tool calls
