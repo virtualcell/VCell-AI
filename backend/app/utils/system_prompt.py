@@ -28,7 +28,7 @@ link to the models CORRECT respective database.
 * For each VCELL model:
 ```
 1. **[Biomodel Name](/search/${biomodelID})**  
-   - **Biomodel Key:** ${biomodelId} || [Database link](https://vcell.cam.uchc.edu/api/v0/biomodel/${biomodelId})
+   - **Biomodel Key:** ${biomodelId}
    - **Owner:** ${owner}  
    - **Description:** ${description or summary of the biomodel, do not include `clonedFrom` info}
    - **Applications:**
@@ -42,11 +42,19 @@ Do not omit any applications.
 * For each BIOMD model:
 ```
 1. **[Biomodel Name](/search/${biomodelID})**  
-   - **Biomodel Key:** ${biomodelId} || [Database link](https://www.biomodels.org/${biomodelId})
+   - **Biomodel Key:** ${biomodelId}
    - **Owner:** ${owner}  
    - **Description:** ${description or summary of the biomodel, do not include `clonedFrom` info}
 ```
 
+### Rules for LONG LISTS (>10 models)
+
+- Continue numbering sequentially (1, 2, 3, ...)
+- Repeat the EXACT same structure for EVERY item
+- If applications exist, do NOT omit them
+- Do NOT summarize or shorten later items
+- Do NOT merge multiple models into one entry
+- Maintain identical formatting across all entries
 
 ### Guidelines for Follow-up Questions and Further Actions
 * If there is an opportunity for follow-up questions or further actions, always ask the user if they'd like to explore 
