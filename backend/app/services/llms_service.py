@@ -54,20 +54,24 @@ def _direct_chat_completion(messages: list[dict]) -> str:
    return response.choices[0].message.content or ""
 
 
-# shorten tool result to only key fields id, name, and short description (limited to 200 characters)
+# do not change the tool call formatting, only shorten results
+# this way the llm will stop returning false results
 def summarize_tool_result(result):
     if isinstance(result, dict) and "models" in result:
-        return [
-            {
-                "id": m.get("id"),
-                "name": m.get("name"),
-                "description": m.get("description", "")[:200]
-            }
-            # limit to 5 models
-            for m in result["models"][:5]
-        ]
-    # limit result to at most 1000 characters
-    return str(result)[:1000]
+        return {
+            "models": [
+                {
+                    "id": m.get("id"),
+                    "name": m.get("name"),
+                    "description": m.get("description", "")[:200],
+                    "score": m.get("score"),  # keep useful signals
+                }
+                for m in result["models"][:5]
+            ],
+            "total": result.get("total"),
+        }
+
+    return result 
 
 
 # adding specific time logs for easier profiling
@@ -210,9 +214,19 @@ async def get_response_with_tools(conversation_history: list[dict], database: st
             messages.append({
                 "role": "tool",
                 "tool_call_id": tool_call.id,
-                "content": str(compact_result),
+                "content": json.dumps(compact_result, ensure_ascii=False),
             })
-        # for tool_call in tool_calls:
+        
+        # extract the bmkeys
+        for tool_call in tool_calls:
+            bmkeys = []
+            # Extract bmkeys only if result is a dictionary and contains the expected key
+            if isinstance(result, dict):
+                if database == "vcdb":
+                    bmkeys = result.get("unique_model_keys (bmkey)", [])
+                elif database == "bmdb":
+                    biomd_models = result.get("data", [])
+                    bmkeys = [model.get("id") for model in biomd_models if model.get("id")]
         #     # Extract the function name and arguments
         #     name = tool_call.function.name
         #     args = json.loads(tool_call.function.arguments)
@@ -224,15 +238,6 @@ async def get_response_with_tools(conversation_history: list[dict], database: st
 
         #     logger.info(f"Tool Result: {str(result)[:500]}")
 
-        #     bmkeys = []
-        #     # Extract bmkeys only if result is a dictionary and contains the expected key
-        #     if isinstance(result, dict):
-        #         if database == "vcdb":
-        #             bmkeys = result.get("unique_model_keys (bmkey)", [])
-        #         elif database == "bmdb":
-        #             biomd_models = result.get("data", [])
-        #             bmkeys = [model.get("id") for model in biomd_models if model.get("id")]
-
         #     compact_result = summarize_tool_result(result)
             
         #     # Send the result back to the model
@@ -243,6 +248,7 @@ async def get_response_with_tools(conversation_history: list[dict], database: st
             
     logger.info("DEBUG100-START")
     print(len(str(messages)))
+    print("DEBUG300: ", messages)
 
     llm2_start = time.perf_counter()
 
