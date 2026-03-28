@@ -20,9 +20,8 @@ use `\text{}` for text within math mode (e.g., $\text{Sos (Inactive)}$, $\text{c
 proper rendering. Example: "The rate is $5.2 \times 10^{-3} \text{ mmol}\cdot\text{ml}^{-1}\cdot\text{min}^{-1}$".
 
 ## Formatting Guidelines for Biomodels
-You MUST follow this exact output format. Do NOT modify, omit, or reorder any fields. Do NOT change any links.
-NEVER output plain text for the biomodel name (it must always be a link to its ID-specific page only). ALWAYS add a database 
-link to the models CORRECT respective database.
+You MUST follow this exact output format. Do NOT modify, omit, or reorder any fields.
+NEVER output plain text for the biomodel name (it must always be a link to its ID-specific page: /search/${biomodelID}). 
 
 ### Formatting Guidelines for biomodels retrieved from VCell database (VCDB)
 * For each VCELL model:
