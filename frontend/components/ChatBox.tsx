@@ -108,11 +108,13 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [useVCDB, setUseVCDB] = useState(database ? database === "vcdb" : true);
   const [useBMDB, setUseBMDB] = useState(database === "bmdb");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingVCDB, setIsLoadingVCDB] = useState(false);
+  const [isLoadingBMDB, setIsLoadingBMDB] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const abortController = useRef<AbortController | null>(null);
+  const isLoading = isLoadingVCDB || isLoadingBMDB; 
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -277,7 +279,7 @@ const saveConversation = (messages: Message[]) => {
     // };
     // setMessages((prev) => [...prev, userMessage]);
     setInputMessage("");
-    setIsLoading(true);
+    setIsLoadingVCDB(true);
     try {
       const finalPrompt = promptPrefix
         ? `${promptPrefix} ${msg}${parameterContext}`
@@ -348,7 +350,7 @@ const saveConversation = (messages: Message[]) => {
         },
       ]);
     } finally {
-      setIsLoading(false);
+      setIsLoadingVCDB(false);
     }
   }; // End of handleSendMessage
 
@@ -402,7 +404,7 @@ const handleSendMessage2 = async (overrideMessage?: string) => {
     // };
     // setMessages((prev) => [...prev, userMessage]);
     setInputMessage("");
-    setIsLoading(true);
+    setIsLoadingBMDB(true);
     try {
       const finalPrompt = promptPrefix
         ? `${promptPrefix} ${msg}${parameterContext}`
@@ -469,7 +471,7 @@ const handleSendMessage2 = async (overrideMessage?: string) => {
         },
       ]);
     } finally {
-      setIsLoading(false);
+        setIsLoadingBMDB(false);
     }
   }; // End of handleSendMessage2
 
@@ -497,7 +499,8 @@ const handleSendMessage2 = async (overrideMessage?: string) => {
         },
       ]);
 
-      setIsLoading(false);
+      setIsLoadingVCDB(false);
+      setIsLoadingBMDB(false);
     }
   };
 
