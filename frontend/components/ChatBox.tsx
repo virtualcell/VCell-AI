@@ -171,6 +171,30 @@ const saveConversation = (messages: Message[]) => {
     ...(useBMDB && bmdbActions ? bmdbActions : []),
   ];
 
+  const formatBiomodelIds = (content: string, bmkeys: string[], db: "vcdb" | "bmdb"): string => {
+    if (!bmkeys || bmkeys.length === 0) return content;
+
+    let formattedContent = content;
+    let db_link = "";
+
+    if (db == "vcdb") {
+      db_link = "https://vcell.cam.uchc.edu/api/v0/biomodel/"
+    } else if (db == "bmdb") {
+      db_link = "https://www.biomodels.org/"
+    }
+    // Replace biomodel IDs with hyperlinks
+    bmkeys.forEach((bmId) => {
+      const link = `[Database Details](${db_link}${bmId})`;
+      const replacementString = `${bmId} || ${link}`;
+
+      // only replace if bmId is not already in a /search/ link
+      const regex = new RegExp(`(?<!/)\\b${bmId}\\b`, "g");
+      formattedContent = formattedContent.replace(regex, `${bmId} || ${link}`);
+    });
+
+    return formattedContent;
+  };
+
   const handleQuickAction = (message: string) => {
     setInputMessage("");
     if (database) {
@@ -298,10 +322,10 @@ const saveConversation = (messages: Message[]) => {
       const aiResponse =
         data.response || "Sorry, I didn't get a response from the server.";
       const bmkeys = data.bmkeys || [];
+      console.log(bmkeys)
 
       // Format the response to include hyperlinks for biomodel IDs
-      //const formattedResponse = formatBiomodelIds(aiResponse, bmkeys);
-      const formattedResponse = aiResponse
+      const formattedResponse = formatBiomodelIds(aiResponse, bmkeys, "vcdb");
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -422,8 +446,7 @@ const handleSendMessage2 = async (overrideMessage?: string) => {
 
       console.log(bmkeys)
       // Format the response to include hyperlinks for biomodel IDs
-      //const formattedResponse = formatBiomodelIds(aiResponse, bmkeys);
-      const formattedResponse = aiResponse
+      const formattedResponse = formatBiomodelIds(aiResponse, bmkeys, "bmdb");
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
