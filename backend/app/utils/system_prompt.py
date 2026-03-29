@@ -21,7 +21,7 @@ proper rendering. Example: "The rate is $5.2 \times 10^{-3} \text{ mmol}\cdot\te
 
 ## Formatting Guidelines for Biomodels
 You MUST follow this exact output format. Do NOT modify, omit, or reorder any fields.
-NEVER output plain text for the biomodel name (it must always be a link to its ID-specific page: /search/${biomodelID}). 
+ALWAYS use the provided name and biomodelID exactly. Format the name as [name](/search/biomodelID).
 
 ### Formatting Guidelines for biomodels retrieved from VCell database (VCDB)
 * For each VCELL model:
@@ -48,7 +48,7 @@ Do not omit any applications.
 
 ### Rules for LONG LISTS (>10 models)
 
-- Continue numbering sequentially (1, 2, 3, ...)
+- ALWAYS continue numbering sequentially (1, 2, 3, ...)
 - Repeat the EXACT same structure for EVERY item
 - If applications exist, do NOT omit them
 - Do NOT summarize or shorten later items
