@@ -22,19 +22,19 @@ async def query_llm(conversation_history: dict):
     Returns:
         dict: The final response after processing the prompt with the tools.
     """
-    result, bmkeys = await get_llm_response(
+    result, bmkeys, tool_summary = await get_llm_response(
         conversation_history.get("conversation_history", []), database="vcdb"
     )
-    return {"response": result, "bmkeys": bmkeys}
+    return {"response": result, "bmkeys": bmkeys, "tool_summary": tool_summary}
 
 # For BioModelsDB search using BioModelsDB API 
 @router.post("/biomd-search")
 async def search_llm(conversation_history: dict):
     print("DEBUG20: BIOMD POST: ROUTER")
-    result, bmkeys = await get_llm_response(
+    result, bmkeys, tool_summary = await get_llm_response(
         conversation_history.get("conversation_history", []), database="bmdb"
     )
-    return {"response": result, "bmkeys": bmkeys}
+    return {"response": result, "bmkeys": bmkeys, "tool_summary": tool_summary}
 
 
 

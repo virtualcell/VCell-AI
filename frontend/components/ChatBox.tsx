@@ -325,16 +325,22 @@ const saveConversation = (messages: Message[]) => {
         data.response || "Sorry, I didn't get a response from the server.";
       const bmkeys = data.bmkeys || [];
       console.log(bmkeys)
+      const toolSummary = data.tool_summary || "";
 
       // Format the response to include hyperlinks for biomodel IDs
       const formattedResponse = formatBiomodelIds(aiResponse, bmkeys, "vcdb");
+
+      // show the tool summar text in the website output
+      const toolSummaryText = toolSummary
+        ? `\n\n${toolSummary}`
+        : "";
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
         content: useVCDB && useBMDB
-                ? `**VCell Database:**\n\n${formattedResponse}`
-                : formattedResponse,
+                ? `**VCell Database:**\n\n${formattedResponse}${toolSummaryText}`
+                : `${formattedResponse}${toolSummaryText}`,
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, assistantMessage]);
@@ -446,16 +452,23 @@ const handleSendMessage2 = async (overrideMessage?: string) => {
         data.response || "Sorry, I didn't get a response from the server.";
       const bmkeys = data.bmkeys || [];
 
+      const toolSummary = data.tool_summary || "";
+
       console.log(bmkeys)
       // Format the response to include hyperlinks for biomodel IDs
       const formattedResponse = formatBiomodelIds(aiResponse, bmkeys, "bmdb");
+
+      // show tool summary text in the website output
+      const toolSummaryText = toolSummary
+        ? `\n\n${toolSummary}`
+        : "";
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
         content: useVCDB && useBMDB
-                ? `**BIOMD Database:**\n\n${formattedResponse}`
-                : formattedResponse,
+              ? `**BIOMD Database:**\n\n${formattedResponse}${toolSummaryText}`
+              : `${formattedResponse}${toolSummaryText}`,
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, assistantMessage]);

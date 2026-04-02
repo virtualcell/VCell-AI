@@ -17,8 +17,8 @@ async def get_llm_response(conversation_history: list[dict], database: str) -> t
     """
     try:
         print("DEBUG20: BIOMD POST: get_llm_response")
-        result, bmkeys = await get_response_with_tools(conversation_history, database)
-        return result, bmkeys
+        result, bmkeys, tool_summary = await get_response_with_tools(conversation_history, database)
+        return result, bmkeys, tool_summary
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
