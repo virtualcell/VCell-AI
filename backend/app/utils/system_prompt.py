@@ -38,7 +38,7 @@ Do not omit any applications.
 ```
 
 ### Formatting Guidelines for biomodels retrieved from BioModels database (BMDB)
-* For each BIOMD model:
+* For each BMDB model:
 ```
 1. **[Biomodel Name](/search/${biomodelID})**  
    - **Biomodel Key:** ${biomodelId}

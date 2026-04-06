@@ -79,7 +79,7 @@ interface BiomodelDetail {
 }
 
 interface BiomodelDBDetail {
-  bioID: string;
+  bmdbID: string;
   name: string;
   author?: string;
   description?: string;
@@ -94,7 +94,7 @@ interface BiomodelDBDetail {
 export default function BiomodelDetailPage() {
   const params = useParams<{ bmid: string }>();
   const bmid = params?.bmid;
-  const bioMDid = bmid.startsWith("BIOMD");
+  const bmdbID = bmid.startsWith("BIOMD");
   const [data, setData] = useState<BiomodelDetail | null>(null);
   const [bmdbData, setBmdbData] = useState<BiomodelDBDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -144,7 +144,7 @@ export default function BiomodelDetailPage() {
 
   // set default selected checkbox as bmdb if the id is from biomodels database, otherwise set to vcdb
   const [selectedDatabases, setSelectedDatabases] = useState<("bmdb" | "vcdb")[]>(
-        bioMDid ? ["bmdb"] : ["vcdb"]
+        bmdbID ? ["bmdb"] : ["vcdb"]
       );
 
   useEffect(() => {
@@ -152,7 +152,7 @@ export default function BiomodelDetailPage() {
     setLoading(true);
     setError("");
 
-     if (bioMDid) {
+     if (bmdbID) {
       fetch(`${process.env.NEXT_PUBLIC_API_URL2}/${bmid}?format=json`)
         .then((res) => {
           if (!res.ok) throw new Error("Failed to fetch biomodel details");
@@ -160,7 +160,7 @@ export default function BiomodelDetailPage() {
         })
         .then((json) => {
           setBmdbData({
-          bioID: bmid,
+          bmdbID: bmid,
           name: json.name,
           author: json.publication?.authors?.map((a: any) => a.name) || [],
           description: extractDescription(json.description || ""),
@@ -205,7 +205,7 @@ export default function BiomodelDetailPage() {
       try {
 
         // get diagram image from biomodels database
-        if (bioMDid) {
+        if (bmdbID) {
           const bmdbAPIUrl = process.env.NEXT_PUBLIC_API_URL2;
           const bmdbRes = await fetch(`${bmdbAPIUrl}/model/download/${bmid}?filename=${bmid}.png`);
           if (bmdbRes.ok) {
@@ -243,11 +243,11 @@ export default function BiomodelDetailPage() {
     }; 
 
     fetchDiagramAnalysis(); 
-  }, [data?.bmKey, bioMDid, bmid]);
+  }, [data?.bmKey, bmdbID, bmid]);
 
   // Create combined messages when diagram analysis is ready
   useEffect(() => {
-    if (diagramAnalysis && !bioMDid && data?.bmKey) {
+    if (diagramAnalysis && !bmdbID && data?.bmKey) {
       const diagramMessage = `# Diagram Analysis \n ${diagramAnalysis}`;
       setCombinedMessages([diagramMessage]);
     }
@@ -259,7 +259,7 @@ export default function BiomodelDetailPage() {
   let biomodelDiagramUrl = "";
   if (data) {
    biomodelDiagramUrl = `https://vcell.cam.uchc.edu/api/v0/biomodel/${data.bmKey}/diagram`;
-  } else if (bioMDid) {
+  } else if (bmdbID) {
     biomodelDiagramUrl = diagramAnalysis; // the base64 image string
   }
 
@@ -268,7 +268,7 @@ export default function BiomodelDetailPage() {
 
   return (
     <>
-    {bioMDid && bmdbData && (
+    {bmdbID && bmdbData && (
       <div className="min-h-screen bg-slate-50">
       <div className="container mx-auto p-8 max-w-6xl">
     <Card className="mb-8 shadow-lg border-slate-200">
@@ -279,7 +279,7 @@ export default function BiomodelDetailPage() {
         </CardTitle>
         <span className="flex items-center gap-1">
             <Hash className="h-4 w-4 text-green-400" />{" "}
-            <span className="font-mono text-green-700">{bmdbData?.bioID}</span>
+            <span className="font-mono text-green-700">{bmdbData?.bmdbID}</span>
 
             <User className="h-4 w-4 text-green-400" />{" "}
             <span className="font-mono text-green-700">{bmdbData?.author}</span>
@@ -392,7 +392,7 @@ export default function BiomodelDetailPage() {
                       startMessage={""}
                       quickActions={quickActions}
                       cardTitle={"BioModels AI Assistant"}
-                      promptPrefix={`Analyze the BioModels model with ID ${bmdbData.bioID}`}
+                      promptPrefix={`Analyze the BioModels model with ID ${bmdbData.bmdbID}`}
                       isLoading={false}
                     />
                   </div>
@@ -404,7 +404,7 @@ export default function BiomodelDetailPage() {
   </Card>
   </div>
   </div>
-)} {!bioMDid && data && (
+)} {!bmdbID && data && (
   <div className="min-h-screen bg-slate-50">
       <div className="container mx-auto p-8 max-w-6xl">
         <Card className="mb-8 shadow-lg border-slate-200">

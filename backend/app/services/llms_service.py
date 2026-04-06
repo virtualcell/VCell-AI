@@ -1,13 +1,6 @@
-# from app.utils.tools_utils import (
-#     ToolsDefinitions as tools,
-#     BIOMD_TOOLS as biotool,
-#     execute_tool,
-# )
-
-
 # IMPLEMENTATION: separating tools into subsets and sending only relevant tools to llm
 from app.utils.tools_utils import (
-   BIOMD_TOOLS as biotool,
+   BMDB_TOOLS as bmdbtools,
    execute_tool,
    select_tools_for_prompt,
    should_use_tools,
@@ -125,11 +118,11 @@ async def get_response_with_tools(conversation_history: list[dict], database: st
     llm1_start = time.perf_counter()
 
     if database == "bmdb":
-        print("DEBUG20: BIOMD POST: get_response_with_tools")
+        print("DEBUG20: BMDB POST: get_response_with_tools")
         response = client.chat.completions.create(
             model=settings.AZURE_DEPLOYMENT_NAME,
             messages=messages,
-            tools=biotool,
+            tools=bmdbtools,
             tool_choice="auto",
         )
     # elif database == "vcdb":
@@ -255,8 +248,8 @@ async def get_response_with_tools(conversation_history: list[dict], database: st
                 if database == "vcdb":
                     bmkeys = result.get("unique_model_keys (bmkey)", [])
                 elif database == "bmdb":
-                    biomd_models = result.get("data", [])
-                    bmkeys = [model.get("id") for model in biomd_models if model.get("id")]
+                    bmdb_models = result.get("data", [])
+                    bmkeys = [model.get("id") for model in bmdb_models if model.get("id")]
         #     # Extract the function name and arguments
         #     name = tool_call.function.name
         #     args = json.loads(tool_call.function.arguments)

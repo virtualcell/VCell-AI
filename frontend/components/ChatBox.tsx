@@ -204,7 +204,7 @@ const saveConversation = (messages: Message[]) => {
         handleSendMessage(message);
       } 
       if (database.includes("bmdb")) {
-        handleSendMessage2(message);
+        handleSendMessageBMDB(message);
       }
     } else {
       handleSend(message)
@@ -226,7 +226,7 @@ const saveConversation = (messages: Message[]) => {
     setMessages((prev) => [...prev, userMessage]);
 
   if (useVCDB) {handleSendMessage(inputMessage);}
-  if (useBMDB){handleSendMessage2(inputMessage);}
+  if (useBMDB){handleSendMessageBMDB(inputMessage);}
 };
 
   const handleSendMessage = async (overrideMessage?: string) => {
@@ -362,7 +362,7 @@ const saveConversation = (messages: Message[]) => {
   }; // End of handleSendMessage
 
 // 
-const handleSendMessage2 = async (overrideMessage?: string) => {
+const handleSendMessageBMDB = async (overrideMessage?: string) => {
     const msg = overrideMessage ?? inputMessage;
     if (!msg.trim()) return;
     const controller = new AbortController();
@@ -428,7 +428,7 @@ const handleSendMessage2 = async (overrideMessage?: string) => {
       ].map((msg) => ({ role: msg.role, content: msg.content }));
 
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/biomd-search`,
+        `${process.env.NEXT_PUBLIC_API_URL}/bmdb-search`,
         {   
           method: "POST",
           headers: {
@@ -487,7 +487,7 @@ const handleSendMessage2 = async (overrideMessage?: string) => {
     } finally {
         setIsLoadingBMDB(false);
     }
-  }; // End of handleSendMessage2
+  }; // End of handleSendMessageBMDB
 
 
 

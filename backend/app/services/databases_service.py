@@ -140,9 +140,9 @@ async def fetch_simulation_details(params: SimulationRequestParams) -> dict:
         response.raise_for_status()
         return response.json()
 
-@observe(name="FETCH_BIOMD_MODELS")
-async def fetch_biomd_models(params: BiomodelRequestParams) -> dict:
-    print("DEBUG20: BIOMD POST: in tool FETCH_BIOMD_MODELS")
+@observe(name="FETCH_BMDB_MODELS")
+async def fetch_bmdb_models(params: BiomodelRequestParams) -> dict:
+    print("DEBUG20: BMDB POST: in tool FETCH_BMDB_MODELS")
 
     # Construct the query string using urlencoded parameters (params_dict)
     query_string = params.bmName if params.bmName else params.bmId
@@ -185,10 +185,10 @@ async def get_xml_file(bmId: str, truncate: bool = False, max_retries: int = 3) 
     # Check connectivity first
     if not await check_vcell_connectivity():
         logger.error(
-            "BioMD API is not reachable. Please check your network connection and DNS settings."
+            "BMDB API is not reachable. Please check your network connection and DNS settings."
         )
         raise Exception(
-            "BioMD API is not reachable. Please check your network connection and DNS settings."
+            "BMDB API is not reachable. Please check your network connection and DNS settings."
         )
 
     for attempt in range(max_retries + 1):

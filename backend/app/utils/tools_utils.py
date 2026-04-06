@@ -4,7 +4,7 @@ from app.services.databases_service import (
     fetch_simulation_details,
     get_vcml_file,
     fetch_publications,
-    fetch_biomd_models,
+    fetch_bmdb_models,
     get_xml_file
 )
 from app.services.knowledge_base_service import get_similar_chunks
@@ -189,10 +189,10 @@ fetch_publications_tool = ToolDefinition(
 )
 
 
-fetch_biomd_tool = ToolDefinition(
+fetch_bmdb_tool = ToolDefinition(
     type="function",
     function=FunctionDefinition(
-        name="fetch_biomd_models",
+        name="fetch_bmdb_models",
         description="Retrieves a list of biomodels from the BioModels database based on filtering criteria which is the biomodel name. This allows to search for specific biomodels in the BioModels database based on their attributes and retrieve the results.",
         parameters=ParameterSchema(
             type="object",
@@ -242,7 +242,7 @@ ToolsDefinitions = [
     search_vcell_knowledge_base_tool,
     fetch_publications_tool,
 ]
-BIOMD_TOOLS = [fetch_biomd_tool,
+BMDB_TOOLS = [fetch_bmdb_tool,
                get_xml_file_tool]
 
 
@@ -369,10 +369,9 @@ async def execute_tool(name, args):
         elif name == "fetch_publications":
             return await fetch_publications()
         
-        elif name == "fetch_biomd_models":
+        elif name == "fetch_bmdb_models":
             params = BiomodelRequestParams(**args)
-            print("DEBUG About to call fetch_biomodels()")
-            return await fetch_biomd_models(params)
+            return await fetch_bmdb_models(params)
         elif name == "get_xml_file":
             return await get_xml_file(args["bmId"])
 

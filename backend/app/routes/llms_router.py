@@ -28,24 +28,14 @@ async def query_llm(conversation_history: dict):
     return {"response": result, "bmkeys": bmkeys, "tool_summary": tool_summary}
 
 # For BioModelsDB search using BioModelsDB API 
-@router.post("/biomd-search")
+@router.post("/bmdb-search")
 async def search_llm(conversation_history: dict):
-    print("DEBUG20: BIOMD POST: ROUTER")
-    result, bmkeys, tool_summary = await get_llm_response(
+    print("DEBUG20: BMDB POST: ROUTER")
+    result, bmdbkeys, tool_summary = await get_llm_response(
         conversation_history.get("conversation_history", []), database="bmdb"
     )
-    return {"response": result, "bmkeys": bmkeys, "tool_summary": tool_summary}
+    return {"response": result, "bmkeys": bmdbkeys, "tool_summary": tool_summary}
 
-
-
-# @router.get("/biomodels-search")
-# async def biomodels_search(query: str):
-#     async with httpx.AsyncClient() as client:
-#         response = await client.get(
-#             "https://www.biomodels.org/search",
-#             params={"query": query, "format": "json"}
-#         )
-#         return response.json()
 
 @router.post("/analyse/{biomodel_id}")
 async def analyse_biomodel(biomodel_id: str, user_prompt: str):
