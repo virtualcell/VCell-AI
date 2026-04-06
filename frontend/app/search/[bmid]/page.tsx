@@ -142,6 +142,11 @@ export default function BiomodelDetailPage() {
     },
   ];
 
+  // set default selected checkbox as bmdb if the id is from biomodels database, otherwise set to vcdb
+  const [selectedDatabases, setSelectedDatabases] = useState<("bmdb" | "vcdb")[]>(
+        bioMDid ? ["bmdb"] : ["vcdb"]
+      );
+
   useEffect(() => {
     if (!bmid) return;
     setLoading(true);
@@ -383,7 +388,7 @@ export default function BiomodelDetailPage() {
                     </span>
                   </div>
                   <div className="bg-slate-50 border border-slate-200 rounded shadow-sm h-[600px] overflow-hidden">
-                    <ChatBox database={bioMDid ? "bmdb" : "vcdb"}
+                    <ChatBox database={selectedDatabases}
                       startMessage={""}
                       quickActions={quickActions}
                       cardTitle={"BioModels AI Assistant"}
@@ -645,7 +650,7 @@ export default function BiomodelDetailPage() {
                     </span>
                   </div>
                   <div className="bg-slate-50 border border-slate-200 rounded shadow-sm h-[600px] overflow-hidden">
-                    <ChatBox database={bioMDid ? "bmdb" : "vcdb"}
+                    <ChatBox database={selectedDatabases}
                       startMessage={combinedMessages}
                       quickActions={quickActions}
                       cardTitle="VCell AI Assistant"

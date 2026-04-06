@@ -34,7 +34,7 @@ interface ChatParameters {
 }
 
 interface ChatBoxProps {
-  database?: "vcdb" | "bmdb";
+  database?: ("vcdb" | "bmdb")[];
   startMessage: string | string[];
   quickActions: QuickAction[];
   VCellActions?: QuickAction[];
@@ -106,8 +106,8 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
 
   const [inputMessage, setInputMessage] = useState("");
   const [conversationId, setConversationId] = useState<string | null>(null);
-  const [useVCDB, setUseVCDB] = useState(database ? database === "vcdb" : true);
-  const [useBMDB, setUseBMDB] = useState(database === "bmdb");
+  const [useVCDB, setUseVCDB] = useState(database ? database.includes("vcdb") : true);
+  const [useBMDB, setUseBMDB] = useState(database ? database.includes("bmdb") : false);
   const [isLoadingVCDB, setIsLoadingVCDB] = useState(false);
   const [isLoadingBMDB, setIsLoadingBMDB] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -200,9 +200,10 @@ const saveConversation = (messages: Message[]) => {
   const handleQuickAction = (message: string) => {
     setInputMessage("");
     if (database) {
-      if (database == "vcdb") {
+      if (database.includes("vcdb")) {
         handleSendMessage(message);
-      } else if (database == "bmdb") {
+      } 
+      if (database.includes("bmdb")) {
         handleSendMessage2(message);
       }
     } else {
