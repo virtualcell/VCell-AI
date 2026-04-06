@@ -200,7 +200,7 @@ fetch_bmdb_tool = ToolDefinition(
                 "bmId": {
                     "type": "string",
                     "default": "",
-                    "description": "The unique identifier of the biomodel. This can be used to retrieve specific biomodels directly by their ID. It is under the format BIOMD followed by 10 numbers",
+                    "description": "The unique identifier of the biomodel. This can be used to retrieve specific biomodels directly by their ID. It is under the format BIOMD followed by 10 numbers or MODEL followed by 10 numbers.",
                 },
                 "bmName": {
                     "type": "string",

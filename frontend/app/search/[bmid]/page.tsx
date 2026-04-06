@@ -94,7 +94,7 @@ interface BiomodelDBDetail {
 export default function BiomodelDetailPage() {
   const params = useParams<{ bmid: string }>();
   const bmid = params?.bmid;
-  const bmdbID = bmid.startsWith("BIOMD");
+  const bmdbID = bmid.startsWith("BIOMD") || bmid.startsWith("MODEL");
   const [data, setData] = useState<BiomodelDetail | null>(null);
   const [bmdbData, setBmdbData] = useState<BiomodelDBDetail | null>(null);
   const [loading, setLoading] = useState(true);
