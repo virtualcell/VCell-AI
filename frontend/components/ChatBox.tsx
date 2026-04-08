@@ -199,6 +199,14 @@ const saveConversation = (messages: Message[]) => {
 
   const handleQuickAction = (message: string) => {
     setInputMessage("");
+      const userMessage: Message = {
+      id: Date.now().toString(),
+      role: "user",
+      content: message,
+      timestamp: new Date(),
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
     if (database) {
       if (database.includes("vcdb")) {
         handleSendMessage(message);
