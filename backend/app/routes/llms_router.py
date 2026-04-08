@@ -19,6 +19,7 @@ async def query_llm(conversation_history: dict):
     Endpoint to query the LLM and execute the necessary tools.
     Args:
         conversation_history (dict): The conversation history containing user prompts and responses.
+        database (str): The database to query - vcdb in this case.
     Returns:
         dict: The final response after processing the prompt with the tools.
     """
@@ -26,15 +27,6 @@ async def query_llm(conversation_history: dict):
         conversation_history.get("conversation_history", []), database="vcdb"
     )
     return {"response": result, "bmkeys": bmkeys, "tool_summary": tool_summary}
-
-# For BioModelsDB search using BioModelsDB API 
-@router.post("/bmdb-search")
-async def search_llm(conversation_history: dict):
-    print("DEBUG20: BMDB POST: ROUTER")
-    result, bmdbkeys, tool_summary = await get_llm_response(
-        conversation_history.get("conversation_history", []), database="bmdb"
-    )
-    return {"response": result, "bmkeys": bmdbkeys, "tool_summary": tool_summary}
 
 
 @router.post("/analyse/{biomodel_id}")
