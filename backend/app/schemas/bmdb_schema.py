@@ -20,7 +20,7 @@ class OrderByEnum(str, Enum):
 
 
 # Biomodel Request Parameters schema
-class BiomodelRequestParams(BaseModel, use_enum_values=True):
+class BMDBRequestParams(BaseModel, use_enum_values=True):
     bmName: Optional[str] = ""  # Name of the biomodel to search for
     bmId: Optional[str] = ""  # Biomodel ID
     category: Optional[CategoryEnum] = CategoryEnum.all  # Category of the biomodel
@@ -33,6 +33,3 @@ class BiomodelRequestParams(BaseModel, use_enum_values=True):
         OrderByEnum.date_desc
     )  # Order of results (default is "date_desc")
 
-class SimulationRequestParams(BaseModel):
-    bmId: str  # Biomodel ID for which simulations will be fetched
-    simId: str  # Simulation ID to fetch specific simulation details

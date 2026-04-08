@@ -1,6 +1,7 @@
+from fastapi import APIRouter, Depends, HTTPException, Response
+from typing import List
 from multiprocessing import process
-
-from fastapi import APIRouter, HTTPException
+from app.schemas.bmdb_schema import BMDBRequestParams
 import httpx
 import requests
 from app.controllers.llms_controller import (
@@ -13,23 +14,34 @@ from app.controllers.bmdb_controller import (
 
 router = APIRouter()
 
-# For BioModelsDB search using BioModelsDB API 
-@router.post("/bmdb-search")
-async def search_llm(conversation_history: dict):
-    """
-    Endpoint to query the LLM and execute the necessary tools.
-    Args:
-        conversation_history (dict): The conversation history containing user prompts and responses.
-        database (str): The database to query - bmdb in this case.
-    Returns:
-        dict: The final response after processing the prompt with the tools.
-    """
 
-    print("DEBUG20: BMDB POST: ROUTER")
-    result, bmdbkeys, tool_summary = await get_llm_response(
-        conversation_history.get("conversation_history", []), database="bmdb"
-    )
-    return {"response": result, "bmkeys": bmdbkeys, "tool_summary": tool_summary}
+@router.get("/search", response_model=dict)
+async def get_biomodels(params: BMDBRequestParams = Depends()):
+    """
+    Endpoint to retrieve bmdb models based on provided parameters.
+    """
+    try:
+        return await get_bmdb_models_controller(params)
+    except HTTPException as e:
+        raise e
+
+# For BioModelsDB search using BioModelsDB API 
+# @router.post("/bmdb-search")
+# async def search_llm(conversation_history: dict):
+#     """
+#     Endpoint to query the LLM and execute the necessary tools.
+#     Args:
+#         conversation_history (dict): The conversation history containing user prompts and responses.
+#         database (str): The database to query - bmdb in this case.
+#     Returns:
+#         dict: The final response after processing the prompt with the tools.
+#     """
+
+#     print("DEBUG20: BMDB POST: ROUTER")
+#     result, bmdbkeys, tool_summary = await get_llm_response(
+#         conversation_history.get("conversation_history", []), database="bmdb"
+#     )
+#     return {"response": result, "bmkeys": bmdbkeys, "tool_summary": tool_summary}
 
 
 # @router.get("/", response_model=dict)

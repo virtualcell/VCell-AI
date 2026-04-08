@@ -1,14 +1,14 @@
 import httpx
 from typing import List
 from fastapi import HTTPException, Response
-from app.schemas.vcelldb_schema import BiomodelRequestParams, SimulationRequestParams
+from app.schemas.bmdb_schema import BMDBRequestParams
 from app.services.databases_service import (
     get_xml_file,
     fetch_bmdb_models,
 )
 
 
-async def get_bmdb_models_controller(params: BiomodelRequestParams) -> dict:
+async def get_bmdb_models_controller(params: BMDBRequestParams) -> dict:
     """
     Controller function to retrieve biomodels based on filters and sorting.
     Raises:
