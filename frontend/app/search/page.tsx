@@ -85,9 +85,9 @@ export default function BiomodelSearchPage() {
     orderBy: "date_desc",
   });
 
-  const [bioModelsQuery, setBioModelsQuery] = useState("");
-  const [bioModelsResults, setBioModelsResults] = useState<any[]>([]);
-  const [bioModelsIsLoading, setBioModelsIsLoading] = useState(false);
+  const [BMDBQuery, setBMDBQuery] = useState("");
+  const [BMDBResults, setBMDBResults] = useState<any[]>([]);
+  const [BMDBIsLoading, setBMDBIsLoading] = useState(false);
 
 
   const [results, setResults] = useState<BiomodelResult[]>([]);
@@ -95,7 +95,7 @@ export default function BiomodelSearchPage() {
   const [isAdvancedSearchOpen, setIsAdvancedSearchOpen] = useState(false);
 
   const handleSearch = async () => {
-    setBioModelsResults([]);
+    setBMDBResults([]);
     setIsLoading(true);
     try {
       // Build query params from filters, omitting empty bmName
@@ -142,10 +142,10 @@ export default function BiomodelSearchPage() {
   // introduce a separate search function for the BioModel DB search form.
   const handleSearch2 = async () => {
     setResults([]);
-    setBioModelsIsLoading(true);
+    setBMDBIsLoading(true);
     try {
       // build API url
-      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL2}/search?query=${bioModelsQuery}&format=json`;
+      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL2}/search?query=${BMDBQuery}&format=json`;
 
       const res = await fetch(apiUrl);
       if (!res.ok) throw new Error("Failed to fetch biomodels");
@@ -181,11 +181,11 @@ export default function BiomodelSearchPage() {
         name: model.name,
         description: descriptions[index],
       }));
-      setBioModelsResults(mappedResults);
+      setBMDBResults(mappedResults);
       } catch (err) {
-        setBioModelsResults([]);
+        setBMDBResults([]);
       } finally {
-        setBioModelsIsLoading(false);
+        setBMDBIsLoading(false);
       }};
 
 
@@ -482,9 +482,9 @@ export default function BiomodelSearchPage() {
                 <Input
                   id="ID"
                   placeholder="Enter biomodel name..."
-                  value={bioModelsQuery}
+                  value={BMDBQuery}
                   onChange={(e) =>
-                    setBioModelsQuery(e.target.value)
+                    setBMDBQuery(e.target.value)
                   }
                   className="border-slate-300 focus:border-blue-500 h-9"
                 />
@@ -495,18 +495,18 @@ export default function BiomodelSearchPage() {
             <div className="mt-4 pt-4 border-t border-slate-200">
               <Button
                 onClick={handleSearch2}
-                disabled={bioModelsIsLoading}
+                disabled={BMDBIsLoading}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 h-9"
               >
                 <Search className="h-4 w-4 mr-2" />
-                {bioModelsIsLoading ? "Searching..." : "Search"}
+                {BMDBIsLoading ? "Searching..." : "Search"}
               </Button>
             </div>
           </CardContent>
         </Card>
 
         {/* Results Section */}
-        {(results.length > 0 || bioModelsResults.length > 0) && (
+        {(results.length > 0 || BMDBResults.length > 0) && (
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-2xl font-semibold text-slate-900">
@@ -515,14 +515,14 @@ export default function BiomodelSearchPage() {
               <Badge variant="secondary" className="bg-blue-100 text-blue-800">
                 {results.length > 0
                   ? results.length
-                  : bioModelsResults.length} models found
+                  : BMDBResults.length} models found
               </Badge>
             </div>
 
             {/* Output for BioModels Database Results */}
-            {bioModelsResults.length > 0 && (
+            {BMDBResults.length > 0 && (
              <div className="grid gap-4">
-              {bioModelsResults.map((model: any) => (
+              {BMDBResults.map((model: any) => (
                 <Link
                   key={model.id}
                   href={`/search/${model.id}`}
