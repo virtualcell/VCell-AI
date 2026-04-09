@@ -140,7 +140,7 @@ export default function BiomodelSearchPage() {
   };
 
   // introduce a separate search function for the BioModel DB search form.
-  const handleSearch2 = async () => {
+  const handleSearchBMDB = async () => {
     setResults([]);
     setBMDBIsLoading(true);
     try {
@@ -494,7 +494,7 @@ export default function BiomodelSearchPage() {
               {/* Search Button for BioModel DB*/}
             <div className="mt-4 pt-4 border-t border-slate-200">
               <Button
-                onClick={handleSearch2}
+                onClick={handleSearchBMDB}
                 disabled={BMDBIsLoading}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 h-9"
               >
