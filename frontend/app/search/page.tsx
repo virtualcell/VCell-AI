@@ -145,7 +145,7 @@ export default function BiomodelSearchPage() {
     setBMDBIsLoading(true);
     try {
       // build API url
-      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL2}/search?query=${BMDBQuery}&format=json`;
+      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL_BMDB}/search?query=${BMDBQuery}&format=json`;
 
       const res = await fetch(apiUrl);
       if (!res.ok) throw new Error("Failed to fetch biomodels");
@@ -157,7 +157,7 @@ export default function BiomodelSearchPage() {
         try {
 
           // build url using model ID
-          const descURL = `${process.env.NEXT_PUBLIC_API_URL2}/${model.id}?format=json`;
+          const descURL = `${process.env.NEXT_PUBLIC_API_URL_BMDB}/${model.id}?format=json`;
           const descRes = await fetch(descURL);
           if (!descRes.ok) throw new Error("Failed to fetch model description");
           const descData = await descRes.json();

@@ -36,7 +36,7 @@ services:
       - "3000:3000"
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:8000
-      NEXT_PUBLIC_API_URL2: https://www.biomodels.org/
+      NEXT_PUBLIC_API_URL_BMDB: https://www.biomodels.org/
     depends_on:
       - backend
     env_file:

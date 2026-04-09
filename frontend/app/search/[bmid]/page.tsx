@@ -153,7 +153,7 @@ export default function BiomodelDetailPage() {
     setError("");
 
      if (bmdbID) {
-      fetch(`${process.env.NEXT_PUBLIC_API_URL2}/${bmid}?format=json`)
+      fetch(`${process.env.NEXT_PUBLIC_API_URL_BMDB}/${bmid}?format=json`)
         .then((res) => {
           if (!res.ok) throw new Error("Failed to fetch biomodel details");
           return res.json();
@@ -174,7 +174,7 @@ export default function BiomodelDetailPage() {
                 name: file.name,
                 description: file.description || "",
                 fileSize: file.fileSize || "",
-                downloadLink: `${process.env.NEXT_PUBLIC_API_URL2}/model/download/${bmid}?filename=${file.name}`,
+                downloadLink: `${process.env.NEXT_PUBLIC_API_URL_BMDB}/model/download/${bmid}?filename=${file.name}`,
               })),
         });
       })
@@ -206,7 +206,7 @@ export default function BiomodelDetailPage() {
 
         // get diagram image from biomodels database
         if (bmdbID) {
-          const bmdbAPIUrl = process.env.NEXT_PUBLIC_API_URL2;
+          const bmdbAPIUrl = process.env.NEXT_PUBLIC_API_URL_BMDB;
           const bmdbRes = await fetch(`${bmdbAPIUrl}/model/download/${bmid}?filename=${bmid}.png`);
           if (bmdbRes.ok) {
             // convert the .png response into blob to store image as a string
