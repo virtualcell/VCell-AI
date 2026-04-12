@@ -35,6 +35,7 @@ interface ChatParameters {
 
 interface ChatBoxProps {
   database?: ("vcdb" | "bmdb")[];
+  placeholder?: string;
   startMessage: string | string[];
   quickActions: QuickAction[];
   VCellActions?: QuickAction[];
@@ -47,6 +48,7 @@ interface ChatBoxProps {
 
 export const ChatBox: React.FC<ChatBoxProps> = ({
   database,
+  placeholder,
   startMessage,
   quickActions,
   VCellActions,
@@ -638,12 +640,12 @@ const handleSendMessageBMDB = async (overrideMessage?: string) => {
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder={useVCDB && useBMDB
+            placeholder={placeholder || (useVCDB && useBMDB
                           ? "Ask about VCell and BioModels biomodels..."
                           : useVCDB
                           ? "Ask about VCell biomodels..."
                           : "Ask about BioModels biomodels..."
-                        }
+                        )}
             className="flex-1 border-slate-300 focus:border-blue-500"
             disabled={isLoading || isInitialLoading}
           />

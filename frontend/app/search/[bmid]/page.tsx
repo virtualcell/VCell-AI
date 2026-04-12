@@ -390,6 +390,7 @@ export default function BiomodelDetailPage() {
                   <div className="bg-slate-50 border border-slate-200 rounded shadow-sm h-[600px] overflow-hidden">
                     <ChatBox database={selectedDatabases}
                       startMessage={""}
+                      placeholder={`Ask about this specific biomodel...`}
                       quickActions={quickActions}
                       cardTitle={"BioModels AI Assistant"}
                       promptPrefix={`Analyze the BioModels model with ID ${bmdbData.bmdbID}`}
@@ -651,6 +652,7 @@ export default function BiomodelDetailPage() {
                   </div>
                   <div className="bg-slate-50 border border-slate-200 rounded shadow-sm h-[600px] overflow-hidden">
                     <ChatBox database={selectedDatabases}
+                      placeholder={"Ask about this specific biomodel..."}
                       startMessage={combinedMessages}
                       quickActions={quickActions}
                       cardTitle="VCell AI Assistant"
