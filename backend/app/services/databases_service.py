@@ -94,9 +94,6 @@ async def fetch_biomodels(params: BiomodelRequestParams) -> dict:
 
     # Construct the full URL
     url = f"{VCELL_API_BASE_URL}/biomodel?{query_string}"
-    # elif source == "search":
-    #     bm_name = params_dict.get("bmName", "")
-    #     url = f"{BIOMODELS_API_URL}/{quote(bm_name)}"
 
     # Log the URL being queried
     logger.info(f"Querying URL: {url}")
@@ -241,6 +238,24 @@ async def get_xml_file(bmId: str, truncate: bool = False, max_retries: int = 3) 
     raise Exception(
         f"Failed to fetch XML file for biomodel {bmId} after {max_retries + 1} attempts"
     )
+
+
+@observe(name="GET_BMDB_MODEL_INFO")
+async def get_bmdb_model_info(bmdbID: str) -> dict:
+    """
+    Fetches information about a specific given model from BMDB.
+    """
+    url = f"{BIOMODELS_API_URL}/{bmdbID}?format=json"
+
+    logger.info(f"Fetching BMDB model info from URL: {url}")
+
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url)
+        response.raise_for_status()
+        raw_data = response.json()
+    
+    # returns dictionary with model info, including name, description, etc.
+    return raw_data
 
 
 @observe(name="GET_VCML_FILE")
