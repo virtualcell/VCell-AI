@@ -4,6 +4,7 @@ from app.utils.tools_utils import (
    execute_tool,
    select_tools_for_prompt,
    should_use_tools,
+   default_rows,
 )
 
 from app.services.databases_service import (
@@ -13,6 +14,8 @@ from app.services.databases_service import (
 )
 
 from app.utils.system_prompt import SYSTEM_PROMPT
+from app.utils.bmdb_system_prompt import BMDB_SYSTEM_PROMPT
+from app.utils.vcdb_system_prompt import VCDB_SYSTEM_PROMPT
 
 from app.schemas.vcelldb_schema import BiomodelRequestParams
 from app.core.singleton import get_openai_client
@@ -105,7 +108,7 @@ async def get_response_with_tools(conversation_history: list[dict], database: st
     messages = [
         {
             "role": "system",
-            "content": SYSTEM_PROMPT,
+            "content": SYSTEM_PROMPT + (BMDB_SYSTEM_PROMPT if database == "bmdb" else VCDB_SYSTEM_PROMPT),
         },
     ]
 
@@ -125,21 +128,6 @@ async def get_response_with_tools(conversation_history: list[dict], database: st
             tools=bmdbtools,
             tool_choice="auto",
         )
-    # elif database == "vcdb":
-
-    #     user_prompt = conversation_history[-1]["content"]
-    #     print("CCCCCCC" + str(user_prompt))
-
-
-    #     logger.info(f"User prompt: {user_prompt}")
-
-    #     response = client.chat.completions.create(
-    #         name="GET_RESPONSE_WITH_TOOLS::RETRIEVE_TOOLS",
-    #         model=settings.AZURE_DEPLOYMENT_NAME,
-    #         messages=messages,
-    #         tools=tools,
-    #         tool_choice="auto",
-    #     )
 
     # IMPLEMENTATION: changing the way llm sees/chooses tools
     elif database == "vcdb":
@@ -250,23 +238,6 @@ async def get_response_with_tools(conversation_history: list[dict], database: st
                 elif database == "bmdb":
                     bmdb_models = result.get("data", [])
                     bmkeys = [model.get("id") for model in bmdb_models if model.get("id")]
-        #     # Extract the function name and arguments
-        #     name = tool_call.function.name
-        #     args = json.loads(tool_call.function.arguments)
-
-        #     logger.info(f"Tool Call: {name} with args: {args}")
-
-        #     # Execute the tool function
-        #     result = await execute_tool(name, args)
-
-        #     logger.info(f"Tool Result: {str(result)[:500]}")
-
-        #     compact_result = summarize_tool_result(result)
-            
-        #     # Send the result back to the model
-        #     messages.append(
-        #         {"role": "tool", "tool_call_id": tool_call.id, "content": str(compact_result)}
-        #     )
 
             
     logger.info("DEBUG100-START")
@@ -298,6 +269,7 @@ async def get_response_with_tools(conversation_history: list[dict], database: st
     log_timing("TOTAL REQUEST TIME (from initial request to final output)", total_start)
     total_time = time.perf_counter() - total_start
     tool_summary += f"*Total request time: {total_time:.2f}s.*"
+    tool_summary += f"\n*Max rows fetched for list of biomodels was {default_rows}.*"
 
     return final_response, bmkeys, tool_summary
 
