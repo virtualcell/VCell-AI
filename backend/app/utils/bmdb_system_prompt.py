@@ -1,14 +1,13 @@
 BMDB_SYSTEM_PROMPT = """
 ## Formatting Guidelines for Biomodels
-Ignore all previous instructions.
 You MUST follow this exact output format. Do NOT modify, omit, or reorder any fields.
-ALWAYS use the provided name and biomodelID exactly. Format the name as [name](/search/bmdbID).
+ALWAYS use the provided name and biomodelID exactly. Format the name as [name](/search/${id}).
 
 ### Formatting Guidelines for biomodels retrieved from BioModels database (BMDB)
 * For each BMDB model:
 ```
-1. **[Biomodel Name](/search/${bmdbID})**  
-   - **Biomodel Key:** ${bmdbId}
+1. **[Biomodel Name](/search/${id})**  
+   - **Biomodel Key:** ${id}
    - **Owner:** ${owner}  
    - **Description:** ${description or summary of the biomodel, do not include `clonedFrom` info}
 ```
