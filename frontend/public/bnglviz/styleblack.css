@@ -1,0 +1,78 @@
+body {
+  background-color: white;
+}
+
+* {
+  color: black;
+  font-family: "Times New Roman", Times, serif;
+}
+
+p {
+  margin: 3px;
+}
+
+canvas {
+  display: block;
+}
+
+button {
+  border: 1px solid grey;
+  border-radius: 2px;
+}
+
+input::file-selector-button {
+  border: 1px solid grey;
+  border-radius: 2px;
+  /*font-family: "Andale Mono";*/
+  background-color: white;
+}
+
+.dark-mode {
+  background-color: black;
+  color: white;
+}
+
+.light-mode {
+  background-color: white;
+  color: black;
+}
+
+.big-arrow {
+  font-size: 25px;
+
+}
+
+.main-td {
+  padding: 10px;
+}
+
+.main-td > p {
+  white-space: pre-wrap;
+  font-family: courier, monospace;
+  border-radius: 3px;
+  padding: 0 3px;
+}
+
+.divider-td {
+  padding: 0px;
+  height: 0px;
+}
+
+.bngl-header {
+  text-align: center;
+  margin: 0px;
+}
+
+.table-divider {
+  font-size: 30px;
+  text-align: left;
+  margin: 0px;
+}
+
+#limitation-div {
+  display: block;
+}
+
+#loading-p {
+  display: none;
+}

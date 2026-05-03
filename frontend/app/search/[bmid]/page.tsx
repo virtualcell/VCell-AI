@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/collapsible";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChatBox } from "@/components/ChatBox";
+import { BnglVisualizerSection } from "@/components/BnglVisualizerSection";
 import {
   User,
   Lock,
@@ -498,6 +499,9 @@ export default function BiomodelDetailPage() {
                     onLoad={() => setError("")}
                   />
                 </div>
+                
+                {/* BNGL Visualization Section */}
+                <BnglVisualizerSection biomodelId={data.bmKey} />
                 
                 {/* Description Section */}
                 <Collapsible className="mb-6" defaultOpen>

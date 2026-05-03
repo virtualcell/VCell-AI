@@ -5,6 +5,7 @@ from app.controllers.vcelldb_controller import (
     get_biomodels_controller,
     get_simulation_details_controller,
     get_vcml_controller,
+    get_bngl_controller,
     get_sbml_controller,
     get_diagram_url_controller,
     get_diagram_image_controller,
@@ -49,6 +50,15 @@ async def get_vcml(biomodel_id: str, truncate: bool = False):
         return await get_vcml_controller(biomodel_id, truncate)
     except HTTPException as e:
         raise e
+
+
+@router.get("/biomodel/{biomodel_id}/biomodel.bngl", response_model=dict)
+async def get_bngl(biomodel_id: str):
+    """
+    Endpoint to get BNGL file contents for a given biomodel.
+    Returns empty data if the model is not rule-based.
+    """
+    return await get_bngl_controller(biomodel_id)
 
 
 @router.get("/biomodel/{biomodel_id}/biomodel.sbml", response_model=str)

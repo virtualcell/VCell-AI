@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>BNGL Visualizer</title>
+    <link rel="stylesheet" type="text/css" href="styleblack.css"/>
+    <style>
+        body {
+            margin: 0;
+            padding: 10px;
+            font-family: Arial, sans-serif;
+        }
+        #loading-p {
+            display: none;
+            color: #666;
+            font-style: italic;
+        }
+        /* Make sure tables and canvases fit within iframe */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        canvas {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+<p id="loading-p">Loading...</p>
+<div id="canvas-container"></div>
+<div id="table-container"></div>
+
+<script src="model-graphics.js"></script>
+<script src="bngl-extractor.js"></script>
+<script src="html-interface.js"></script>
+<script>
+  // Get major elements
+  const canvContain = document.getElementById("canvas-container");
+  const tableContain = document.getElementById("table-container");
+  const body = document.body;
+  const loadingText = document.getElementById("loading-p");
+
+  // Create a dummy file input for HTMLInterface constructor (it expects one)
+  const dummyFileInput = document.createElement("input");
+  dummyFileInput.type = "file";
+  dummyFileInput.style.display = "none";
+  body.appendChild(dummyFileInput);
+
+  // Connect interface
+  var htmlInterface = new HTMLInterface(body, canvContain, tableContain, dummyFileInput, loadingText);
+
+  // Listen for postMessage from parent window
+  window.addEventListener('message', function(event) {
+    // For security, you might want to check event.origin here
+    if (event.data && typeof event.data === 'string' && event.data.trim()) {
+      loadingText.style.display = 'block';
+      try {
+        htmlInterface.visualize(event.data);
+        loadingText.style.display = 'none';
+      } catch (error) {
+        console.error('Error visualizing BNGL:', error);
+        loadingText.innerHTML = 'Error loading visualization';
+      }
+    }
+  });
+
+  // Send ready message to parent
+  window.parent.postMessage('bnglviz-ready', '*');
+</script>
+</body>
+</html>
