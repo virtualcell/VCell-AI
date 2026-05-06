@@ -32,22 +32,38 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-const historyItems = [
-  "Calcium Biomodel Comparison",
-  "Protein Details on Tutorial Models",
-  "Biomodels authored by ModelBrick",
-  "Count of Rule-based models",
-  "VCML File Analysis of Calcium Models",
-];
+import { useState, useEffect } from "react";
 
 export function AppSidebar() {
   const pathname = usePathname();
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
 
+  const [historyItems, setHistoryItems] = useState<any[]>([]);
+
+  useEffect(() => {
+  const loadHistory = () => {
+    const stored = localStorage.getItem("chat_conversations");
+    if (!stored) return;
+
+    const conversations = JSON.parse(stored);
+
+    setHistoryItems(
+      conversations.map((c: any) => ({
+        id: c.id,
+        text: c.title
+      }))
+    );
+  };
+
+  loadHistory();
+  window.addEventListener("conversation-updated", loadHistory);
+  return () => window.removeEventListener("storage", loadHistory);
+}, []);
+
   if (pathname == "/" || pathname == "/signin" || pathname == "/signup") {
     return null;
-  }
+  }  
 
   return (
     <Sidebar className="border-r border-slate-200" collapsible="icon">
@@ -229,13 +245,17 @@ export function AppSidebar() {
               </SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {historyItems.map((item, index) => (
-                    <SidebarMenuItem key={index}>
-                      <SidebarMenuButton className="text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-50">
-                        <span className="truncate">{item}</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
+                  {historyItems.map((item) => (
+                      <SidebarMenuItem key={item.id}>
+                        <SidebarMenuButton
+                          asChild
+                          className="text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-50">
+                          <Link href={`/chat?conversation=${item.id}`}>
+                            <span className="truncate">{item.text}</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>

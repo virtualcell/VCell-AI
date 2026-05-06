@@ -2,7 +2,7 @@ import httpx
 from typing import List
 from fastapi import HTTPException, Response
 from app.schemas.vcelldb_schema import BiomodelRequestParams, SimulationRequestParams
-from app.services.vcelldb_service import (
+from app.services.databases_service import (
     fetch_biomodels,
     fetch_simulation_details,
     get_vcml_file,
@@ -21,7 +21,9 @@ async def get_biomodels_controller(params: BiomodelRequestParams) -> dict:
         HTTPException: If the VCell API request fails.
     """
     try:
+        print("About to call fetch_biomodels()")
         biomodels = await fetch_biomodels(params)
+        print("fetch_biomodels() completed successfully")
         return biomodels
     except httpx.HTTPStatusError as e:
         raise HTTPException(
@@ -142,7 +144,9 @@ async def get_publications_controller() -> List[dict]:
         HTTPException: If the VCell API request fails.
     """
     try:
+        print("About to call fetch_publications()")
         publications = await fetch_publications()
+        print("fetch_publications() completed successfully")
         return publications
     except httpx.HTTPStatusError as e:
         raise HTTPException(

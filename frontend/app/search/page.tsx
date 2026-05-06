@@ -48,6 +48,30 @@ interface BiomodelResult {
   groupUsers: string[];
 }
 
+// add function to format description from the BMDB response, which is in XML format
+// extract using DOMParser
+export function extractDescription(xmlString: string): string {
+  if (!xmlString) return "";
+
+  try {
+    const parser = new DOMParser();
+    const document = parser.parseFromString(xmlString, "text/xml");
+
+    // Get <div class="dc:description">
+    const descriptionDiv = document.querySelector("div.dc\\:description p");
+
+    if (descriptionDiv?.textContent) {
+      return descriptionDiv.textContent.trim();
+    } 
+    return "";
+    // else  first paragraph
+    // const firstP = document.querySelector("p");
+    // return firstP?.textContent?.trim() || "";
+  } catch (err) {
+    return "";
+  }
+}
+
 export default function BiomodelSearchPage() {
   const [filters, setFilters] = useState<SearchFilters>({
     bmId: "",
@@ -61,11 +85,17 @@ export default function BiomodelSearchPage() {
     orderBy: "date_desc",
   });
 
+  const [BMDBQuery, setBMDBQuery] = useState("");
+  const [BMDBResults, setBMDBResults] = useState<any[]>([]);
+  const [BMDBIsLoading, setBMDBIsLoading] = useState(false);
+
+
   const [results, setResults] = useState<BiomodelResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isAdvancedSearchOpen, setIsAdvancedSearchOpen] = useState(false);
 
   const handleSearch = async () => {
+    setBMDBResults([]);
     setIsLoading(true);
     try {
       // Build query params from filters, omitting empty bmName
@@ -108,6 +138,56 @@ export default function BiomodelSearchPage() {
       setIsLoading(false);
     }
   };
+
+  // introduce a separate search function for the BioModel DB search form.
+  const handleSearchBMDB = async () => {
+    setResults([]);
+    setBMDBIsLoading(true);
+    try {
+      // build API url
+      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL_BMDB}/search?query=${BMDBQuery}&format=json`;
+
+      const res = await fetch(apiUrl);
+      if (!res.ok) throw new Error("Failed to fetch biomodels");
+      const data = await res.json();
+      console.log("BioModels response in data.models:", data.models);
+
+      // get description from the id's specific endpoint
+      const description = (data.models || []).map(async (model: any) => {
+        try {
+
+          // build url using model ID
+          const descURL = `${process.env.NEXT_PUBLIC_API_URL_BMDB}/${model.id}?format=json`;
+          const descRes = await fetch(descURL);
+          if (!descRes.ok) throw new Error("Failed to fetch model description");
+          const descData = await descRes.json();
+
+          return descData.description || "";
+        } catch (err) {
+          console.error(`Error fetching description for model ${model.id}:`, err);
+          return "";
+        }
+      });
+
+      // get descriptions for all of the models from the query results
+      let descriptions = await Promise.all(description);
+
+      // get the actual description from the xml format returned by the API
+      descriptions = descriptions.map((desc) => extractDescription(desc));
+      
+      // format API response to include id, name, and description for each model
+      const mappedResults = (data.models || []).map((model: any, index: number) => ({
+        id: model.id,
+        name: model.name,
+        description: descriptions[index],
+      }));
+      setBMDBResults(mappedResults);
+      } catch (err) {
+        setBMDBResults([]);
+      } finally {
+        setBMDBIsLoading(false);
+      }};
+
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -382,18 +462,90 @@ export default function BiomodelSearchPage() {
           </CardContent>
         </Card>
 
+        {/* search box for Biomodel DB */}
+        <Card className="mb-8 shadow-sm border-slate-200">
+          <CardHeader className="bg-slate-50 border-b border-slate-200 px-4 py-3">
+            <CardTitle className="flex items-center gap-2 text-slate-900 text-base">
+              <Filter className="h-4 w-4" />
+              Search BioModels Database
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div className="space-y-1">
+                <Label
+                  htmlFor="ID"
+                  className="text-slate-700 font-medium text-sm"
+                >
+                  Model Name
+                </Label>
+                <Input
+                  id="ID"
+                  placeholder="Enter biomodel name..."
+                  value={BMDBQuery}
+                  onChange={(e) =>
+                    setBMDBQuery(e.target.value)
+                  }
+                  className="border-slate-300 focus:border-blue-500 h-9"
+                />
+              </div>
+              </div>
+
+              {/* Search Button for BioModel DB*/}
+            <div className="mt-4 pt-4 border-t border-slate-200">
+              <Button
+                onClick={handleSearchBMDB}
+                disabled={BMDBIsLoading}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 h-9"
+              >
+                <Search className="h-4 w-4 mr-2" />
+                {BMDBIsLoading ? "Searching..." : "Search"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Results Section */}
-        {results.length > 0 && (
+        {(results.length > 0 || BMDBResults.length > 0) && (
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-2xl font-semibold text-slate-900">
                 Search Results
               </h2>
               <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                {results.length} models found
+                {results.length > 0
+                  ? results.length
+                  : BMDBResults.length} models found
               </Badge>
             </div>
 
+            {/* Output for BioModels Database Results */}
+            {BMDBResults.length > 0 && (
+             <div className="grid gap-4">
+              {BMDBResults.map((model: any) => (
+                <Link
+                  key={model.id}
+                  href={`/search/${model.id}`}
+                  className="block"
+                >
+                <Card key={model.id}>
+                  <CardContent>
+                    <h3 className="text-lg font-semibold">{model.name}</h3>
+                    <p className="text-sm text-slate-500">{model.id}</p>
+                    {model.description && (
+                    <p className="text-sm text-slate-600">
+                      {model.description}
+                    </p>
+                  )}
+                  </CardContent>
+                </Card>
+                </Link>
+              ))}
+            </div>
+            )}
+
+            {/* Output for VCell Biomodel Database Results */}
+            {results.length > 0 && (
             <div className="grid gap-4">
               {results.map((model) => (
                 <Link
@@ -451,6 +603,7 @@ export default function BiomodelSearchPage() {
                 </Link>
               ))}
             </div>
+            )}
           </div>
         )}
       </div>

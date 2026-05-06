@@ -8,8 +8,10 @@ from langfuse import observe
 from typing import List
 
 VCELL_API_BASE_URL = "https://vcell.cam.uchc.edu/api/v0"
+BIOMODELS_API_URL = "https://biomodels.org/"
 
 logger = get_logger("vcelldb_service")
+print("CHECK: in VCELL_DB_SERVICE")
 
 
 def sanitize_vcml_content(vcml_content: str) -> str:
@@ -37,6 +39,10 @@ def sanitize_vcml_content(vcml_content: str) -> str:
     
     logger.info("VCML content sanitized: ImageData tags removed")
     return sanitized_content
+
+# def sanitize_xml_content(vcml_content: str) -> str:
+
+#     return sanitized_content
 
 
 async def check_vcell_connectivity() -> bool:
@@ -75,8 +81,11 @@ async def fetch_biomodels(params: BiomodelRequestParams) -> dict:
     Returns:
         dict: A dictionary containing a list of biomodels with metadata.
     """
+
+    print("CHECK: in VCELL_DB_SERVICE")
     # Transform None to "" (optional, only if needed for empty fields)
     params_dict = {k: (v if v is not None else "") for k, v in params.dict().items()}
+    print("DEBUG: " + str(params_dict))
 
     logger.info(f"Fetching biomodels with parameters: {params_dict}")
 
@@ -120,12 +129,133 @@ async def fetch_simulation_details(params: SimulationRequestParams) -> dict:
     Returns:
         Simulation: A Simulation object containing simulation details.
     """
+    print("CHECK: in VCELL_DB_SERVICE")
     async with httpx.AsyncClient() as client:
         response = await client.get(
             f"{VCELL_API_BASE_URL}/biomodel/{params.bmId}/simulation/{params.simId}"
         )
         response.raise_for_status()
         return response.json()
+
+@observe(name="FETCH_BMDB_MODELS")
+async def fetch_bmdb_models(params: BiomodelRequestParams) -> dict:
+    print("DEBUG20: BMDB POST: in tool FETCH_BMDB_MODELS")
+
+    # Construct the query string using urlencoded parameters (params_dict)
+    query_string = params.bmName if params.bmName else params.bmId
+
+    # Construct the full URL
+    url = f"{BIOMODELS_API_URL}search?query={query_string}&format=json"
+
+    # Log the URL being queried
+    logger.info(f"Querying URL: {url}")
+
+    # Perform the API request
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url)
+        response.raise_for_status()
+        raw_data = response.json()
+    
+    print("FINAL URL:", response.request.url)
+    print("STATUS CODE:", response.status_code)
+    print("RAW JSON:", raw_data)
+
+    # Extract list
+    biomodels = raw_data.get("models", [])
+
+    # Build response with metadata
+    return {
+        "search_params": {
+            "bmId": params.bmId,
+            "bmName": params.bmName
+        },
+        "models_count": len(biomodels),
+        "data": biomodels
+    }
+
+
+@observe(name="GET_XML_FILE")
+async def get_xml_file(bmId: str, truncate: bool = False, max_retries: int = 3) -> str:
+    
+    logger.info(f"Fetching XML file for biomodel: {bmId}")    
+
+    # Check connectivity first
+    if not await check_vcell_connectivity():
+        logger.error(
+            "BMDB API is not reachable. Please check your network connection and DNS settings."
+        )
+        raise Exception(
+            "BMDB API is not reachable. Please check your network connection and DNS settings."
+        )
+
+    for attempt in range(max_retries + 1):
+        try:
+            url = f"{BIOMODELS_API_URL}model/download/{bmId}?filename={bmId}_url.xml"
+            logger.info(
+                f"Requesting URL: {url} (attempt {attempt + 1}/{max_retries + 1})"
+            )
+
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.get(url)
+                logger.info(f"Response status: {response.status_code}")
+                logger.info(f"Response headers: {dict(response.headers)}")
+                response.raise_for_status()
+
+                return response.text
+                # if truncate:
+                #     return sanitize_vcml_content(response.text[:500])
+                # else:
+                #     return sanitize_vcml_content(response.text)
+
+        except httpx.HTTPStatusError as e:
+            logger.error(
+                f"HTTP error fetching XML file for biomodel {bmId}: {e.response.status_code} - {e.response.text}"
+            )
+            if attempt == max_retries:
+                raise e
+            logger.warning(f"Retrying in {2 ** attempt} seconds...")
+            await asyncio.sleep(2**attempt)
+
+        except httpx.RequestError as e:
+            logger.error(
+                f"Request error fetching XML file for biomodel {bmId}: {str(e)}"
+            )
+            if attempt == max_retries:
+                raise e
+            logger.warning(f"Retrying in {2 ** attempt} seconds...")
+            await asyncio.sleep(2**attempt)
+
+        except Exception as e:
+            logger.error(
+                f"Unexpected error fetching XML file for biomodel {bmId}: {str(e)}"
+            )
+            if attempt == max_retries:
+                raise e
+            logger.warning(f"Retrying in {2 ** attempt} seconds...")
+            await asyncio.sleep(2**attempt)
+
+    # This should never be reached, but just in case
+    raise Exception(
+        f"Failed to fetch XML file for biomodel {bmId} after {max_retries + 1} attempts"
+    )
+
+
+@observe(name="GET_BMDB_MODEL_INFO")
+async def get_bmdb_model_info(bmdbID: str) -> dict:
+    """
+    Fetches information about a specific given model from BMDB.
+    """
+    url = f"{BIOMODELS_API_URL}/{bmdbID}?format=json"
+
+    logger.info(f"Fetching BMDB model info from URL: {url}")
+
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url)
+        response.raise_for_status()
+        raw_data = response.json()
+    
+    # returns dictionary with model info, including name, description, etc.
+    return raw_data
 
 
 @observe(name="GET_VCML_FILE")

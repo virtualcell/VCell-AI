@@ -1,6 +1,7 @@
 "use client";
 
 import type React from "react";
+import { Suspense } from "react";
 import { useState, useEffect } from "react";
 import {
   MessageSquare,
@@ -8,6 +9,7 @@ import {
   User,
   Search,
   FileText,
+  FileSearch,
   BarChart3Icon as Diagram3,
   HelpCircle,
   FlaskConical,
@@ -19,6 +21,7 @@ import { ChatBox } from "@/components/ChatBox";
 
 export default function ChatPage() {
   const [showOnboarding, setShowOnboarding] = useState(false);
+  
 
   useEffect(() => {
     // Check if user has seen onboarding before
@@ -37,40 +40,18 @@ export default function ChatPage() {
   const startMessage = `I'm here to help you with **biomodel analysis**, **vcell software** and **research support**  .\nFeel free to ask anything! 🚀`;
   const quickActions = [
     {
-      label: "List all tutorial models",
-      icon: <Search className="h-3 w-3 mr-2" />,
-      value: "List all tutorial models",
-    },
-    {
       label: "List Calcium models",
       icon: <FileText className="h-3 w-3 mr-2" />,
       value: "List all Calcium models",
     },
     {
-      label: "List all models by ModelBrick",
-      icon: <User className="h-3 w-3 mr-2" />,
-      value: "List all models by ModelBrick",
-    },
-    {
-      label: "What solvers are used in tutorial models",
-      icon: <Diagram3 className="h-3 w-3 mr-2" />,
-      value: "What solvers are used in tutorial models",
-    },
-/*     {
-      label:
-        "What are different types of VCell applications used in Tutorial models",
-      icon: <MessageSquare className="h-3 w-3 mr-2" />,
-      value:
-        "What are different types of VCell applications used in Tutorial models",
-    }, */
-    {
-      label: "What Tutorial models use Spatial Stochastic applications?",
-      icon: <Bot className="h-3 w-3 mr-2" />,
-      value: "What Tutorial models use Spatial Stochastic applications?",
+      label: "List all EGFR models",
+      icon: <Search className="h-3 w-3 mr-2" />,
+      value: "List all EGFR models",
     },
   ];
 
-  const supplementalActions = [
+  const VCellActions = [
     {
       label: "How to create an account on VCell Software?",
       icon: <User className="h-3 w-3 mr-2" />,
@@ -86,11 +67,41 @@ export default function ChatPage() {
       icon: <FlaskConical className="h-3 w-3 mr-2" />,
       value: "How to model Moving Boundaries in VCell Software?",
     },
+    {
+      label: "List all tutorial models",
+      icon: <Search className="h-3 w-3 mr-2" />,
+      value: "List all tutorial models",
+    },
+    {
+      label: "List all models by ModelBrick",
+      icon: <User className="h-3 w-3 mr-2" />,
+      value: "List all models by ModelBrick",
+    },
+    {
+      label: "What solvers are used in tutorial models",
+      icon: <Diagram3 className="h-3 w-3 mr-2" />,
+      value: "What solvers are used in tutorial models",
+    },
+    {
+      label: "What Tutorial models use Spatial Stochastic applications?",
+      icon: <Bot className="h-3 w-3 mr-2" />,
+      value: "What Tutorial models use Spatial Stochastic applications?",
+    },
+
+  ];
+
+  const bmdbActions = [
+    {
+      label: "List all Kholodenko models",
+      icon: <FileText className="h-3 w-3 mr-2" />,
+      value: "List all Kholodenko models",
+    },
   ];
 
   const cardTitle = "VCell AI Assistant";
 
   return (
+    <Suspense fallback={<div>Loading...</div>}>
     <div className="h-screen bg-slate-50 flex flex-col">
       <div className="container mx-auto p-6 max-w-7xl flex-1 flex flex-col min-h-0">
         {/* Header */}
@@ -122,7 +133,8 @@ export default function ChatPage() {
           <ChatBox
             startMessage={[startMessage]}
             quickActions={quickActions}
-            supplementalActions={supplementalActions}
+            VCellActions={VCellActions}
+            bmdbActions={bmdbActions}
             cardTitle={cardTitle}
           />
         </div>
@@ -133,5 +145,6 @@ export default function ChatPage() {
         onClose={handleOnboardingClose}
       />
     </div>
+  </Suspense>
   );
 }

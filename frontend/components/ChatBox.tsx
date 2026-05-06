@@ -6,9 +6,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { MessageSquare, Send, Bot, User, Loader2 } from "lucide-react";
 
+import { useSearchParams } from "next/navigation";
+
 interface Message {
   id: string;
-  role: "user" | "assistant";
+  role: "user" | "assistant" | "system";
   content: string;
   timestamp: Date;
 }
@@ -32,9 +34,12 @@ interface ChatParameters {
 }
 
 interface ChatBoxProps {
+  database?: ("vcdb" | "bmdb")[];
+  placeholder?: string;
   startMessage: string | string[];
   quickActions: QuickAction[];
-  supplementalActions?: QuickAction[];
+  VCellActions?: QuickAction[];
+  bmdbActions?: QuickAction[];
   cardTitle: string;
   promptPrefix?: string;
   isLoading?: boolean;
@@ -42,9 +47,12 @@ interface ChatBoxProps {
 }
 
 export const ChatBox: React.FC<ChatBoxProps> = ({
+  database,
+  placeholder,
   startMessage,
   quickActions,
-  supplementalActions,
+  VCellActions,
+  bmdbActions,
   cardTitle,
   promptPrefix,
   isLoading: isInitialLoading = false,
@@ -72,13 +80,43 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
     return [];
   };
 
-  const [messages, setMessages] = useState<Message[]>(
-    createInitialMessages(startMessage),
-  );
+  const [messages, setMessages] = useState<Message[]>(() => {
+    return createInitialMessages(startMessage);
+});
+
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+  const id = searchParams.get("conversation");
+
+  if (id) {
+    const stored = localStorage.getItem("chat_conversations");
+    if (!stored) return;
+
+    const conversations = JSON.parse(stored);
+    const convo = conversations.find((c: any) => c.id === id);
+
+    if (convo) {
+  setMessages(convo.messages);
+  setConversationId(id); 
+}
+  } else {
+    setMessages(createInitialMessages(startMessage));
+  }
+}, [searchParams, startMessage]);
+
+
   const [inputMessage, setInputMessage] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [useVCDB, setUseVCDB] = useState(database ? database.includes("vcdb") : true);
+  const [useBMDB, setUseBMDB] = useState(database ? database.includes("bmdb") : false);
+  const [isLoadingVCDB, setIsLoadingVCDB] = useState(false);
+  const [isLoadingBMDB, setIsLoadingBMDB] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const abortController = useRef<AbortController | null>(null);
+  const isLoading = isLoadingVCDB || isLoadingBMDB; 
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -88,45 +126,126 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
     scrollToBottom();
   }, [messages]);
 
-  // Update messages when startMessage changes (when analysis completes)
-  useEffect(() => {
-    if (startMessage && !isInitialLoading) {
-      setMessages(createInitialMessages(startMessage));
-    }
-  }, [startMessage, isInitialLoading]);
 
-  // Helper function to format biomodel IDs as hyperlinks
-  const formatBiomodelIds = (content: string, bmkeys: string[]): string => {
+useEffect(() => {
+  if (messages.length === 0) return;
+  const hasUserMessage = messages.some((m) => m.role === "user");
+  if (!hasUserMessage) return;
+
+  saveConversation(messages);
+
+  window.dispatchEvent(new Event("conversation-updated"));
+}, [messages]);
+
+const saveConversation = (messages: Message[]) => {
+  if (messages.length === 0) return;
+
+  const stored = localStorage.getItem("chat_conversations");
+  const conversations = stored ? JSON.parse(stored) : [];
+
+  let id = conversationId;
+
+  // If no conversation yet then create a new one
+  if (!id) {
+    id = crypto.randomUUID();
+    setConversationId(id);
+
+    const firstUserMessage = messages.find((m) => m.role === "user");
+
+    const newConversation = {
+      id,
+      title: firstUserMessage?.content.slice(0, 40) || "Chat",
+      messages,
+    };
+
+    conversations.unshift(newConversation);
+  } else {
+    // Update existing conversation
+    const index = conversations.findIndex((c: any) => c.id === id);
+    if (index !== -1) {
+      conversations[index].messages = messages;
+    }
+  }
+
+  localStorage.setItem("chat_conversations", JSON.stringify(conversations));
+};
+
+  const activeActions = [
+    ...(useVCDB && VCellActions ? VCellActions : []),
+    ...(useBMDB && bmdbActions ? bmdbActions : []),
+  ];
+
+  const formatBiomodelIds = (content: string, bmkeys: string[], db: "vcdb" | "bmdb"): string => {
     if (!bmkeys || bmkeys.length === 0) return content;
 
     let formattedContent = content;
+    let db_link = "";
 
+    if (db == "vcdb") {
+      db_link = "https://vcell.cam.uchc.edu/api/v0/biomodel/"
+    } else if (db == "bmdb") {
+      db_link = "https://www.biomodels.org/"
+    }
     // Replace biomodel IDs with hyperlinks
     bmkeys.forEach((bmId) => {
-      const searchString = `${bmId}`;
-      const encodedPrompt = encodeURIComponent(`Describe model`);
-      /* const ai_link = `[AI Analysis](/analyze/${bmId}?prompt=${encodedPrompt})`;
-      const db_link = `[Database](/search/${bmId})`;
-      const replacementString = `**${bmId}** -- ${ai_link} &nbsp;|&nbsp; ${db_link}`; */
-      const db_link = `[Database Details](/search/${bmId})`;
-      const replacementString = `**${bmId}** || ${db_link}`;
-      formattedContent = formattedContent.replaceAll(
-        searchString,
-        replacementString,
-      );
+      const link = `[Database Details](${db_link}${bmId})`;
+      const replacementString = `${bmId} || ${link}`;
+
+      // only replace if bmId is not already in a /search/ link
+      const regex = new RegExp(`(?<!/)\\b${bmId}\\b`, "g");
+      formattedContent = formattedContent.replace(regex, `${bmId} || ${link}`);
     });
 
     return formattedContent;
   };
 
   const handleQuickAction = (message: string) => {
-    setInputMessage("");
-    handleSendMessage(message);
+    if (database) {
+      setInputMessage("");
+      const userMessage: Message = {
+      id: Date.now().toString(),
+      role: "user",
+      content: message,
+      timestamp: new Date(),
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+      if (database.includes("vcdb")) {
+        handleSendMessage(message);
+      } 
+      if (database.includes("bmdb")) {
+        handleSendMessageBMDB(message);
+      }
+    } else {
+      handleSend(message)
+    }
   };
+
+  const handleSend = (inputMessage: string) => {
+  if (!inputMessage.trim()) return;
+  if (!useVCDB && !useBMDB) {
+    alert("Please select at least one database.");
+    return;
+  }
+  const userMessage: Message = {
+      id: Date.now().toString(),
+      role: "user",
+      content: inputMessage,
+      timestamp: new Date(),
+    };
+    setMessages((prev) => [...prev, userMessage]);
+
+  if (useVCDB) {handleSendMessage(inputMessage);}
+  if (useBMDB){handleSendMessageBMDB(inputMessage);}
+};
 
   const handleSendMessage = async (overrideMessage?: string) => {
     const msg = overrideMessage ?? inputMessage;
     if (!msg.trim()) return;
+
+    const controller = new AbortController();
+    abortController.current = controller;
+
     // Build parameter context string
     let parameterContext = "";
     if (parameters) {
@@ -162,19 +281,34 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
       }
     }
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content: msg,
-      timestamp: new Date(),
-    };
-    setMessages((prev) => [...prev, userMessage]);
+    console.log("PPPPPP: " + "This is the msg: " + msg);
+    // const userMessage: Message = {
+    //   id: Date.now().toString(),
+    //   role: "user",
+    //   content: msg,
+    //   timestamp: new Date(),
+    // };
+    // setMessages((prev) => [...prev, userMessage]);
     setInputMessage("");
-    setIsLoading(true);
+    setIsLoadingVCDB(true);
     try {
       const finalPrompt = promptPrefix
         ? `${promptPrefix} ${msg}${parameterContext}`
         : `${msg}${parameterContext}`;
+      console.log("RRRRRR: " + "This is the promptPrefix: " + promptPrefix);
+      console.log("RRRRRR: " + "This is the finalPrompt sent to backend: " + finalPrompt);
+
+      // Only send system messages, last 5 non-system messages, and new user prompt to backend 
+      const systemMessages = messages.filter((m) => m.role === "system");
+      const recentNonSystem = messages.filter((m) => m.role !== "system").slice(-5);
+
+      const historyToSend = [
+      ...systemMessages,
+      ...recentNonSystem,
+      { role: "user", content: finalPrompt },
+      ].map((msg) => ({ role: msg.role, content: msg.content }));
+
+
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/query`,
         {
@@ -183,29 +317,41 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
             "Content-Type": "application/json",
             accept: "application/json",
           },
-          body: JSON.stringify({
-            conversation_history: [
-              ...messages,
-              { role: "user", content: finalPrompt },
-            ].map(msg => ({
-              role: msg.role,
-              content: msg.content,
-            })),
-          }),
+          body: JSON.stringify({ conversation_history: historyToSend }),
+//JSON.stringify({
+          //   conversation_history: [
+          //     ...messages,
+          //     { role: "user", content: finalPrompt },
+          //   ].map(msg => ({
+          //     role: msg.role,
+          //     content: msg.content,
+          //   })),
+          // }),
+          signal: controller.signal,
         },
       );
+      console.log("AAAAAA API query sent to backend: " + finalPrompt);
       const data = await res.json();
       const aiResponse =
         data.response || "Sorry, I didn't get a response from the server.";
       const bmkeys = data.bmkeys || [];
+      console.log(bmkeys)
+      const toolSummary = data.tool_summary || "";
 
       // Format the response to include hyperlinks for biomodel IDs
-      const formattedResponse = formatBiomodelIds(aiResponse, bmkeys);
+      const formattedResponse = formatBiomodelIds(aiResponse, bmkeys, "vcdb");
+
+      // show the tool summar text in the website output
+      const toolSummaryText = toolSummary
+        ? `\n\n${toolSummary}`
+        : "";
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: formattedResponse,
+        content: useVCDB && useBMDB
+                ? `**VCell Database:**\n\n${formattedResponse}${toolSummaryText}`
+                : `${formattedResponse}${toolSummaryText}`,
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, assistantMessage]);
@@ -221,17 +367,168 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
         },
       ]);
     } finally {
-      setIsLoading(false);
+      setIsLoadingVCDB(false);
     }
-  };
+  }; // End of handleSendMessage
+
+// 
+const handleSendMessageBMDB = async (overrideMessage?: string) => {
+    const msg = overrideMessage ?? inputMessage;
+    if (!msg.trim()) return;
+    const controller = new AbortController();
+    abortController.current = controller;
+    // Build parameter context string
+    let parameterContext = "";
+    if (parameters) {
+      const contextParts = [];
+
+      if (parameters.biomodelId) {
+        contextParts.push(`biomodel ID: ${parameters.biomodelId}`);
+      }
+      if (parameters.bmName) {
+        contextParts.push(`model name: ${parameters.bmName}`);
+      }
+      if (parameters.owner) {
+        contextParts.push(`authored by: ${parameters.owner}`);
+      }
+      if (parameters.category && parameters.category !== "all") {
+        contextParts.push(`category: ${parameters.category}`);
+      }
+      if (parameters.savedLow) {
+        contextParts.push(`saved after: ${parameters.savedLow}`);
+      }
+      if (parameters.savedHigh) {
+        contextParts.push(`saved before: ${parameters.savedHigh}`);
+      }
+      if (parameters.maxRows && parameters.maxRows !== 1000) {
+        contextParts.push(`max results: ${parameters.maxRows}`);
+      }
+      if (parameters.orderBy && parameters.orderBy !== "date_desc") {
+        contextParts.push(`sort by: ${parameters.orderBy}`);
+      }
+
+      if (contextParts.length > 0) {
+        parameterContext = `\n\nHere are some specifics that I want: ${contextParts.join(", ")}`;
+      }
+    }
+
+    console.log("PPPPPP: " + "This is the msg: " + msg);
+    // const userMessage: Message = {
+    //   id: Date.now().toString(),
+    //   role: "user",
+    //   content: msg,
+    //   timestamp: new Date(),
+    // };
+    // setMessages((prev) => [...prev, userMessage]);
+    setInputMessage("");
+    setIsLoadingBMDB(true);
+    try {
+      const finalPrompt = promptPrefix
+        ? `${promptPrefix} ${msg}${parameterContext}`
+        : `${msg}${parameterContext}`;
+
+      // Only send system messages, last 5 non-system messages, and new user prompt to backend 
+      const systemMessages = messages.filter((m) => m.role === "system");
+      const recentNonSystem = messages.filter((m) => m.role !== "system").slice(-5);
+
+      const historyToSend = [
+      ...systemMessages,
+      ...recentNonSystem,
+      { role: "user", content: finalPrompt },
+      ].map((msg) => ({ role: msg.role, content: msg.content }));
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/bmdb-search`,
+        {   
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            accept: "application/json",
+          },
+          body: JSON.stringify({ conversation_history: historyToSend }),
+          // JSON.stringify({
+          //   conversation_history: [
+          //     ...messages,
+          //     { role: "user", content: finalPrompt },
+          //   ].map(msg => ({
+          //     role: msg.role,
+          //     content: msg.content,
+          //   })),
+          // }),
+          signal: controller.signal,
+        },
+      );
+      const data = await res.json();
+      const aiResponse =
+        data.response || "Sorry, I didn't get a response from the server.";
+      const bmkeys = data.bmkeys || [];
+
+      const toolSummary = data.tool_summary || "";
+
+      console.log(bmkeys)
+      // Format the response to include hyperlinks for biomodel IDs
+      const formattedResponse = formatBiomodelIds(aiResponse, bmkeys, "bmdb");
+
+      // show tool summary text in the website output
+      const toolSummaryText = toolSummary
+        ? `\n\n${toolSummary}`
+        : "";
+
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: useVCDB && useBMDB
+              ? `**BIOMD Database:**\n\n${formattedResponse}${toolSummaryText}`
+              : `${formattedResponse}${toolSummaryText}`,
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, assistantMessage]);
+    } catch (error) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 2).toString(),
+          role: "assistant",
+          content:
+            "There was an error connecting to the backend. Please try again.",
+          timestamp: new Date(),
+        },
+      ]);
+    } finally {
+        setIsLoadingBMDB(false);
+    }
+  }; // End of handleSendMessageBMDB
+
+
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      handleSendMessage();
+      handleSend(inputMessage);
     }
   };
 
+  const handleStop = () => {
+    if (abortController.current) {
+      abortController.current.abort();
+      abortController.current = null;
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          role: "system",
+          content: "Response stopped by user.",
+          timestamp: new Date(),
+        },
+      ]);
+
+      setIsLoadingVCDB(false);
+      setIsLoadingBMDB(false);
+    }
+  };
+
+  const session = searchParams.get('session')
   return (
     <Card className="h-full flex flex-col shadow-sm border-slate-200">
       <CardHeader className="bg-slate-50 border-b border-slate-200 flex-shrink-0">
@@ -246,11 +543,14 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
             {messages.map((message) => (
               <div
                 key={message.id}
+                // User messages are right-aligned, assistant messages are left-aligned
                 className={`flex gap-3 ${message.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`flex gap-3 max-w-[80%] ${
-                    message.role === "user" ? "flex-row-reverse" : "flex-row"
+                  className={`flex gap-3 ${
+                    // User messages are right-aligned and take up to 80% width
+                    // assistant messages are left-aligned and take full width
+                    message.role === "user" ? "flex-row-reverse max-w-[80%]" : "flex-row w-full"
                   }`}
                 >
                   <div
@@ -315,22 +615,53 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
         </ScrollArea>
       </CardContent>
       <div className="border-t border-slate-200 p-4 flex-shrink-0">
+        <div className="flex gap-4 mb-2">
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={useVCDB}
+              onChange={(e) => setUseVCDB(e.target.checked)}
+            />
+            VCell DB
+          </label>
+
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={useBMDB}
+              onChange={(e) => setUseBMDB(e.target.checked)}
+            />
+            BioModels DB
+          </label>
+        </div>
         <div className="flex gap-2">
           <Input
             ref={inputRef}
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Ask any questions about VCell biomodels..."
+            placeholder={placeholder || (useVCDB && useBMDB
+                          ? "Ask about VCell and BioModels biomodels..."
+                          : useVCDB
+                          ? "Ask about VCell biomodels..."
+                          : "Ask about BioModels biomodels..."
+                        )}
             className="flex-1 border-slate-300 focus:border-blue-500"
             disabled={isLoading || isInitialLoading}
           />
           <Button
-            onClick={() => handleSendMessage()}
+            onClick={() => handleSend(inputMessage)}
             disabled={isLoading || isInitialLoading || !inputMessage.trim()}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4"
           >
             <Send className="h-4 w-4" />
+          </Button>
+
+          <Button
+            onClick={handleStop}
+            className="bg-blue-500 hover:bg-gray-600 text-white"
+          >
+            Stop
           </Button>
         </div>
 
@@ -354,10 +685,11 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
           </div>
         )}
 
-        {supplementalActions && (
+      
+        {useVCDB && !useBMDB && VCellActions && (
           <div className="mt-3 pt-3 border-t-2 border-slate-200">
             <div className="flex flex-wrap gap-1">
-              {supplementalActions.map((action, idx) => (
+              {VCellActions.map((action, idx) => (
                 <Button key={idx} variant="ghost" size="sm" className="h-4 px-1 text-xs text-slate-500 hover:text-slate-700 hover:bg-slate-100" onClick={() => handleQuickAction(action.value)}>
                   {action.icon}
                   <span className="ml-0.5">{action.label}</span>
@@ -366,6 +698,39 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
             </div>
           </div>
         )}
+
+        {useBMDB && !useVCDB && bmdbActions && (
+          <div className="mt-3 pt-3 border-t-2 border-slate-200">
+            <div className="flex flex-wrap gap-1">
+              {bmdbActions.map((action, idx) => (
+                <Button key={idx} variant="ghost" size="sm" className="h-4 px-1 text-xs text-slate-500 hover:text-slate-700 hover:bg-slate-100" onClick={() => handleQuickAction(action.value)}>
+                  {action.icon}
+                  <span className="ml-0.5">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {useVCDB && useBMDB && activeActions.length > 0 && (
+          <div className="mt-3 pt-3 border-t-2 border-slate-200">
+            <div className="flex flex-wrap gap-1">
+              {activeActions.map((action, idx) => (
+                <Button
+                  key={idx}
+                  variant="ghost"
+                  size="sm"
+                  className="h-4 px-1 text-xs text-slate-500 hover:text-slate-700 hover:bg-slate-100"
+                  onClick={() => handleQuickAction(action.value)}
+                >
+                  {action.icon}
+                  <span className="ml-0.5">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
+
       </div>
     </Card>
   );

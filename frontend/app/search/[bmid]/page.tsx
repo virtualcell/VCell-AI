@@ -1,5 +1,5 @@
 "use client";
-
+import { extractDescription } from "../page";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -78,10 +78,25 @@ interface BiomodelDetail {
   applications: Application[];
 }
 
+interface BiomodelDBDetail {
+  bmdbID: string;
+  name: string;
+  author?: string;
+  description?: string;
+  files: Array<{
+    name: string;
+    description: string;
+    fileSize: string;
+    downloadLink: string;
+  }>;
+}
+
 export default function BiomodelDetailPage() {
   const params = useParams<{ bmid: string }>();
   const bmid = params?.bmid;
+  const bmdbID = bmid.startsWith("BIOMD") || bmid.startsWith("MODEL");
   const [data, setData] = useState<BiomodelDetail | null>(null);
+  const [bmdbData, setBmdbData] = useState<BiomodelDBDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("overview");
@@ -127,10 +142,46 @@ export default function BiomodelDetailPage() {
     },
   ];
 
+  // set default selected checkbox as bmdb if the id is from biomodels database, otherwise set to vcdb
+  const [selectedDatabases, setSelectedDatabases] = useState<("bmdb" | "vcdb")[]>(
+        bmdbID ? ["bmdb"] : ["vcdb"]
+      );
+
   useEffect(() => {
     if (!bmid) return;
     setLoading(true);
     setError("");
+
+     if (bmdbID) {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL_BMDB}/${bmid}?format=json`)
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed to fetch biomodel details");
+          return res.json();
+        })
+        .then((json) => {
+          setBmdbData({
+          bmdbID: bmid,
+          name: json.name,
+          author: json.publication?.authors?.map((a: any) => a.name) || [],
+          description: extractDescription(json.description || ""),
+          files: [
+              ...(json.files?.main || []),
+              ...(json.files?.additional || [])
+            ]
+              // max out at 4 files shown - can change if needed
+              .slice(0, 4)
+              .map((file: any) => ({
+                name: file.name,
+                description: file.description || "",
+                fileSize: file.fileSize || "",
+                downloadLink: `${process.env.NEXT_PUBLIC_API_URL_BMDB}/model/download/${bmid}?filename=${file.name}`,
+              })),
+        });
+      })
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+    } else {
+
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/biomodel?bmId=${bmid}`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch biomodel details");
@@ -145,13 +196,32 @@ export default function BiomodelDetailPage() {
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
+    }
   }, [bmid]);
-
   useEffect(() => {
-    if (!data?.bmKey) return;
+    if (!bmid) return;
     
     const fetchDiagramAnalysis = async () => {
       try {
+
+        // get diagram image from biomodels database
+        if (bmdbID) {
+          const bmdbAPIUrl = process.env.NEXT_PUBLIC_API_URL_BMDB;
+          const bmdbRes = await fetch(`${bmdbAPIUrl}/model/download/${bmid}?filename=${bmid}.png`);
+          if (bmdbRes.ok) {
+            // convert the .png response into blob to store image as a string
+            const blob = await bmdbRes.blob();
+            const reader = new FileReader();
+
+            // store the base64 string
+            reader.onloadend = () => {
+              const base64data = reader.result as string;
+              setDiagramAnalysis(base64data);
+            };
+            reader.readAsDataURL(blob);
+          }
+        } else {
+          if (!data?.bmKey) return;
         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
         const res = await fetch(`${apiUrl}/analyse/${data.bmKey}/diagram`, {
           method: "POST",
@@ -167,29 +237,176 @@ export default function BiomodelDetailPage() {
           const errorData = await res.json();
           setAnalysisError(errorData.detail || "Failed to analyze diagram.");
         }
-      } catch (err) {
+      }} catch (err) {
         setAnalysisError("Failed to fetch diagram analysis.");
       }
-    };
+    }; 
 
-    fetchDiagramAnalysis();
-  }, [data?.bmKey]);
+    fetchDiagramAnalysis(); 
+  }, [data?.bmKey, bmdbID, bmid]);
 
   // Create combined messages when diagram analysis is ready
   useEffect(() => {
-    if (diagramAnalysis) {
+    if (diagramAnalysis && !bmdbID && data?.bmKey) {
       const diagramMessage = `# Diagram Analysis \n ${diagramAnalysis}`;
       setCombinedMessages([diagramMessage]);
     }
   }, [diagramAnalysis]);
 
   if (error) return <div className="p-8 text-center text-red-600">{error}</div>;
-  if (!data) return null;
+  if (!data && !bmdbData) return null;
 
-  const biomodelDiagramUrl = `https://vcell.cam.uchc.edu/api/v0/biomodel/${data.bmKey}/diagram`;
+  let biomodelDiagramUrl = "";
+  if (data) {
+   biomodelDiagramUrl = `https://vcell.cam.uchc.edu/api/v0/biomodel/${data.bmKey}/diagram`;
+  } else if (bmdbID) {
+    biomodelDiagramUrl = diagramAnalysis; // the base64 image string
+  }
+
+  if (error) return <div className="p-8 text-center text-red-600">{error}</div>;
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <>
+    {bmdbID && bmdbData && (
+      <div className="min-h-screen bg-slate-50">
+      <div className="container mx-auto p-8 max-w-6xl">
+    <Card className="mb-8 shadow-lg border-slate-200">
+      <CardHeader className="bg-gradient-to-r from-green-100 to-green-50 border-b border-slate-200">
+        <CardTitle className="text-2xl font-extrabold text-green-900 flex items-center gap-2.5">
+          <FlaskConical className="h-7 w-7 text-green-500" />
+          {bmdbData?.name}
+        </CardTitle>
+        <span className="flex items-center gap-1">
+            <Hash className="h-4 w-4 text-green-400" />{" "}
+            <span className="font-mono text-green-700">{bmdbData?.bmdbID}</span>
+
+            <User className="h-4 w-4 text-green-400" />{" "}
+            <span className="font-mono text-green-700">{bmdbData?.author}</span>
+        </span>
+      </CardHeader>
+      <CardContent className="p-6 bg-white">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-6 bg-slate-600">
+                <TabsTrigger value="overview" className="flex items-center gap-2 font-bold text-white">
+                  <FileText className="h-4 w-4" />
+                  Overview
+                </TabsTrigger>
+                <TabsTrigger value="analysis" className="flex items-center gap-2 font-bold text-white">
+                  <Search className="h-4 w-4" />
+                  AI Analysis
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="overview" className="space-y-6">
+                {/* Diagram section */}
+                <div className="mb-6">
+                  <img
+                    src={biomodelDiagramUrl || "/placeholder.svg"}
+                    alt="Biomodel Diagram"
+                    className="max-w-full h-[350px] mx-auto border border-black-200 rounded shadow"
+                    onError={() => setError("Failed to load diagram image.")}
+                    onLoad={() => setError("")}
+                  />
+                </div> 
+
+                  {/* Description Section */}
+                <div>
+                <Collapsible className="mb-6" defaultOpen>
+                  <CollapsibleTrigger asChild>
+                    <div className="flex items-center gap-2 mb-2 cursor-pointer hover:bg-slate-50 p-2 rounded transition-colors">
+                      <FileText className="h-4 w-4 text-green-400" />
+                      <span className="font-semibold text-slate-800 text-sm">
+                        Description
+                      </span>
+                      <ChevronsUpDown className="h-4 w-4 text-slate-400 ml-auto" />
+                    </div>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <div className="whitespace-pre-line text-slate-700 bg-green-50 rounded p-3 border border-green-100 shadow-sm text-sm">
+                      {bmdbData && bmdbData.description && bmdbData.description.trim() !== ""
+                        ? bmdbData.description
+                        : "No description is available for this biomodel"}
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+
+                {/* Files Section */}
+                <Collapsible className="mb-6" defaultOpen>
+                  <CollapsibleTrigger asChild>
+                    <div className="flex items-center gap-2 mb-2 cursor-pointer hover:bg-slate-50 p-2 rounded transition-colors">
+                      <Layers className="h-4 w-4 text-green-400" />
+                      <span className="font-semibold text-slate-800 text-sm">
+                        Files
+                      </span>
+                      <ChevronsUpDown className="h-4 w-4 text-slate-400 ml-auto" />
+                    </div>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                  {bmdbData?.files?.length > 0 && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        {bmdbData.files.map((file, index) => (
+                          <div
+                            key={index}
+                            className="border border-slate-200 rounded p-4 bg-slate-50 shadow-sm hover:shadow transition"
+                          >
+                            
+                            <div className="font-medium text-green-900 text-sm">
+                              {file.name}
+                            </div>
+
+                            <div className="text-xs text-slate-500 mt-1 font-mono">
+                              {file.description}
+                            </div>
+
+                            <a
+                              href={file.downloadLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="mt-3 inline-flex items-center text-xs font-semibold text-green-700 hover:underline"
+                            >
+                              Download →
+                            </a>
+                          </div>
+                        ))}
+                      </div>
+                  )}
+                  </CollapsibleContent>
+                  </Collapsible>
+                </div>
+                <div>
+                </div>
+                 </TabsContent>
+                 <TabsContent value="analysis" className="space-y-6">
+
+                {/* AI Analysis Section */}
+                <div className="mb-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Search className="h-4 w-4 text-blue-400" />
+                    <span className="font-semibold text-slate-800 text-sm">
+                      AI Analysis Assistant
+                    </span>
+                  </div>
+                  <div className="bg-slate-50 border border-slate-200 rounded shadow-sm h-[600px] overflow-hidden">
+                    <ChatBox database={selectedDatabases}
+                      startMessage={""}
+                      placeholder={`Ask about this specific biomodel...`}
+                      quickActions={quickActions}
+                      cardTitle={"BioModels AI Assistant"}
+                      promptPrefix={`Analyze the BioModels model with ID ${bmdbData.bmdbID}`}
+                      isLoading={false}
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+
+              </Tabs>
+    </CardContent>
+  </Card>
+  </div>
+  </div>
+)} {!bmdbID && data && (
+  <div className="min-h-screen bg-slate-50">
       <div className="container mx-auto p-8 max-w-6xl">
         <Card className="mb-8 shadow-lg border-slate-200">
           <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-50 border-b border-slate-200 px-5 py-4 flex flex-col md:flex-row md:items-center md:justify-between">
@@ -259,7 +476,7 @@ export default function BiomodelDetailPage() {
           </CardHeader>
           <CardContent className="p-6 bg-white">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsList className="grid w-full grid-cols-2 mb-6 bg-slate-600">
                 <TabsTrigger value="overview" className="flex items-center gap-2 font-bold text-white">
                   <FileText className="h-4 w-4" />
                   Overview
@@ -434,7 +651,8 @@ export default function BiomodelDetailPage() {
                     </span>
                   </div>
                   <div className="bg-slate-50 border border-slate-200 rounded shadow-sm h-[600px] overflow-hidden">
-                    <ChatBox
+                    <ChatBox database={selectedDatabases}
+                      placeholder={"Ask about this specific biomodel..."}
                       startMessage={combinedMessages}
                       quickActions={quickActions}
                       cardTitle="VCell AI Assistant"
@@ -449,5 +667,8 @@ export default function BiomodelDetailPage() {
         </Card>
       </div>
     </div>
-  );
+    )}
+    </>
+  ); 
 }
+

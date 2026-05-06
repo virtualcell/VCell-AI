@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Suspense from "react";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -21,7 +22,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ChatBox } from "@/components/ChatBox";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 interface AnalysisResults {
   title: string;
@@ -49,6 +50,7 @@ export default function AnalysisResultsPage({
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const session = searchParams.get('session')
   const prompt = searchParams.get("prompt") || "";
 
   // Unwrap the params Promise
@@ -242,16 +244,16 @@ export default function AnalysisResultsPage({
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="container mx-auto p-8 max-w-6xl">
+      <div className="container mx-auto p-8 w-full max-w-10xl">
         <Card className="mb-10 shadow-lg border-slate-200">
-          <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-50 border-b border-slate-200 px-6 py-5 flex flex-col md:flex-row md:items-center md:justify-between">
+          <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-50 border-b border-slate-200 pl-6 pr-2 py-5 flex flex-col md:flex-row md:items-center md:justify-between">
             <div className="flex flex-col gap-2 w-full">
               <div className="flex items-center justify-between w-full">
                 <CardTitle className="text-3xl font-extrabold text-blue-900 flex items-center gap-3">
                   <FlaskConical className="h-8 w-8 text-blue-500" />
                   {biomodelData?.name || `Biomodel ${id}`}
                 </CardTitle>
-                <div className="flex gap-3">
+                <div className="flex gap-3 ml-5">
                   <button
                     onClick={handleDownloadVCML}
                     className="inline-flex items-center gap-2 px-4 py-2 rounded border border-blue-600 text-blue-700 bg-white font-semibold shadow-sm transition-colors hover:bg-blue-50"

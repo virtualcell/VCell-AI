@@ -277,7 +277,7 @@ export default function AdminSettingsPage() {
                           <br/>Follow the steps below to get started with your local deployment.
                         </p>
                         <p className="mt-2">
-                          For more details, check <a href="https://github.com/KacemMathlouthi/VCell-GSoC" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 underline font-medium">https://github.com/KacemMathlouthi/VCell-GSoC</a>
+                          For more details, check <a href="https://github.com/virtualcell/VCell-AI.git" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 underline font-medium">https://github.com/KacemMathlouthi/VCell-GSoC</a>
                         </p>
                       </div>
                     </div>
@@ -287,10 +287,10 @@ export default function AdminSettingsPage() {
                     <h3 className="font-semibold text-slate-800">Step 1: Clone the Repository</h3>
                     <div className="flex items-center gap-2">
                       <code className="bg-slate-800 text-green-400 px-3 py-2 rounded flex-1">
-                        git clone https://github.com/KacemMathlouthi/VCell-GSoC.git
+                        git clone https://github.com/virtualcell/VCell-AI.git
                       </code>
                       <Button
-                        onClick={() => copyToClipboard("git clone https://github.com/KacemMathlouthi/VCell-GSoC.git")}
+                        onClick={() => copyToClipboard("git clone https://github.com/virtualcell/VCell-AI.git")}
                         size="sm"
                         variant="outline"
                       >
@@ -304,13 +304,12 @@ export default function AdminSettingsPage() {
                     <p className="text-slate-600">Configure the .env files following the .env.example in both frontend and backend folders</p>
                     <div className="flex items-start gap-2">
                       <pre className="bg-slate-800 text-green-400 px-3 py-2 rounded flex-1 text-sm whitespace-pre-wrap">
-{`# Frontend .env
-cp frontend/.env.example frontend/.env
-# Backend .env  
-cp backend/.env.example backend/.env`}
+{`# Copy and configure environment files
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env`}
                       </pre>
                       <Button
-                        onClick={() => copyToClipboard("cp frontend/.env.example frontend/.env && cp backend/.env.example backend/.env")}
+                        onClick={() => copyToClipboard("cp backend/.env.example backend/.env && cp frontend/.env.example frontend/.env")}
                         size="sm"
                         variant="outline"
                       >
