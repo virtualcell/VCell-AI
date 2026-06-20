@@ -1,0 +1,24 @@
+from fastapi import HTTPException
+
+from app.services.users_service import sync_auth0_user
+
+
+async def sync_current_user_controller(
+    payload: dict,
+) -> dict:
+    """
+    Sync authenticated Auth0 user into Supabase.
+    """
+
+    auth0_sub = payload.get("sub")
+
+    if not auth0_sub:
+        raise HTTPException(
+            status_code=400,
+            detail="Missing Auth0 subject claim",
+        )
+
+    return {
+        "status": "success",
+        "user": sync_auth0_user(payload),
+    }
