@@ -5,8 +5,7 @@ import {
   History,
   Sparkles,
   FlaskConical,
-  UserPlus,
-  LogIn,
+  LogOut,
   Shield,
   FolderOpen,
   Settings,
@@ -45,7 +44,7 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
 
-  if (pathname == "/" || pathname == "/signin" || pathname == "/signup") {
+  if (pathname == "/") {
     return null;
   }
 
@@ -272,28 +271,16 @@ export function AppSidebar() {
             className={`flex ${isCollapsed ? "flex-col space-y-1" : ""} gap-2`}
           >
             <Button
-              variant="outline"
-              size={isCollapsed ? "icon" : "sm"}
-              className={`${isCollapsed ? "h-8 w-8 rounded-md" : "flex-1"} flex items-center gap-2`}
-              asChild
-              title={isCollapsed ? "Sign Up" : undefined}
-            >
-              <Link href="/signup">
-                <UserPlus className="h-3 w-3" />
-                {!isCollapsed && "Sign Up"}
-              </Link>
-            </Button>
-            <Button
               variant="default"
               size={isCollapsed ? "icon" : "sm"}
-              className={`${isCollapsed ? "h-8 w-8 rounded-md" : "flex-1"} flex items-center gap-2`}
+              className={`${isCollapsed ? "h-8 w-8 rounded-md" : "w-full"} flex items-center gap-2`}
               asChild
-              title={isCollapsed ? "Sign In" : undefined}
+              title={isCollapsed ? "Logout" : undefined}
             >
-              <Link href="/signin">
-                <LogIn className="h-3 w-3" />
-                {!isCollapsed && "Sign In"}
-              </Link>
+              <a href="/auth/logout">
+                <LogOut className="h-3 w-3" />
+                {!isCollapsed && "Logout"}
+              </a>
             </Button>
           </div>
 
