@@ -3,6 +3,7 @@ import { FileText, Loader2, Download } from "lucide-react";
 import XMLViewer from "react-xml-viewer";
 import { MarkdownRenderer } from "./markdown-renderer";
 import { Button } from "@/components/ui/button";
+import { getAccessToken } from "@auth0/nextjs-auth0/client";
 
 interface VCMLSectionProps {
   biomodelId: string;
@@ -18,10 +19,12 @@ export const VCMLSection: React.FC<VCMLSectionProps> = ({ biomodelId }) => {
       setIsAnalysisLoading(true);
       setAnalysisError("");
       try {
+        const token = await getAccessToken();
         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
         const res = await fetch(`${apiUrl}/analyse/${biomodelId}/vcml`, {
           method: "POST",
           headers: {
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         });

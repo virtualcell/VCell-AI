@@ -22,6 +22,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ChatBox } from "@/components/ChatBox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getAccessToken } from "@auth0/nextjs-auth0/client";
 
 interface AnalysisResults {
   title: string;
@@ -91,10 +92,12 @@ export default function AnalysisResultsPage({
       setIsAnalysisLoading(true);
       setAnalysisError("");
       try {
+        const token = await getAccessToken();
         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
         const res = await fetch(`${apiUrl}/analyse/${id}/diagram`, {
           method: "POST",
           headers: {
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         });
@@ -115,6 +118,7 @@ export default function AnalysisResultsPage({
 
     const fetchAnalysis = async () => {
       try {
+        const token = await getAccessToken();
         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
         const url = new URL(`${apiUrl}/analyse/${id}`);
         if (prompt) {
@@ -124,6 +128,7 @@ export default function AnalysisResultsPage({
         const analyseRes = await fetch(url.toString(), {
           method: "POST",
           headers: {
+            Authorization: `Bearer ${token}`,
             accept: "application/json",
           },
         });

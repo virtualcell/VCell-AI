@@ -28,6 +28,7 @@ import {
   Briefcase,
   Cog,
 } from "lucide-react";
+import { getAccessToken } from "@auth0/nextjs-auth0/client";
 
 interface Simulation {
   key: string;
@@ -152,10 +153,12 @@ export default function BiomodelDetailPage() {
     
     const fetchDiagramAnalysis = async () => {
       try {
+        const token = await getAccessToken();
         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
         const res = await fetch(`${apiUrl}/analyse/${data.bmKey}/diagram`, {
           method: "POST",
           headers: {
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         });

@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { MessageSquare, Send, Bot, User, Loader2 } from "lucide-react";
+import { getAccessToken } from "@auth0/nextjs-auth0/client";
 
 interface Message {
   id: string;
@@ -172,6 +173,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
     setInputMessage("");
     setIsLoading(true);
     try {
+      const token = await getAccessToken();
       const finalPrompt = promptPrefix
         ? `${promptPrefix} ${msg}${parameterContext}`
         : `${msg}${parameterContext}`;
@@ -180,6 +182,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
         {
           method: "POST",
           headers: {
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
             accept: "application/json",
           },
