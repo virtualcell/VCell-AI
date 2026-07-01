@@ -13,6 +13,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import Image from "next/image";
 
+const loginHref = "/auth/login?returnTo=/chat";
+const signupHref = "/auth/login?returnTo=/chat&screen_hint=signup";
+
 export default function LandingPage() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -34,13 +37,13 @@ export default function LandingPage() {
             </div>
             <div className="flex items-center gap-3">
               <Button variant="outline" size="sm" asChild>
-                <Link href="/signin" className="flex items-center gap-2">
+                <Link href={loginHref} className="flex items-center gap-2">
                   <LogIn className="h-4 w-4" />
                   Sign In
                 </Link>
               </Button>
               <Button size="sm" asChild>
-                <Link href="/signup" className="flex items-center gap-2">
+                <Link href={signupHref} className="flex items-center gap-2">
                   <UserPlus className="h-4 w-4" />
                   Sign Up
                 </Link>
@@ -75,7 +78,7 @@ export default function LandingPage() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link href="/chat">
+              <Link href={loginHref}>
                 <Button
                   size="lg"
                   className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
@@ -84,7 +87,7 @@ export default function LandingPage() {
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
-              <Link href="/signup">
+              <Link href={signupHref}>
                 <Button
                   variant="outline"
                   size="lg"

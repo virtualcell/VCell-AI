@@ -1,9 +1,11 @@
 from langfuse.openai import AzureOpenAI, OpenAI
 from qdrant_client import QdrantClient
 from app.core.config import settings
+from supabase import Client, create_client
 
 openai_client = None
 qdrant_client = None
+supabase_client = None
 
 
 # OpenAI
@@ -22,7 +24,7 @@ def connect_openai():
                 api_key=settings.AZURE_API_KEY,
                 base_url=settings.AZURE_ENDPOINT,
                 project=None,
-                organization=None
+                organization=None,
             )
     return openai_client
 
@@ -44,3 +46,21 @@ def get_qdrant_client():
     connect_qdrant()
     qdrant = qdrant_client
     return qdrant
+
+
+def connect_supabase():
+    global supabase_client
+    if supabase_client is None:
+        if not settings.SUPABASE_URL or not settings.SUPABASE_SERVICE_ROLE_KEY:
+            raise ValueError("Supabase configuration is missing")
+        supabase_client = create_client(
+            settings.SUPABASE_URL,
+            settings.SUPABASE_SERVICE_ROLE_KEY,
+        )
+    return supabase_client
+
+
+def get_supabase_client() -> Client:
+    connect_supabase()
+    supabase = supabase_client
+    return supabase

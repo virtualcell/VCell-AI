@@ -14,6 +14,7 @@ from app.routes.vcelldb_router import router as vcelldb_router
 from app.routes.llms_router import router as llms_router
 from app.routes.qdrant_router import router as qdrant_router
 from app.routes.knowledge_base_router import router as knowledge_base_router
+from app.routes.users_router import router as users_router
 
 ascii_art = """
 ╔════════════════════════════════════════════════════════════════════════════════════╗
@@ -56,6 +57,7 @@ app.include_router(knowledge_base_router, tags=["Knowledge Base"], prefix="/kb")
 app.include_router(llms_router, tags=["LLM with Tool Calling"])
 app.include_router(vcelldb_router, tags=["VCellDB API Wrapper"])
 app.include_router(qdrant_router, tags=["Qdrant Vector DB"], prefix="/qdrant")
+app.include_router(users_router, tags=["Users"])
 
 if __name__ == "__main__":
     uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)

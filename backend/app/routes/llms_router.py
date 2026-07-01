@@ -1,16 +1,21 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+
 from app.controllers.llms_controller import (
     get_llm_response,
     analyse_biomodel_controller,
     analyse_vcml_controller,
     analyse_diagram_controller,
 )
+from app.core.auth import verify_auth0_token
 
 router = APIRouter()
 
 
 @router.post("/query")
-async def query_llm(conversation_history: dict):
+async def query_llm(
+    conversation_history: dict,
+    _payload: dict = Depends(verify_auth0_token),
+):
     """
     Endpoint to query the LLM and execute the necessary tools.
     Args:
@@ -25,7 +30,11 @@ async def query_llm(conversation_history: dict):
 
 
 @router.post("/analyse/{biomodel_id}")
-async def analyse_biomodel(biomodel_id: str, user_prompt: str):
+async def analyse_biomodel(
+    biomodel_id: str,
+    user_prompt: str,
+    _payload: dict = Depends(verify_auth0_token),
+):
     """
     Endpoint to analyze a biomodel using the LLM service.
     Args:
@@ -39,7 +48,10 @@ async def analyse_biomodel(biomodel_id: str, user_prompt: str):
 
 
 @router.post("/analyse/{biomodel_id}/vcml")
-async def analyse_vcml(biomodel_id: str):
+async def analyse_vcml(
+    biomodel_id: str,
+    _payload: dict = Depends(verify_auth0_token),
+):
     """
     Endpoint to analyze VCML content for a given biomodel.
     Args:
@@ -52,7 +64,10 @@ async def analyse_vcml(biomodel_id: str):
 
 
 @router.post("/analyse/{biomodel_id}/diagram")
-async def analyse_diagram(biomodel_id: str):
+async def analyse_diagram(
+    biomodel_id: str,
+    _payload: dict = Depends(verify_auth0_token),
+):
     """
     Endpoint to analyze diagram for a given biomodel.
     Args:

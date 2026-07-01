@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { BarChart3Icon as Diagram3, Search, Loader2 } from "lucide-react";
 import { MarkdownRenderer } from "./markdown-renderer";
+import { getAccessToken } from "@auth0/nextjs-auth0/client";
 
 interface DiagramSectionProps {
   biomodelId: string;
@@ -20,10 +21,12 @@ export const DiagramSection: React.FC<DiagramSectionProps> = ({
       setIsAnalysisLoading(true);
       setAnalysisError("");
       try {
+        const token = await getAccessToken();
         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
         const res = await fetch(`${apiUrl}/analyse/${biomodelId}/diagram`, {
           method: "POST",
           headers: {
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         });
