@@ -9,7 +9,9 @@ metadata:
   labels:
     app: backend-ingress
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    # TLS/cert for this host is issued via frontend-ingress (one cert-manager
+    # cluster-issuer per host, matching the vcell-fluxcd pattern). This separate
+    # Ingress exists only for the /api rewrite (rewrite-target is ingress-wide).
     nginx.ingress.kubernetes.io/rewrite-target: /$2
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
