@@ -54,6 +54,40 @@ sensitive values are sealed:
 `secrets.dat` (plaintext) and the generated `secret-*.yaml` are **gitignored**.
 Run `secrets.sh` to (re)generate the sealed manifests before applying an overlay.
 
+### Why the frontend has secrets: Node vs browser trust boundary
+
+`frontend-secrets` (`AUTH0_SECRET`, `AUTH0_CLIENT_SECRET`) may look surprising for
+a "frontend" — secrets must never reach an untrusted browser. They don't. The
+`frontend` image is a **Next.js app, which is two programs**:
+
+- **Node server** (the pod / `frontend` container) — *trusted*. It runs SSR and the
+  `/auth/*` route handlers. This is the only thing that reads `AUTH0_SECRET` and
+  `AUTH0_CLIENT_SECRET`.
+- **Browser** (React bundle on the user's machine) — *untrusted*. It gets only the
+  compiled JS/HTML and an httpOnly, encrypted session cookie.
+
+The app uses `@auth0/nextjs-auth0` v4 in the **Backend-for-Frontend (BFF)** pattern:
+Authorization Code + PKCE, with the `code`→token exchange executed **server-side** by
+the Node process (a confidential client / Auth0 "Regular Web Application"). The client
+secret authenticates that exchange and the session key encrypts the resulting tokens
+into the httpOnly cookie — all inside the Node server.
+
+What this means for these Kubernetes secrets:
+
+- `AUTH0_SECRET` / `AUTH0_CLIENT_SECRET` are consumed **only by the Node server pod**.
+  They are never inlined into the browser bundle (only `NEXT_PUBLIC_*` values are, and
+  the only one here is the non-secret `NEXT_PUBLIC_API_URL`). Sealing them and injecting
+  them as pod env is correct and safe.
+- The refresh token stays inside the encrypted cookie (server-decryptable only). The
+  browser does receive a short-lived **access token** (via a server endpoint) to call
+  the backend directly — a scoped bearer token, not a secret.
+
+> If the frontend is ever re-architected to a **public SPA client** (e.g.
+> `@auth0/auth0-react`, code+PKCE in the browser, Auth0 "Single-Page Application"),
+> there is **no client secret at all** — delete `frontend-secrets`, drop
+> `AUTH0_SECRET`/`AUTH0_CLIENT_SECRET` from `secrets.dat`/`secrets.sh`, and remove the
+> `frontend-secrets` `secretKeyRef`s from `base/frontend.yaml`.
+
 ## One-time cluster setup (Sealed Secrets controller)
 
 ```bash
