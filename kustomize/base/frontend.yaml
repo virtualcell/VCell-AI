@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  labels:
+    app: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: ghcr.io/virtualcell/vcell-ai-frontend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          # Non-secret configuration (NEXT_PUBLIC_API_URL, APP_BASE_URL,
+          # AUTH0_DOMAIN, AUTH0_CLIENT_ID, AUTH0_AUDIENCE) comes from the
+          # frontend-config ConfigMap generated per-environment in config/.
+          envFrom:
+            - configMapRef:
+                name: frontend-config
+          # Secret values come from the sealed "frontend-secrets" secret,
+          # generated per-overlay by scripts/sealed_secret_frontend.sh.
+          env:
+            - name: AUTH0_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: frontend-secrets
+                  key: auth0-secret
+            - name: AUTH0_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: frontend-secrets
+                  key: auth0-client-secret
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 15
+      imagePullSecrets:
+        - name: ghcr-secret
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  labels:
+    app: frontend
+spec:
+  ports:
+    - name: "3000"
+      port: 3000
+      targetPort: 3000
+  selector:
+    app: frontend

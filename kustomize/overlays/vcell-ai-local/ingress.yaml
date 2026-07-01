@@ -1,0 +1,46 @@
+# Minikube ingress (nginx addon), plain HTTP on host vcell-ai.local.
+# Add "127.0.0.1 vcell-ai.local" to /etc/hosts and run `minikube tunnel`.
+#   /api/*  -> backend:8000  (the /api prefix is stripped via rewrite-target)
+#   /*      -> frontend:3000
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: backend-ingress
+  labels:
+    app: backend-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: vcell-ai.local
+      http:
+        paths:
+          - path: /api(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: backend
+                port:
+                  number: 8000
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: frontend-ingress
+  labels:
+    app: frontend-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: vcell-ai.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 3000

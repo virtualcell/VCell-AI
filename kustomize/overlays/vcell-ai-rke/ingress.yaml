@@ -1,0 +1,59 @@
+# Two Ingress objects share the host vcell-ai.cam.uchc.edu:
+#   /api/*  -> backend:8000  (the /api prefix is stripped via rewrite-target,
+#             because the FastAPI routes are served at the root, e.g. /biomodel)
+#   /*      -> frontend:3000 (Next.js app, incl. /auth/* Auth0 routes)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: backend-ingress
+  labels:
+    app: backend-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - vcell-ai.cam.uchc.edu
+      secretName: letsencrypt-prod-vcell-ai-tls
+  rules:
+    - host: vcell-ai.cam.uchc.edu
+      http:
+        paths:
+          - path: /api(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: backend
+                port:
+                  number: 8000
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: frontend-ingress
+  labels:
+    app: frontend-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - vcell-ai.cam.uchc.edu
+      secretName: letsencrypt-prod-vcell-ai-tls
+  rules:
+    - host: vcell-ai.cam.uchc.edu
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 3000
