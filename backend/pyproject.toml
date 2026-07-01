@@ -33,6 +33,11 @@ pytest = "^8.4.0"
 httpx = "^0.28.1"
 pytest-asyncio = "^1.0.0"
 
+[tool.pytest.ini_options]
+# rootdir resolves to this file's dir (backend/), so "." puts backend/ on
+# sys.path and makes `import app` work regardless of the cwd pytest runs from.
+pythonpath = ["."]
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
