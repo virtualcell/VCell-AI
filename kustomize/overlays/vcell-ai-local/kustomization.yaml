@@ -5,9 +5,9 @@ namespace: vcell-ai-local
 
 images:
   - name: ghcr.io/virtualcell/vcell-ai-backend
-    newTag: latest
+    newTag: 0.1.6.2
   - name: ghcr.io/virtualcell/vcell-ai-frontend
-    newTag: latest
+    newTag: 0.1.6.2
 
 replicas:
   - count: 1

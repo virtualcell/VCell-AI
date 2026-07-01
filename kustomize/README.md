@@ -124,8 +124,37 @@ kubectl apply -k .
 ```
 
 Update image tags per environment in `overlays/<env>/kustomization.yaml`
-(`images[].newTag`). Build & push images with
-`scripts/build_and_push.sh <tag> virtualcell`.
+(`images[].newTag`). Images are published to ghcr by
+`.github/workflows/build_containers.yml` on **git-tag push** — CI pushes the
+**git tag** as the image tag (e.g. `0.1.6.2`); there is **no `:latest`** tag, so
+overlays must pin a real published tag. `scripts/build_and_push.sh <tag>
+virtualcell` does the same build/push locally.
+
+## Known follow-up: frontend `NEXT_PUBLIC_API_URL` is baked at build time
+
+`NEXT_PUBLIC_*` values are inlined into the browser bundle at **Next.js build
+time**, not read at runtime. The current CI (`build_containers.yml`) hardcodes
+
+```
+NEXT_PUBLIC_API_URL=http://k8s-wn-01.cam.uchc.edu:30001
+```
+
+when building `vcell-ai-frontend`, so the published image always points the
+browser at that NodePort — it will **ignore** the `NEXT_PUBLIC_API_URL` set in
+`config/<env>/frontend.env` at runtime, and will not use the ingress host
+(`vcell-ai[-dev].cam.uchc.edu/api`) this overlay configures.
+
+To make the frontend image environment-portable, one of:
+
+1. Turn `NEXT_PUBLIC_API_URL` into a **Docker build arg** and build a separate
+   frontend image per environment (CI passes the right value per tag/target), or
+2. Refactor the frontend so the API base URL is resolved at **runtime** (e.g. a
+   server-rendered `/config` endpoint or a non-`NEXT_PUBLIC_` server var proxied
+   by the Node server), so one image works everywhere.
+
+Until then, align the CI build arg / NodePort with how each environment is
+actually served. This touches `build_containers.yml` and the frontend
+`Dockerfile`, so it is intentionally left out of this PR.
 
 ## Notes
 
