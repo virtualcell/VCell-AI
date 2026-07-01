@@ -1,18 +1,31 @@
-import sys
 import os
+
 import pytest
 
-# This tells pytest that all tests in the file should run in asyncio mode.
-pytestmark = pytest.mark.asyncio
+# These are LIVE integration tests: they call Azure OpenAI (which in turn hits
+# the VCell API) and assert on real model output. They require a *reachable*
+# Azure endpoint plus valid credentials. CI cannot run them — the configured
+# Azure endpoint is not resolvable from GitHub Actions runners — so they are
+# opt-in via an explicit flag and skipped everywhere else. Run them locally with:
+#   RUN_LLM_INTEGRATION_TESTS=1 poetry run pytest tests/test_llms_service.py
+_RUN_LLM_TESTS = os.getenv("RUN_LLM_INTEGRATION_TESTS") == "1"
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+if _RUN_LLM_TESTS:
+    from app.services.llms_service import (
+        get_llm_response,
+        get_response_with_tools,
+        analyse_vcml,
+        analyse_diagram,
+    )
 
-from app.services.llms_service import (
-    get_llm_response,
-    get_response_with_tools,
-    analyse_vcml,
-    analyse_diagram,
-)
+# asyncio mode for all tests here; skip the whole file unless explicitly opted in.
+pytestmark = [
+    pytest.mark.asyncio,
+    pytest.mark.skipif(
+        not _RUN_LLM_TESTS,
+        reason="Live LLM integration tests; set RUN_LLM_INTEGRATION_TESTS=1 to run",
+    ),
+]
 
 
 class TestLLMsService:

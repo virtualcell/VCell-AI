@@ -1,11 +1,7 @@
-import sys
-import os
 import pytest
 
 # This tells pytest that all tests in the file should run in asyncio mode.
 pytestmark = pytest.mark.asyncio
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 from app.services.vcelldb_service import (
     fetch_biomodels,
