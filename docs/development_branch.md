@@ -1,8 +1,12 @@
 # Development Branch Summary
 
-Summary of the `development` branch contribution relative to `main`. This branch adds BioModels Database (BMDB) integration as a second data source alongside the existing VCell database, along with performance optimizations to the LLM tool-calling pipeline.
+Summary of the unmerged `origin/development` branch, which adds BioModels Database (BMDB) integration as a second data source alongside the existing VCell database, along with performance optimizations to the LLM tool-calling pipeline.
 
-**Stats:** 60 commits, 26 files changed, ~1,667 lines added, ~254 lines removed (vs. `origin/main`).
+> **Scope note:** This document describes work that lives **only** on the `origin/development` branch. None of the code referenced below (`bmdb_router.py`, `databases_service.py`, etc.) exists on `main` or in the branch this doc is committed to — do not expect to find it here.
+>
+> `development` diverged from `main` at commit `5d95ca1`, **before** the Auth0/Supabase authentication work (PR #67) was merged into `main`. It has not been rebased since, so it does not include that auth work, and a direct `git diff main development` reports extra churn (44 files) from main's newer commits. The figures below count only development's own additions since the divergence point.
+
+**Stats (three-dot `origin/main...origin/development`, i.e. development's own changes since the merge base `5d95ca1`):** 60 commits, 26 files changed, ~1,667 lines added, ~254 lines removed.
 
 ## Features
 
