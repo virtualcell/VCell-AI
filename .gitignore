@@ -11,3 +11,12 @@ backend/Downloads
 backend/.ipynb_checkpoints
 backend/.venv
 .idea
+
+# Kubernetes / kustomize secret material
+# secrets.dat holds PLAINTEXT secrets — never commit it.
+kustomize/overlays/*/secrets.dat
+# Generated SealedSecret manifests (encrypted, but cluster-specific — generated
+# per-overlay by secrets.sh; not committed in this repo).
+kustomize/overlays/*/secret-backend.yaml
+kustomize/overlays/*/secret-frontend.yaml
+kustomize/overlays/*/secret-ghcr.yaml
