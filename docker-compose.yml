@@ -10,6 +10,19 @@ services:
       - qdrant-data:/qdrant/storage
     restart: unless-stopped
 
+  ### LiteLLM Proxy (OpenAI-compatible LLM gateway)
+  litellm:
+    image: ghcr.io/berriai/litellm:main-stable
+    container_name: litellm-vcellai
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./litellm_config.yaml:/app/config.yaml
+    env_file:
+      - ./litellm.env
+    command: --config /app/config.yaml
+    restart: unless-stopped
+
   ### Backend (FastAPI with Poetry)
   backend:
     build: ./backend
