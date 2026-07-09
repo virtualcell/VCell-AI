@@ -24,12 +24,12 @@ async def query_llm(
         dict: The final response after processing the prompt with the tools.
     """
     model = conversation_history.get("model", "openai-model")
-    result, bmkeys = await get_llm_response(
+    result, bmkeys, model_used = await get_llm_response(
         conversation_history.get("conversation_history", []),
         model,
         payload,
     )
-    return {"response": result, "bmkeys": bmkeys}
+    return {"response": result, "bmkeys": bmkeys, "model_used": model_used}
 
 
 @router.post("/analyse/{biomodel_id}")

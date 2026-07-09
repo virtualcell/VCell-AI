@@ -27,7 +27,7 @@ async def get_llm_response(
     conversation_history: list[dict],
     model: str,
     payload: dict,
-) -> tuple[str, list]:
+) -> tuple[str, list, str]:
     """
     Controller function to interact with the LLM service.
     Args:
@@ -35,15 +35,15 @@ async def get_llm_response(
         model (str): The LiteLLM model alias to use.
         payload (dict): The verified Auth0 token payload for the caller.
     Returns:
-        tuple[str, list]: A tuple containing the final response and bmkeys list.
+        tuple[str, list, str]: The final response, bmkeys list, and model actually used.
     """
     try:
         supabase = get_supabase_client()
         virtual_key = await _get_virtual_key(payload, supabase)
-        result, bmkeys = await get_response_with_tools(
+        result, bmkeys, model_used = await get_response_with_tools(
             conversation_history, virtual_key, model
         )
-        return result, bmkeys
+        return result, bmkeys, model_used
     except Exception as e:
         if isinstance(e, HTTPException):
             raise e

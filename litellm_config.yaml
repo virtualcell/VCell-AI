@@ -4,5 +4,10 @@ model_list:
       model: openai/gpt-4o
       api_key: os.environ/OPENAI_API_KEY
 
+  - model_name: local-model
+    litellm_params:
+      model: os.environ/LOCAL_LLM_MODEL
+      api_base: os.environ/LOCAL_LLM_API_BASE
+
 general_settings:
   master_key: os.environ/LITELLM_MASTER_KEY
