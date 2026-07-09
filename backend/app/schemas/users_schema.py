@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class User(BaseModel):
@@ -14,7 +14,7 @@ class User(BaseModel):
     tokens_used: int
     created_at: datetime
     last_login: datetime
-    litellm_virtual_key: Optional[str] = None
+    litellm_virtual_key: Optional[str] = Field(default=None, exclude=True)
 
 
 class SyncUserResponse(BaseModel):
