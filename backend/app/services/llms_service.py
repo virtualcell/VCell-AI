@@ -13,10 +13,52 @@ from app.utils.system_prompt import SYSTEM_PROMPT
 
 from app.schemas.vcelldb_schema import BiomodelRequestParams
 from app.core.litellm import get_litellm_client
+from app.core.config import settings
 import json
 from app.core.logger import get_logger
 
 logger = get_logger("llm_service")
+
+LOCAL_MODEL = "local-model"
+
+
+def _key_for_model(virtual_key: str, model: str) -> str:
+    """
+    A user's budget is enforced across every model on their virtual key, so
+    retrying a budget-exceeded request against local-model with that same
+    key would just fail again. Use the unconstrained master key instead.
+    """
+    if model == LOCAL_MODEL and settings.LITELLM_MASTER_KEY:
+        return settings.LITELLM_MASTER_KEY
+    return virtual_key
+
+
+def _is_budget_error(error: Exception) -> bool:
+    status_code = getattr(error, "status_code", None)
+    error_text = str(error).lower()
+    return status_code in {400, 402, 429} and any(
+        marker in error_text for marker in ("budget", "quota", "limit", "exceeded")
+    )
+
+
+async def _create_chat_completion(virtual_key: str, model: str, **kwargs):
+    """
+    Call the requested model; on a budget-exceeded error, silently retry
+    against local-model using the master key.
+    """
+    client = get_litellm_client(_key_for_model(virtual_key, model))
+    try:
+        return await client.chat.completions.create(model=model, **kwargs)
+    except Exception as error:
+        if model != LOCAL_MODEL and _is_budget_error(error):
+            logger.info(
+                f"Budget limit reached for {model}; falling back to {LOCAL_MODEL}"
+            )
+            local_client = get_litellm_client(_key_for_model(virtual_key, LOCAL_MODEL))
+            return await local_client.chat.completions.create(
+                model=LOCAL_MODEL, **kwargs
+            )
+        raise
 
 
 async def get_llm_response(
@@ -40,9 +82,9 @@ async def get_llm_response(
         {"role": "user", "content": user_prompt},
     ]
 
-    litellm_client = get_litellm_client(virtual_key)
-    response = await litellm_client.chat.completions.create(
-        model=model,
+    response = await _create_chat_completion(
+        virtual_key,
+        model,
         messages=messages,
     )
 
@@ -67,9 +109,9 @@ async def get_response_with_tools(
 
     logger.info(f"User prompt: {user_prompt}")
 
-    litellm_client = get_litellm_client(virtual_key)
-    response = await litellm_client.chat.completions.create(
-        model=model,
+    response = await _create_chat_completion(
+        virtual_key,
+        model,
         messages=messages,
         tools=tools,
         tool_choice="auto",
@@ -112,8 +154,9 @@ async def get_response_with_tools(
     logger.info(str(messages))
 
     # Send back the final response incorporating the tool result
-    completion = await litellm_client.chat.completions.create(
-        model=model,
+    completion = await _create_chat_completion(
+        virtual_key,
+        model,
         messages=messages,
     )
 
@@ -238,9 +281,9 @@ async def analyse_diagram(biomodel_id: str, virtual_key: str, model: str):
             {"type": "text", "text": diagram_analysis_prompt},
             {"type": "image_url", "image_url": {"url": diagram_url}},
         ]
-        litellm_client = get_litellm_client(virtual_key)
-        response = await litellm_client.chat.completions.create(
-            model=model,
+        response = await _create_chat_completion(
+            virtual_key,
+            model,
             messages=[
                 {
                     "role": "user",

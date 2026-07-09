@@ -9,5 +9,10 @@ model_list:
       model: os.environ/LOCAL_LLM_MODEL
       api_base: os.environ/LOCAL_LLM_API_BASE
 
+litellm_settings:
+  success_callback: ["langfuse"]
+  fallbacks:
+    - openai-model: ["local-model"]
+
 general_settings:
   master_key: os.environ/LITELLM_MASTER_KEY
