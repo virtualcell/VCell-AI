@@ -39,5 +39,9 @@ class Settings(BaseSettings):
     SUPABASE_URL: Optional[str] = None
     SUPABASE_SERVICE_ROLE_KEY: Optional[str] = None
 
+    # LiteLLM Proxy Config
+    LITELLM_URL: str = "http://litellm:4000"
+    LITELLM_MASTER_KEY: Optional[str] = None
+
 
 settings = Settings()
