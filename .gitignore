@@ -20,3 +20,6 @@ kustomize/overlays/*/secrets.dat
 kustomize/overlays/*/secret-backend.yaml
 kustomize/overlays/*/secret-frontend.yaml
 kustomize/overlays/*/secret-ghcr.yaml
+
+qdrant_storage
+litellm.env

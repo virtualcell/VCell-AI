@@ -3,7 +3,7 @@ import uuid
 from markitdown import MarkItDown
 from typing import List, Dict, Any, Optional
 from app.core.config import settings
-from app.core.singleton import get_openai_client, get_qdrant_client
+from app.core.singleton import get_embeddings_client, get_qdrant_client
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from app.services.qdrant_service import (
     create_qdrant_collection,
@@ -13,10 +13,10 @@ from app.services.qdrant_service import (
 )
 from langfuse import observe
 
-openai_client = get_openai_client()
+embeddings_client = get_embeddings_client()
 qdrant_client = get_qdrant_client()
 markitdown_client = MarkItDown(
-    llm_client=openai_client, model=settings.AZURE_DEPLOYMENT_NAME
+    llm_client=embeddings_client, model=settings.AZURE_DEPLOYMENT_NAME
 )
 
 KB_COLLECTION_NAME = settings.QDRANT_COLLECTION_NAME
@@ -53,7 +53,7 @@ def embed_text(text: str):
     Args:
         text (str): The text to embed.
     """
-    response = openai_client.embeddings.create(
+    response = embeddings_client.embeddings.create(
         input=text, model=settings.AZURE_EMBEDDING_DEPLOYMENT_NAME
     )
     return response.data[0].embedding

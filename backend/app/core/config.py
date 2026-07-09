@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Optional
+from decimal import Decimal
 
 
 class Settings(BaseSettings):
@@ -38,6 +39,12 @@ class Settings(BaseSettings):
     # Supabase Config
     SUPABASE_URL: Optional[str] = None
     SUPABASE_SERVICE_ROLE_KEY: Optional[str] = None
+
+    # LiteLLM Proxy Config
+    LITELLM_URL: str = "http://litellm:4000"
+    LITELLM_MASTER_KEY: Optional[str] = None
+    DEFAULT_USER_BUDGET: Decimal = Decimal("10.00")
+    DEFAULT_BUDGET_DURATION: str = "30d"
 
 
 settings = Settings()

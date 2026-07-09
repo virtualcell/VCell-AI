@@ -12,21 +12,68 @@ from app.services.vcelldb_service import (
 from app.utils.system_prompt import SYSTEM_PROMPT
 
 from app.schemas.vcelldb_schema import BiomodelRequestParams
-from app.core.singleton import get_openai_client
+from app.core.litellm import get_litellm_client
 from app.core.config import settings
 import json
 from app.core.logger import get_logger
 
 logger = get_logger("llm_service")
-client = get_openai_client()
+
+LOCAL_MODEL = "local-model"
 
 
-async def get_llm_response(system_prompt: str, user_prompt: str):
+def _key_for_model(virtual_key: str, model: str) -> str:
+    """
+    A user's budget is enforced across every model on their virtual key, so
+    retrying a budget-exceeded request against local-model with that same
+    key would just fail again. Use the unconstrained master key instead.
+    """
+    if model == LOCAL_MODEL and settings.LITELLM_MASTER_KEY:
+        return settings.LITELLM_MASTER_KEY
+    return virtual_key
+
+
+def _is_budget_error(error: Exception) -> bool:
+    status_code = getattr(error, "status_code", None)
+    error_text = str(error).lower()
+    return status_code in {400, 402, 429} and any(
+        marker in error_text for marker in ("budget", "quota", "limit", "exceeded")
+    )
+
+
+async def _create_chat_completion(virtual_key: str, model: str, **kwargs):
+    """
+    Call the requested model; on a budget-exceeded error, silently retry
+    against local-model using the master key.
+    """
+    client = get_litellm_client(_key_for_model(virtual_key, model))
+    try:
+        return await client.chat.completions.create(model=model, **kwargs)
+    except Exception as error:
+        if model != LOCAL_MODEL and _is_budget_error(error):
+            logger.info(
+                f"Budget limit reached for {model}; falling back to {LOCAL_MODEL}"
+            )
+            local_client = get_litellm_client(_key_for_model(virtual_key, LOCAL_MODEL))
+            return await local_client.chat.completions.create(
+                model=LOCAL_MODEL, **kwargs
+            )
+        raise
+
+
+async def get_llm_response(
+    system_prompt: str,
+    user_prompt: str,
+    virtual_key: str,
+    model: str,
+):
     """
     Helper function to get a response from the LLM.
     args:
         system_prompt (str): The system prompt to guide the LLM.
         user_prompt (str): The user's query or request.
+        virtual_key (str): The caller's LiteLLM virtual key.
+        model (str): The LiteLLM model alias to use.
     returns:
         str: The response from the LLM.
     """
@@ -35,16 +82,20 @@ async def get_llm_response(system_prompt: str, user_prompt: str):
         {"role": "user", "content": user_prompt},
     ]
 
-    response = client.chat.completions.create(
-        name="GET_LLM_RESPONSE",
-        model=settings.AZURE_DEPLOYMENT_NAME,
+    response = await _create_chat_completion(
+        virtual_key,
+        model,
         messages=messages,
     )
 
     return response.choices[0].message.content
 
 
-async def get_response_with_tools(conversation_history: list[dict]):
+async def get_response_with_tools(
+    conversation_history: list[dict],
+    virtual_key: str,
+    model: str,
+) -> tuple[str, list, str]:
     messages = [
         {
             "role": "system",
@@ -58,68 +109,72 @@ async def get_response_with_tools(conversation_history: list[dict]):
 
     logger.info(f"User prompt: {user_prompt}")
 
-    response = client.chat.completions.create(
-        name="GET_RESPONSE_WITH_TOOLS::RETRIEVE_TOOLS",
-        model=settings.AZURE_DEPLOYMENT_NAME,
+    response = await _create_chat_completion(
+        virtual_key,
+        model,
         messages=messages,
         tools=tools,
         tool_choice="auto",
     )
 
     # Handle the tool calls
-    tool_calls = response.choices[0].message.tool_calls
+    response_message = response.choices[0].message
+    tool_calls = response_message.tool_calls
 
-    messages.append(response.choices[0].message)
+    messages.append(response_message.model_dump(exclude_none=True))
 
     bmkeys = []
 
-    if tool_calls:
-        for tool_call in tool_calls:
-            # Extract the function name and arguments
-            name = tool_call.function.name
-            args = json.loads(tool_call.function.arguments)
+    if not tool_calls:
+        final_response = response_message.content or ""
+        logger.info(f"LLM Response: {final_response}")
+        return final_response, bmkeys, response.model
 
-            logger.info(f"Tool Call: {name} with args: {args}")
+    for tool_call in tool_calls:
+        # Extract the function name and arguments
+        name = tool_call.function.name
+        args = json.loads(tool_call.function.arguments)
 
-            # Execute the tool function
-            result = await execute_tool(name, args)
+        logger.info(f"Tool Call: {name} with args: {args}")
 
-            logger.info(f"Tool Result: {str(result)[:500]}")
+        # Execute the tool function
+        result = await execute_tool(name, args)
 
-            # Extract bmkeys only if result is a dictionary and contains the expected key
-            if isinstance(result, dict):
-                bmkeys = result.get("unique_model_keys (bmkey)", [])
+        logger.info(f"Tool Result: {str(result)[:500]}")
 
-            # Send the result back to the model
-            messages.append(
-                {"role": "tool", "tool_call_id": tool_call.id, "content": str(result)}
-            )
+        # Extract bmkeys only if result is a dictionary and contains the expected key
+        if isinstance(result, dict):
+            bmkeys = result.get("unique_model_keys (bmkey)", [])
+
+        # Send the result back to the model
+        messages.append(
+            {"role": "tool", "tool_call_id": tool_call.id, "content": str(result)}
+        )
 
     logger.info(str(messages))
 
     # Send back the final response incorporating the tool result
-    completion = client.chat.completions.create(
-        name="GET_RESPONSE_WITH_TOOLS::PROCESS_TOOL_RESULTS",
-        model=settings.AZURE_DEPLOYMENT_NAME,
+    completion = await _create_chat_completion(
+        virtual_key,
+        model,
         messages=messages,
-        metadata={
-            "tool_calls": tool_calls,
-        },
     )
 
     final_response = completion.choices[0].message.content
 
     logger.info(f"LLM Response: {final_response}")
 
-    return final_response, bmkeys
+    return final_response, bmkeys, completion.model
 
 
-async def analyse_vcml(biomodel_id: str):
+async def analyse_vcml(biomodel_id: str, virtual_key: str, model: str):
     """
     Analyze VCML content for a given biomodel.
 
     args:
         biomodel_id (str): The ID of the biomodel to analyze.
+        virtual_key (str): The caller's LiteLLM virtual key.
+        model (str): The LiteLLM model alias to use.
     returns:
         str: The VCML analysis response.
     """
@@ -133,7 +188,9 @@ async def analyse_vcml(biomodel_id: str):
         )
         vcml_system_prompt = "You are a VCell BioModel Assistant, designed to help users understand and interact with biological models in VCell. Your task is to provide human-readable, concise responses based on the given VCML."
         vcml_prompt = f"Analyze the following VCML content for Biomodel {biomodel_id}: {str(vcml)}"
-        vcml_analysis = await get_llm_response(vcml_system_prompt, vcml_prompt)
+        vcml_analysis = await get_llm_response(
+            vcml_system_prompt, vcml_prompt, virtual_key, model
+        )
         return vcml_analysis
     except Exception as e:
         logger.error(
@@ -142,13 +199,17 @@ async def analyse_vcml(biomodel_id: str):
         return f"An error occurred during VCML analysis: {str(e)}"
 
 
-async def analyse_biomodel(biomodel_id: str, user_prompt: str):
+async def analyse_biomodel(
+    biomodel_id: str, user_prompt: str, virtual_key: str, model: str
+):
     """
     Analyze user query with biomodel context.
 
     args:
         biomodel_id (str): The ID of the biomodel to analyze.
         user_prompt (str): The user's query or request.
+        virtual_key (str): The caller's LiteLLM virtual key.
+        model (str): The LiteLLM model alias to use.
     returns:
         str: The AI analysis response.
     """
@@ -172,7 +233,7 @@ async def analyse_biomodel(biomodel_id: str, user_prompt: str):
         # Analyze the user prompt with added biomodel context
         system_prompt = "You are a VCell BioModel Assistant, designed to help users understand and interact with biological models in VCell. Your task is to provide human-readable, accurate responses based on the given data. Give a response to the user's query, considering the provided biomodel information."
         user_analysis_response = await get_llm_response(
-            system_prompt, enhanced_user_prompt
+            system_prompt, enhanced_user_prompt, virtual_key, model
         )
         return user_analysis_response
     except Exception as e:
@@ -180,12 +241,14 @@ async def analyse_biomodel(biomodel_id: str, user_prompt: str):
         return f"An error occurred during AI analysis: {str(e)}"
 
 
-async def analyse_diagram(biomodel_id: str):
+async def analyse_diagram(biomodel_id: str, virtual_key: str, model: str):
     """
     Analyze diagram for a given biomodel.
 
     args:
         biomodel_id (str): The ID of the biomodel to analyze.
+        virtual_key (str): The caller's LiteLLM virtual key.
+        model (str): The LiteLLM model alias to use.
     returns:
         str: The diagram analysis response.
     """
@@ -218,9 +281,9 @@ async def analyse_diagram(biomodel_id: str):
             {"type": "text", "text": diagram_analysis_prompt},
             {"type": "image_url", "image_url": {"url": diagram_url}},
         ]
-        response = client.chat.completions.create(
-            name="ANALYSE_DIAGRAM",
-            model=settings.AZURE_DEPLOYMENT_NAME,
+        response = await _create_chat_completion(
+            virtual_key,
+            model,
             messages=[
                 {
                     "role": "user",

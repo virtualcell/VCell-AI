@@ -1,38 +1,37 @@
-from langfuse.openai import AzureOpenAI, OpenAI
+from openai import AzureOpenAI, OpenAI
 from qdrant_client import QdrantClient
 from app.core.config import settings
 from supabase import Client, create_client
 
-openai_client = None
+embeddings_client = None
 qdrant_client = None
 supabase_client = None
 
 
-# OpenAI
-def connect_openai():
-    global openai_client
-    if openai_client is None:
+# Embeddings / document extraction client
+def connect_embeddings_client():
+    global embeddings_client
+    if embeddings_client is None:
         if settings.PROVIDER == "azure":
-            openai_client = AzureOpenAI(
+            embeddings_client = AzureOpenAI(
                 api_key=settings.AZURE_API_KEY,
                 api_version=settings.AZURE_API_VERSION,
                 azure_endpoint=settings.AZURE_ENDPOINT,
             )
         else:
             ## THIS IS FOR LOCAL LLM ONLY
-            openai_client = OpenAI(
+            embeddings_client = OpenAI(
                 api_key=settings.AZURE_API_KEY,
                 base_url=settings.AZURE_ENDPOINT,
                 project=None,
                 organization=None,
             )
-    return openai_client
+    return embeddings_client
 
 
-def get_openai_client():
-    connect_openai()
-    openai = openai_client
-    return openai
+def get_embeddings_client():
+    connect_embeddings_client()
+    return embeddings_client
 
 
 def connect_qdrant():
