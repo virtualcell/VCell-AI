@@ -6,7 +6,7 @@ LLMModel = Literal["openai-model", "local-model"]
 
 
 class ChatRequest(BaseModel):
-    conversation_history: list[dict] = Field(default_factory=list)
+    conversation_history: list[dict] = Field(..., min_length=1)
     model: LLMModel = "openai-model"
 
 
