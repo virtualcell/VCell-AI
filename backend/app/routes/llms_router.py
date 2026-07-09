@@ -36,7 +36,7 @@ async def query_llm(
 async def analyse_biomodel(
     biomodel_id: str,
     user_prompt: str,
-    model: str = "openai-model",
+    model: LLMModel = "openai-model",
     payload: dict = Depends(verify_auth0_token),
 ):
     """
