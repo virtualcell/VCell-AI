@@ -7,7 +7,7 @@ from app.controllers.llms_controller import (
     analyse_diagram_controller,
 )
 from app.core.auth import verify_auth0_token
-from app.schemas.llms_schema import AnalysisResponse, ChatRequest, ChatResponse
+from app.schemas.llms_schema import AnalysisResponse, ChatRequest, ChatResponse, LLMModel
 
 router = APIRouter()
 
