@@ -71,7 +71,7 @@ async def analyse_vcml(
 @router.post("/analyse/{biomodel_id}/diagram", response_model=AnalysisResponse)
 async def analyse_diagram(
     biomodel_id: str,
-    model: str = "openai-model",
+    model: LLMModel = "openai-model",
     payload: dict = Depends(verify_auth0_token),
 ):
     """
