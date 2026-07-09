@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 
-from app.services.users_service import sync_auth0_user
+from app.services.users_service import sync_current_user
 
 
 async def sync_current_user_controller(
@@ -18,7 +18,4 @@ async def sync_current_user_controller(
             detail="Missing Auth0 subject claim",
         )
 
-    return {
-        "status": "success",
-        "user": sync_auth0_user(payload),
-    }
+    return await sync_current_user(payload)

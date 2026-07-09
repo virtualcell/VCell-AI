@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 
 from app.core.singleton import get_supabase_client
+from app.services.litellm_service import get_or_create_virtual_key
 
 
 def sync_auth0_user(payload: dict) -> dict | None:
@@ -32,3 +33,20 @@ def sync_auth0_user(payload: dict) -> dict | None:
     )
 
     return response.data[0] if response.data else None
+
+
+async def sync_current_user(payload: dict) -> dict:
+    """
+    Ensure the user has a LiteLLM virtual key, then sync them into Supabase.
+    """
+    auth0_sub = payload["sub"]
+
+    supabase = get_supabase_client()
+    await get_or_create_virtual_key(auth0_sub, payload.get("email") or "", supabase)
+
+    user = sync_auth0_user(payload)
+
+    return {
+        "status": "success",
+        "user": user,
+    }
