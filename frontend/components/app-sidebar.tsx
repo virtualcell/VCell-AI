@@ -47,6 +47,22 @@ interface BudgetInfo {
   remaining_budget: number | null;
 }
 
+const formatBudget = (value: number | null): string => {
+  if (value === null) {
+    return "Unlimited";
+  }
+
+  if (Math.abs(value) > 0 && Math.abs(value) < 1) {
+    return `$${Number(value.toFixed(4)).toString()}`;
+  }
+
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 2,
+  }).format(value);
+};
+
 export function AppSidebar() {
   const pathname = usePathname();
   const { state } = useSidebar();
@@ -105,14 +121,15 @@ export function AppSidebar() {
     budget?.max_budget && budget.max_budget > 0
       ? Math.min((budget.spend / budget.max_budget) * 100, 100)
       : 0;
+  const remainingText = !budget
+    ? "Loading..."
+    : `${formatBudget(budget.remaining_budget)} remaining`;
   const budgetSummary = !budget
     ? "Loading..."
     : budget.max_budget === null
-      ? `$${budget.spend.toFixed(2)} spent, unlimited budget`
-      : `$${budget.remaining_budget!.toFixed(2)} remaining of $${budget.max_budget.toFixed(2)}`;
-  const budgetCollapsedText = !budget
-    ? "--"
-    : `$${budget.spend.toFixed(2)}`;
+      ? `${formatBudget(budget.spend)} spent, unlimited budget`
+      : `${formatBudget(budget.spend)} spent of ${formatBudget(budget.max_budget)} budget`;
+  const budgetCollapsedText = !budget ? "--" : formatBudget(budget.spend);
 
   return (
     <Sidebar className="border-r border-slate-200" collapsible="icon">
@@ -315,6 +332,7 @@ export function AppSidebar() {
             {!isCollapsed && (
               <div className="flex justify-between items-center text-xs text-slate-600">
                 <span>Budget</span>
+                <span>{remainingText}</span>
               </div>
             )}
             <div className="w-full bg-slate-200 rounded-full h-2">

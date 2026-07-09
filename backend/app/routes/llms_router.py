@@ -7,32 +7,32 @@ from app.controllers.llms_controller import (
     analyse_diagram_controller,
 )
 from app.core.auth import verify_auth0_token
+from app.schemas.llms_schema import AnalysisResponse, ChatRequest, ChatResponse
 
 router = APIRouter()
 
 
-@router.post("/query")
+@router.post("/query", response_model=ChatResponse)
 async def query_llm(
-    conversation_history: dict,
+    request: ChatRequest,
     payload: dict = Depends(verify_auth0_token),
 ):
     """
     Endpoint to query the LLM and execute the necessary tools.
     Args:
-        conversation_history (dict): The conversation history containing user prompts and responses.
+        request (ChatRequest): The conversation history and model choice.
     Returns:
         dict: The final response after processing the prompt with the tools.
     """
-    model = conversation_history.get("model", "openai-model")
     result, bmkeys, model_used = await get_llm_response(
-        conversation_history.get("conversation_history", []),
-        model,
+        request.conversation_history,
+        request.model,
         payload,
     )
     return {"response": result, "bmkeys": bmkeys, "model_used": model_used}
 
 
-@router.post("/analyse/{biomodel_id}")
+@router.post("/analyse/{biomodel_id}", response_model=AnalysisResponse)
 async def analyse_biomodel(
     biomodel_id: str,
     user_prompt: str,
@@ -51,7 +51,7 @@ async def analyse_biomodel(
     return {"response": result}
 
 
-@router.post("/analyse/{biomodel_id}/vcml")
+@router.post("/analyse/{biomodel_id}/vcml", response_model=AnalysisResponse)
 async def analyse_vcml(
     biomodel_id: str,
     model: str = "openai-model",
@@ -68,7 +68,7 @@ async def analyse_vcml(
     return {"response": result}
 
 
-@router.post("/analyse/{biomodel_id}/diagram")
+@router.post("/analyse/{biomodel_id}/diagram", response_model=AnalysisResponse)
 async def analyse_diagram(
     biomodel_id: str,
     model: str = "openai-model",
