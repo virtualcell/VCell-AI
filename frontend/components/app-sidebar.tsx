@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   Search,
   History,
@@ -14,6 +15,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { getAccessToken, useUser } from "@auth0/nextjs-auth0/client";
 
 import {
   Sidebar,
@@ -39,14 +41,78 @@ const historyItems = [
   "VCML File Analysis of Calcium Models",
 ];
 
+interface BudgetInfo {
+  spend: number;
+  max_budget: number | null;
+  remaining_budget: number | null;
+}
+
 export function AppSidebar() {
   const pathname = usePathname();
   const { state } = useSidebar();
+  const { user, isLoading: isUserLoading } = useUser();
+  const [budget, setBudget] = useState<BudgetInfo | null>(null);
   const isCollapsed = state === "collapsed";
+
+  useEffect(() => {
+    if (isUserLoading || !user) {
+      return;
+    }
+
+    const controller = new AbortController();
+
+    const fetchBudget = async () => {
+      try {
+        const token = await getAccessToken();
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+        if (!apiUrl) {
+          throw new Error("NEXT_PUBLIC_API_URL is not configured");
+        }
+
+        const response = await fetch(`${apiUrl}/users/me/budget`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            accept: "application/json",
+          },
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error(`Budget request failed with status ${response.status}`);
+        }
+
+        setBudget((await response.json()) as BudgetInfo);
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          console.error("Failed to fetch budget", error);
+        }
+      }
+    };
+
+    fetchBudget();
+
+    return () => {
+      controller.abort();
+    };
+  }, [isUserLoading, user]);
 
   if (pathname == "/") {
     return null;
   }
+
+  const usagePercent =
+    budget?.max_budget && budget.max_budget > 0
+      ? Math.min((budget.spend / budget.max_budget) * 100, 100)
+      : 0;
+  const budgetSummary = !budget
+    ? "Loading..."
+    : budget.max_budget === null
+      ? `$${budget.spend.toFixed(2)} spent, unlimited budget`
+      : `$${budget.remaining_budget!.toFixed(2)} remaining of $${budget.max_budget.toFixed(2)}`;
+  const budgetCollapsedText = !budget
+    ? "--"
+    : `$${budget.spend.toFixed(2)}`;
 
   return (
     <Sidebar className="border-r border-slate-200" collapsible="icon">
@@ -244,25 +310,26 @@ export function AppSidebar() {
 
       <SidebarFooter className="border-t border-slate-200 p-4">
         <div className="space-y-3">
-          {/* Usage Progress Bar */}
+          {/* Budget Progress Bar */}
           <div className="space-y-2">
             {!isCollapsed && (
               <div className="flex justify-between items-center text-xs text-slate-600">
-                <span>Monthly Token Limit</span>
-                <span>600K remaining</span>
+                <span>Budget</span>
               </div>
             )}
             <div className="w-full bg-slate-200 rounded-full h-2">
               <div
                 className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                style={{ width: "40%" }}
+                style={{ width: `${usagePercent}%` }}
               ></div>
             </div>
             {isCollapsed ? (
-              <div className="text-xs text-slate-500 text-center">0.4M</div>
+              <div className="text-xs text-slate-500 text-center">
+                {budgetCollapsedText}
+              </div>
             ) : (
               <div className="text-xs text-slate-500 text-center">
-                400K of 1M tokens used this month
+                {budgetSummary}
               </div>
             )}
           </div>
