@@ -111,7 +111,7 @@ export function AppSidebar() {
     return () => {
       controller.abort();
     };
-  }, [isUserLoading, user]);
+  }, [isUserLoading, user?.sub]);
 
   if (pathname == "/") {
     return null;
