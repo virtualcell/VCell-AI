@@ -33,11 +33,11 @@ spec:
                 secretKeyRef:
                   name: litellm-secrets
                   key: master-key
-            - name: OPENAI_API_KEY
+            - name: AZURE_API_KEY
               valueFrom:
                 secretKeyRef:
                   name: litellm-secrets
-                  key: openai-api-key
+                  key: azure-api-key
             - name: LANGFUSE_SECRET_KEY
               valueFrom:
                 secretKeyRef:

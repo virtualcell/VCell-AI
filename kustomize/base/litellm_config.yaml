@@ -1,8 +1,12 @@
 model_list:
+  # "openai-model" is the alias the app requests (backend LLMModel Literal +
+  # frontend). It is backed by Azure OpenAI here — no hosted-OpenAI key needed.
   - model_name: openai-model
     litellm_params:
-      model: openai/gpt-4o
-      api_key: os.environ/OPENAI_API_KEY
+      model: os.environ/AZURE_MODEL          # e.g. azure/<chat-deployment-name>
+      api_base: os.environ/AZURE_API_BASE
+      api_key: os.environ/AZURE_API_KEY
+      api_version: os.environ/AZURE_API_VERSION
 
   - model_name: local-model
     litellm_params:

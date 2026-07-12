@@ -65,12 +65,12 @@ ${SCRIPTS_DIR}/sealed_secret_ghcr.sh \
     > ${SECRETS_DIR}/secret-ghcr.yaml
 echo "✓ secret-ghcr.yaml generated"
 
-# litellm-secrets: <namespace> <master_key> <openai_api_key> <langfuse_secret_key> <langfuse_public_key> <database_url>
+# litellm-secrets: <namespace> <master_key> <azure_api_key> <langfuse_secret_key> <langfuse_public_key> <database_url>
 echo "Generating LiteLLM secrets..."
 ${SCRIPTS_DIR}/sealed_secret_litellm.sh \
     --controller-name ${SEALED_SECRETS_CONTROLLER_NAME} \
     --controller-namespace ${SEALED_SECRETS_CONTROLLER_NAMESPACE} \
-    ${NAMESPACE} "${LITELLM_MASTER_KEY}" "${OPENAI_API_KEY}" "${LANGFUSE_SECRET_KEY}" "${LANGFUSE_PUBLIC_KEY}" "${DATABASE_URL}" \
+    ${NAMESPACE} "${LITELLM_MASTER_KEY}" "${AZURE_API_KEY}" "${LANGFUSE_SECRET_KEY}" "${LANGFUSE_PUBLIC_KEY}" "${DATABASE_URL}" \
     > ${SECRETS_DIR}/secret-litellm.yaml
 echo "✓ secret-litellm.yaml generated"
 
