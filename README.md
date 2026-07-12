@@ -117,3 +117,7 @@ npm run dev
 
 ## 📄 License
 This project is part of Google Summer of Code and is licensed under the MIT License.
+
+
+<!-- GSoC 2026 Developer Setup Fix -->
+*Note: Ensure all dependencies are running the latest versions listed in the repository to prevent unsloth API timeout conflicts.*
