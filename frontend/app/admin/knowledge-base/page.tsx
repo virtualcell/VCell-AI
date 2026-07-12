@@ -38,6 +38,8 @@ export default function KnowledgeBasePage() {
   const [fileContent, setFileContent] = useState<FileContent | null>(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [fileToDelete, setFileToDelete] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -129,11 +131,17 @@ export default function KnowledgeBasePage() {
     }
   };
 
-  const handleDeleteFile = async (fileName: string) => {
-    if (!confirm("Are you sure you want to delete this file?")) return;
+  const handleDeleteFile = (fileName: string) => {
+    setFileToDelete(fileName);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!fileToDelete) return;
+    setShowDeleteModal(false);
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/kb/files/${encodeURIComponent(fileName)}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/kb/files/${encodeURIComponent(fileToDelete)}`,
         {
           method: "DELETE",
           headers: { accept: "application/json" },
@@ -142,15 +150,16 @@ export default function KnowledgeBasePage() {
       if (!res.ok) throw new Error("Failed to delete file");
       const data = await res.json();
       if (data.status !== "success") throw new Error("Failed to delete file");
-      setFiles((prev) => prev.filter((file) => file.name !== fileName));
-      setFilteredFiles((prev) => prev.filter((file) => file.name !== fileName));
-      // If the deleted file is currently previewed, close the modal
-      if (selectedFile && selectedFile.name === fileName) {
+      setFiles((prev) => prev.filter((file) => file.name !== fileToDelete));
+      setFilteredFiles((prev) => prev.filter((file) => file.name !== fileToDelete));
+      if (selectedFile && selectedFile.name === fileToDelete) {
         setSelectedFile(null);
         setFileContent(null);
       }
     } catch (err) {
       setError("Failed to delete file");
+    } finally {
+      setFileToDelete(null);
     }
   };
 
@@ -334,6 +343,42 @@ export default function KnowledgeBasePage() {
             )}
           </CardContent>
         </Card>
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-sm shadow-xl">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                  <Trash2 className="h-5 w-5 text-red-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-900">Delete File</h3>
+              </div>
+              <p className="text-sm text-slate-600 mb-1 mt-3">
+                Are you sure you want to delete
+              </p>
+              <p className="text-sm font-medium text-slate-900 mb-5 break-all">
+                {fileToDelete}
+              </p>
+              <p className="text-xs text-slate-500 mb-6">This action cannot be undone.</p>
+              <div className="flex gap-3 justify-end">
+                <Button
+                  variant="outline"
+                  onClick={() => { setShowDeleteModal(false); setFileToDelete(null); }}
+                  className="border-slate-300 text-slate-700 hover:bg-slate-50"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={confirmDelete}
+                  className="bg-red-600 hover:bg-red-700 text-white border-0"
+                >
+                  Delete
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Upload Modal */}
         {showUploadModal && (
