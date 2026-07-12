@@ -1,12 +1,22 @@
 model_list:
   # "openai-model" is the alias the app requests (backend LLMModel Literal +
-  # frontend). It is backed by Azure OpenAI here — no hosted-OpenAI key needed.
+  # frontend). It is a GROUP of two interchangeable chat backends — Azure OpenAI
+  # and hosted OpenAI. Provide a key for EITHER (or both); LiteLLM routes to
+  # whichever authenticates and cools down one that fails. This gives deploy-time
+  # flexibility without committing to a provider up front.
+  #
+  # NOTE: knowledge-base *embeddings* still use Azure directly (backend), so the
+  # RAG features specifically require an Azure key regardless of the above.
   - model_name: openai-model
     litellm_params:
       model: os.environ/AZURE_MODEL          # e.g. azure/<chat-deployment-name>
-      api_base: os.environ/AZURE_API_BASE
+      api_base: os.environ/AZURE_ENDPOINT    # same value the backend uses for embeddings
       api_key: os.environ/AZURE_API_KEY
       api_version: os.environ/AZURE_API_VERSION
+  - model_name: openai-model
+    litellm_params:
+      model: openai/gpt-4o
+      api_key: os.environ/OPENAI_API_KEY
 
   - model_name: local-model
     litellm_params:

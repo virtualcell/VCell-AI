@@ -33,11 +33,17 @@ spec:
                 secretKeyRef:
                   name: litellm-secrets
                   key: master-key
+            # Provide a key for EITHER provider (or both); see litellm_config.yaml.
             - name: AZURE_API_KEY
               valueFrom:
                 secretKeyRef:
                   name: litellm-secrets
                   key: azure-api-key
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: litellm-secrets
+                  key: openai-api-key
             - name: LANGFUSE_SECRET_KEY
               valueFrom:
                 secretKeyRef:

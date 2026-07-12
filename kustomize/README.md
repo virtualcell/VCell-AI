@@ -12,9 +12,9 @@ Deploys the VCell-AI services from `docker-compose.yml` to Kubernetes:
 
 The backend calls `litellm` for chat (`LITELLM_URL`, per-user virtual keys via
 `LITELLM_MASTER_KEY`) and also uses Azure directly for KB **embeddings**. LiteLLM
-routes `openai-model` (backed by **Azure OpenAI** — the same account, so no separate
-hosted-OpenAI key) with a fallback to `local-model` (in-cluster Ollama), and
-persists virtual keys/budgets to a Postgres (`DATABASE_URL`, e.g. Supabase's
+routes `openai-model` (a group backed by **Azure OpenAI and/or hosted OpenAI** —
+provide a key for either) with a fallback to `local-model` (in-cluster Ollama),
+and persists virtual keys/budgets to a Postgres (`DATABASE_URL`, e.g. Supabase's
 session pooler). Structured after `../sms-api/kustomize`.
 
 ## Layout
@@ -62,7 +62,7 @@ sensitive values are sealed:
 
 - **backend-secrets** → `AZURE_API_KEY`, `LANGFUSE_SECRET_KEY`, `LANGFUSE_PUBLIC_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `LITELLM_MASTER_KEY`
 - **frontend-secrets** → `AUTH0_SECRET`, `AUTH0_CLIENT_SECRET`
-- **litellm-secrets** → `LITELLM_MASTER_KEY`, `AZURE_API_KEY`, `LANGFUSE_SECRET_KEY`, `LANGFUSE_PUBLIC_KEY`, `DATABASE_URL`
+- **litellm-secrets** → `LITELLM_MASTER_KEY`, `AZURE_API_KEY`, `OPENAI_API_KEY`, `LANGFUSE_SECRET_KEY`, `LANGFUSE_PUBLIC_KEY`, `DATABASE_URL` (the `openai-model` alias accepts **either** an Azure key or a hosted-OpenAI key — provide whichever you have; embeddings still need the Azure one)
 - **ghcr-secret** → ghcr.io image-pull credentials (`.dockerconfigjson`)
 
 (`LITELLM_MASTER_KEY` and the Langfuse keys are intentionally in more than one
