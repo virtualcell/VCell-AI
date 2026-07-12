@@ -250,12 +250,12 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
 
   return (
     <Card className="h-full flex flex-col shadow-sm border-slate-200">
-      <CardHeader className="bg-slate-50 border-b border-slate-200 flex-shrink-0">
+      {cardTitle && <CardHeader className="bg-slate-50 border-b border-slate-200 flex-shrink-0">
         <CardTitle className="flex items-center gap-2 text-slate-900">
           <MessageSquare className="h-5 w-5" />
           {cardTitle}
         </CardTitle>
-      </CardHeader>
+      </CardHeader>}
       <CardContent className="flex-1 p-0 overflow-hidden">
         <ScrollArea className="h-full p-4">
           <div className="space-y-4">
