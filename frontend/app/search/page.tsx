@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Filter, ChevronsUpDown } from "lucide-react";
+import { Search, Filter, ChevronsUpDown, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -453,6 +453,41 @@ export default function BiomodelSearchPage() {
             </div>
           </div>
         )}
+
+        {/* Publications Questions Section */}
+        <div className="border-t border-slate-300 pt-8 mt-8">
+          <h2 className="text-xl font-semibold text-slate-900 mb-2 flex items-center gap-2">
+            <BookOpen className="h-5 w-5 text-blue-600" />
+            Publication Questions
+          </h2>
+          <p className="text-slate-600 text-sm mb-4">
+            Explore VCell biomodel publications using the AI assistant.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Link href="/chat" className="flex-1">
+              <Button
+                variant="outline"
+                className="w-full justify-start text-left h-auto py-3 px-4 border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition-colors"
+              >
+                <Search className="h-4 w-4 mr-3 text-blue-600 flex-shrink-0" />
+                <span className="text-sm text-slate-700">
+                  Are there VCell biomodels featured in Nature journal?
+                </span>
+              </Button>
+            </Link>
+            <Link href="/chat" className="flex-1">
+              <Button
+                variant="outline"
+                className="w-full justify-start text-left h-auto py-3 px-4 border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition-colors"
+              >
+                <Search className="h-4 w-4 mr-3 text-blue-600 flex-shrink-0" />
+                <span className="text-sm text-slate-700">
+                  List all publications that feature VCell models of calcium.
+                </span>
+              </Button>
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );
