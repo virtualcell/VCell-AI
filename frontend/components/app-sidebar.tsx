@@ -6,7 +6,6 @@ import {
   Sparkles,
   FlaskConical,
   LogOut,
-  Shield,
   FolderOpen,
   Settings,
 } from "lucide-react";
@@ -259,19 +258,6 @@ export function AppSidebar() {
           )}
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem key="AdminDashboard">
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === "/admin"}
-                  className="data-[active=true]:bg-purple-50 data-[active=true]:text-purple-700 data-[active=true]:border-r-2 data-[active=true]:border-purple-500"
-                  tooltip={isCollapsed ? "Admin Dashboard" : undefined}
-                >
-                  <Link href="/admin" className="flex items-center gap-3">
-                    <Shield className="h-4 w-4 text-purple-500" />
-                    {!isCollapsed && <span>Admin Dashboard</span>}
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
               <SidebarMenuItem key="KnowledgeBase">
                 <SidebarMenuButton
                   asChild

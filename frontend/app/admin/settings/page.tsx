@@ -9,7 +9,6 @@ import {
   Settings,
   Shield,
   Save,
-  ArrowLeft,
   CheckCircle,
   AlertCircle,
   Server,
@@ -130,14 +129,6 @@ export default function AdminSettingsPage() {
               <p className="text-slate-600 mt-2">
                 Configure LLM settings and preferences
               </p>
-            </div>
-            <div className="flex gap-3">
-              <Button
-                onClick={() => window.open("/admin", "_blank")}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded border border-blue-600 text-blue-700 bg-white font-semibold shadow-sm transition-colors hover:bg-blue-50"
-              >
-                <ArrowLeft className="h-4 w-4" /> Back to Dashboard
-              </Button>
             </div>
           </div>
         </div>

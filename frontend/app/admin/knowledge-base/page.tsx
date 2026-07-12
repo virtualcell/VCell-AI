@@ -210,12 +210,6 @@ export default function KnowledgeBasePage() {
               >
                 <Plus className="h-4 w-4" /> Upload File
               </Button>
-              <Button
-                onClick={() => window.open("/admin", "_blank")}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded border border-blue-600 text-blue-700 bg-white font-semibold shadow-sm transition-colors hover:bg-blue-50"
-              >
-                <FileText className="h-4 w-4" /> Back to Dashboard
-              </Button>
             </div>
           </div>
         </div>
