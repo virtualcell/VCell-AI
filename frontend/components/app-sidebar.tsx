@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import {
   Search,
-  History,
   Sparkles,
   FlaskConical,
   LogOut,
@@ -32,14 +31,6 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
-
-const historyItems = [
-  "Calcium Biomodel Comparison",
-  "Protein Details on Tutorial Models",
-  "Biomodels authored by ModelBrick",
-  "Count of Rule-based models",
-  "VCML File Analysis of Calcium Models",
-];
 
 interface BudgetInfo {
   spend: number;
@@ -300,29 +291,6 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
-        {!isCollapsed && (
-          <>
-            <SidebarSeparator />
-            <SidebarGroup>
-              <SidebarGroupLabel className="text-slate-700 font-medium flex items-center gap-2">
-                <History className="h-4 w-4" />
-                Recent History
-              </SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {historyItems.map((item, index) => (
-                    <SidebarMenuItem key={index}>
-                      <SidebarMenuButton className="text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-50">
-                        <span className="truncate">{item}</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </>
-        )}
       </SidebarContent>
 
       <SidebarFooter className="border-t border-slate-200 p-4">
