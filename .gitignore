@@ -20,6 +20,9 @@ kustomize/overlays/*/secrets.dat
 kustomize/overlays/*/secret-backend.yaml
 kustomize/overlays/*/secret-frontend.yaml
 kustomize/overlays/*/secret-ghcr.yaml
+kustomize/overlays/*/secret-litellm.yaml
 
 qdrant_storage
-litellm.env
+# repo-root docker-compose secrets file — anchored with a leading slash so it does
+# NOT also ignore the non-secret kustomize/config/*/litellm.env config files.
+/litellm.env

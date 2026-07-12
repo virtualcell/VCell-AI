@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: litellm
+  labels:
+    app: litellm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: litellm
+  template:
+    metadata:
+      labels:
+        app: litellm
+    spec:
+      containers:
+        - name: litellm
+          image: ghcr.io/berriai/litellm:main-stable
+          imagePullPolicy: IfNotPresent
+          args: ["--config", "/app/config.yaml"]
+          ports:
+            - containerPort: 4000
+          # Non-secret config (local-model alias + api_base, Langfuse host) comes
+          # from the litellm-config ConfigMap generated per-environment.
+          envFrom:
+            - configMapRef:
+                name: litellm-config
+          # Secrets come from the sealed "litellm-secrets" secret.
+          env:
+            - name: LITELLM_MASTER_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: litellm-secrets
+                  key: master-key
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: litellm-secrets
+                  key: openai-api-key
+            - name: LANGFUSE_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: litellm-secrets
+                  key: langfuse-secret-key
+            - name: LANGFUSE_PUBLIC_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: litellm-secrets
+                  key: langfuse-public-key
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: litellm-secrets
+                  key: database-url
+          volumeMounts:
+            - name: litellm-config-file
+              mountPath: /app/config.yaml
+              subPath: config.yaml
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          readinessProbe:
+            httpGet:
+              path: /health/liveliness
+              port: 4000
+            initialDelaySeconds: 15
+            periodSeconds: 15
+      volumes:
+        - name: litellm-config-file
+          configMap:
+            name: litellm-config-file
+      imagePullSecrets:
+        - name: ghcr-secret
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: litellm
+  labels:
+    app: litellm
+spec:
+  ports:
+    - name: "4000"
+      port: 4000
+      targetPort: 4000
+  selector:
+    app: litellm

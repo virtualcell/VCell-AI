@@ -5,9 +5,9 @@ namespace: vcell-ai-rke-dev
 
 images:
   - name: ghcr.io/virtualcell/vcell-ai-backend
-    newTag: 0.1.6.2
+    newTag: 0.1.7
   - name: ghcr.io/virtualcell/vcell-ai-frontend
-    newTag: 0.1.6.2
+    newTag: 0.1.7
 
 replicas:
   - count: 1
@@ -22,5 +22,6 @@ resources:
   - secret-backend.yaml
   - secret-frontend.yaml
   - secret-ghcr.yaml
+  - secret-litellm.yaml
   - ../../config/vcell-ai-rke-dev
   - ../../base

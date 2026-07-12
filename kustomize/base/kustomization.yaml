@@ -5,3 +5,12 @@ resources:
   - qdrant.yaml
   - backend.yaml
   - frontend.yaml
+  - litellm.yaml
+  - ollama.yaml
+
+# litellm_config.yaml is env-agnostic, so it is generated here (mounted read-only
+# into the litellm pod at /app/config.yaml).
+configMapGenerator:
+  - name: litellm-config-file
+    files:
+      - config.yaml=litellm_config.yaml

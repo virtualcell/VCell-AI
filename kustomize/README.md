@@ -1,41 +1,53 @@
 # VCell-AI — Kubernetes deployment (kustomize + sealed secrets)
 
-Deploys the three VCell-AI services from `docker-compose.yml` to Kubernetes:
+Deploys the VCell-AI services from `docker-compose.yml` to Kubernetes:
 
 | Component | Image | Port | Notes |
 |-----------|-------|------|-------|
 | `qdrant`   | `qdrant/qdrant`                          | 6333 / 6334 | StatefulSet + 10Gi PVC |
 | `backend`  | `ghcr.io/virtualcell/vcell-ai-backend`   | 8000 | FastAPI |
 | `frontend` | `ghcr.io/virtualcell/vcell-ai-frontend`  | 3000 | Next.js |
+| `litellm`  | `ghcr.io/berriai/litellm:main-stable`    | 4000 | LLM gateway; chat routes through it with per-user virtual keys/budgets |
+| `ollama`   | `ollama/ollama`                          | 11434 | StatefulSet + 20Gi PVC; serves the `local-model` fallback (CPU; pulls `llama3.1:8b` on start) |
 
-Structured after `../sms-api/kustomize`.
+The backend calls `litellm` for chat (`LITELLM_URL`, per-user virtual keys via
+`LITELLM_MASTER_KEY`) but still uses Azure directly for KB **embeddings**. LiteLLM
+routes `openai-model` (hosted OpenAI gpt-4o) with a fallback to `local-model`
+(in-cluster Ollama), and persists virtual keys/budgets to a Postgres
+(`DATABASE_URL`, e.g. Supabase). Structured after `../sms-api/kustomize`.
 
 ## Layout
 
 ```
 kustomize/
-├── base/                     # Deployments/StatefulSet + Services (env-agnostic)
+├── base/                     # Deployments/StatefulSets + Services (env-agnostic)
 │   ├── qdrant.yaml
 │   ├── backend.yaml
 │   ├── frontend.yaml
+│   ├── litellm.yaml
+│   ├── ollama.yaml
+│   ├── litellm_config.yaml   # -> litellm-config-file ConfigMap (mounted at /app/config.yaml)
 │   └── kustomization.yaml
-├── config/<env>/             # non-secret config -> ConfigMaps (backend/frontend .env)
+├── config/<env>/             # non-secret config -> ConfigMaps
 │   ├── backend.env
 │   ├── frontend.env
+│   ├── litellm.env
 │   └── kustomization.yaml
 ├── overlays/<env>/           # per-environment: namespace, images, ingress, secrets
 │   ├── kustomization.yaml
 │   ├── ingress.yaml
-│   ├── secrets.sh            # master script -> generates the 3 sealed secrets
+│   ├── secrets.sh            # master script -> generates the 4 sealed secrets
 │   ├── secrets.dat.template  # copy to secrets.dat (gitignored) and fill in
 │   ├── secrets.dat           # (gitignored) plaintext inputs
 │   ├── secret-backend.yaml   # (gitignored) generated SealedSecret
 │   ├── secret-frontend.yaml  # (gitignored) generated SealedSecret
-│   └── secret-ghcr.yaml      # (gitignored) generated SealedSecret
+│   ├── secret-ghcr.yaml      # (gitignored) generated SealedSecret
+│   └── secret-litellm.yaml   # (gitignored) generated SealedSecret
 └── scripts/                  # sealing + build helpers
     ├── sealed_secret_backend.sh
     ├── sealed_secret_frontend.sh
     ├── sealed_secret_ghcr.sh
+    ├── sealed_secret_litellm.sh
     └── build_and_push.sh
 ```
 
@@ -47,9 +59,15 @@ Environments (`<env>`): `vcell-ai-rke` (prod, on-prem UCHC RKE), `vcell-ai-rke-d
 Non-secret configuration lives in `config/<env>/*.env` (committed). Only truly
 sensitive values are sealed:
 
-- **backend-secrets** → `AZURE_API_KEY`, `LANGFUSE_SECRET_KEY`, `LANGFUSE_PUBLIC_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
+- **backend-secrets** → `AZURE_API_KEY`, `LANGFUSE_SECRET_KEY`, `LANGFUSE_PUBLIC_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `LITELLM_MASTER_KEY`
 - **frontend-secrets** → `AUTH0_SECRET`, `AUTH0_CLIENT_SECRET`
+- **litellm-secrets** → `LITELLM_MASTER_KEY`, `OPENAI_API_KEY`, `LANGFUSE_SECRET_KEY`, `LANGFUSE_PUBLIC_KEY`, `DATABASE_URL`
 - **ghcr-secret** → ghcr.io image-pull credentials (`.dockerconfigjson`)
+
+(`LITELLM_MASTER_KEY` and the Langfuse keys are intentionally in more than one
+sealed secret — the backend needs the master key to provision virtual keys, and
+LiteLLM needs it plus Langfuse for tracing. Provide each value once in
+`secrets.dat`; `secrets.sh` seals it into the right secrets.)
 
 `secrets.dat` (plaintext) and the generated `secret-*.yaml` are **gitignored**.
 Run `secrets.sh` to (re)generate the sealed manifests before applying an overlay.
