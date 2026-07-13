@@ -65,11 +65,13 @@ spec:
               subPath: config.yaml
           resources:
             requests:
-              memory: "256Mi"
-              cpu: "100m"
+              memory: "512Mi"
+              cpu: "250m"
             limits:
-              memory: "1Gi"
-              cpu: "500m"
+              # LiteLLM runs Prisma migrate + the proxy at startup, which spikes
+              # well past 1Gi (was getting OOMKilled/137). 2Gi gives headroom.
+              memory: "2Gi"
+              cpu: "1"
           readinessProbe:
             httpGet:
               path: /health/liveliness
