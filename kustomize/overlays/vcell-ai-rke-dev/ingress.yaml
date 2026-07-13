@@ -21,7 +21,7 @@ spec:
   tls:
     - hosts:
         - vcell-ai-dev.cam.uchc.edu
-      secretName: letsencrypt-staging-vcell-ai-dev-tls
+      secretName: letsencrypt-prod-vcell-ai-dev-tls
   rules:
     - host: vcell-ai-dev.cam.uchc.edu
       http:
@@ -41,13 +41,13 @@ metadata:
   labels:
     app: frontend-ingress
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-staging"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   ingressClassName: nginx
   tls:
     - hosts:
         - vcell-ai-dev.cam.uchc.edu
-      secretName: letsencrypt-staging-vcell-ai-dev-tls
+      secretName: letsencrypt-prod-vcell-ai-dev-tls
   rules:
     - host: vcell-ai-dev.cam.uchc.edu
       http:
