@@ -15,7 +15,7 @@ model_list:
       api_version: os.environ/AZURE_API_VERSION
   - model_name: openai-model
     litellm_params:
-      model: openai/gpt-4o
+      model: os.environ/OPENAI_MODEL
       api_key: os.environ/OPENAI_API_KEY
 
   - model_name: local-model
