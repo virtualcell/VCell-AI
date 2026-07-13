@@ -204,6 +204,34 @@ async def get_vcml_file(
     )
 
 
+def _has_defined_molecules(bngl_content: str) -> bool:
+    """
+    Checks whether the "molecule types" block in BNGL content defines any
+    molecules. VCell's BNGL export always names this block
+    "begin molecule types" / "end molecule types" (confirmed against several
+    real exported models).
+
+    Args:
+        bngl_content (str): Raw BNGL content.
+    Returns:
+        bool: True if the block exists and lists at least one molecule;
+        False if the block is missing or empty.
+    """
+    match = re.search(
+        r"begin\s+molecule types\s*\n(.*?)\n\s*end\s+molecule types",
+        bngl_content,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+    if not match:
+        return False
+
+    lines = [
+        line for line in match.group(1).splitlines()
+        if line.strip() and not line.strip().startswith("#")
+    ]
+    return bool(lines)
+
+
 @observe(name="GET_BNGL_FILE")
 async def get_bngl_file(
     biomodel_id: str, max_retries: int = 3
@@ -250,6 +278,13 @@ async def get_bngl_file(
                 # Check if content is empty or minimal (some models might return empty BNGL)
                 if not bngl_content or len(bngl_content) < 50:
                     logger.info(f"Empty or minimal BNGL content for biomodel {biomodel_id}")
+                    return ""
+
+                # Skip visualization if the molecule-definitions block is missing or empty
+                if not _has_defined_molecules(bngl_content):
+                    logger.info(
+                        f"No molecule definitions found for biomodel {biomodel_id}, skipping visualization"
+                    )
                     return ""
 
                 return bngl_content
