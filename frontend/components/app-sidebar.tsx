@@ -117,19 +117,30 @@ export function AppSidebar() {
     return null;
   }
 
+  const isLoggedOut = !isUserLoading && !user;
+
   const usagePercent =
     budget?.max_budget && budget.max_budget > 0
       ? Math.min((budget.spend / budget.max_budget) * 100, 100)
       : 0;
-  const remainingText = !budget
-    ? "Loading..."
-    : `${formatBudget(budget.remaining_budget)} remaining`;
-  const budgetSummary = !budget
-    ? "Loading..."
-    : budget.max_budget === null
-      ? `${formatBudget(budget.spend)} spent, unlimited budget`
-      : `${formatBudget(budget.spend)} spent of ${formatBudget(budget.max_budget)} budget`;
-  const budgetCollapsedText = !budget ? "--" : formatBudget(budget.spend);
+  const remainingText = isLoggedOut
+    ? "Log in to see your token usage"
+    : !budget
+      ? "Loading..."
+      : `${formatBudget(budget.remaining_budget)} remaining`;
+  const budgetSummary = isLoggedOut
+    ? "Log in to see your token usage"
+    : !budget
+      ? "Loading..."
+      : budget.max_budget === null
+        ? `${formatBudget(budget.spend)} spent, unlimited budget`
+        : `${formatBudget(budget.spend)} spent of ${formatBudget(budget.max_budget)} budget`;
+  const budgetCollapsedText = isLoggedOut
+    ? "Log in"
+    : !budget
+      ? "--"
+      : formatBudget(budget.spend);
+  const loginReturnHref = `/auth/login?returnTo=${encodeURIComponent(pathname)}`;
 
   return (
     <Sidebar className="border-r border-slate-200" collapsible="icon">
@@ -332,7 +343,13 @@ export function AppSidebar() {
             {!isCollapsed && (
               <div className="flex justify-between items-center text-xs text-slate-600">
                 <span>Budget</span>
-                <span>{remainingText}</span>
+                {isLoggedOut ? (
+                  <Link href={loginReturnHref} className="text-blue-600 hover:underline">
+                    {remainingText}
+                  </Link>
+                ) : (
+                  <span>{remainingText}</span>
+                )}
               </div>
             )}
             <div className="w-full bg-slate-200 rounded-full h-2">
@@ -343,11 +360,23 @@ export function AppSidebar() {
             </div>
             {isCollapsed ? (
               <div className="text-xs text-slate-500 text-center">
-                {budgetCollapsedText}
+                {isLoggedOut ? (
+                  <Link href={loginReturnHref} className="text-blue-600 hover:underline">
+                    {budgetCollapsedText}
+                  </Link>
+                ) : (
+                  budgetCollapsedText
+                )}
               </div>
             ) : (
               <div className="text-xs text-slate-500 text-center">
-                {budgetSummary}
+                {isLoggedOut ? (
+                  <Link href={loginReturnHref} className="text-blue-600 hover:underline">
+                    {budgetSummary}
+                  </Link>
+                ) : (
+                  budgetSummary
+                )}
               </div>
             )}
           </div>

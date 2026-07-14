@@ -15,6 +15,7 @@ import Image from "next/image";
 
 const loginHref = "/auth/login?returnTo=/chat";
 const signupHref = "/auth/login?returnTo=/chat&screen_hint=signup";
+const exploreHref = "/search";
 
 export default function LandingPage() {
   return (
@@ -78,7 +79,7 @@ export default function LandingPage() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link href={loginHref}>
+              <Link href={exploreHref}>
                 <Button
                   size="lg"
                   className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
@@ -87,7 +88,7 @@ export default function LandingPage() {
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
-              <Link href={signupHref}>
+              <Link href={exploreHref}>
                 <Button
                   variant="outline"
                   size="lg"
