@@ -22,7 +22,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { ChatBox } from "@/components/ChatBox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getAccessToken } from "@auth0/nextjs-auth0/client";
+import { getAccessToken, useUser } from "@auth0/nextjs-auth0/client";
+import { LoginRequiredDialog } from "@/components/login-required-dialog";
 
 interface AnalysisResults {
   title: string;
@@ -63,6 +64,8 @@ export default function AnalysisResultsPage({
   const [combinedMessages, setCombinedMessages] = useState<string[]>([]);
   const [biomodelData, setBiomodelData] = useState<BiomodelDetail | null>(null);
   const [biomodelLoading, setBiomodelLoading] = useState(true);
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const { user, isLoading: isUserLoading } = useUser();
 
   useEffect(() => {
     const fetchBiomodelData = async () => {
@@ -88,6 +91,13 @@ export default function AnalysisResultsPage({
   }, [id]);
 
   useEffect(() => {
+    if (isUserLoading) return;
+    if (!user) {
+      setShowLoginDialog(true);
+      setIsAnalysisLoading(false);
+      return;
+    }
+
     const fetchDiagramAnalysis = async () => {
       setIsAnalysisLoading(true);
       setAnalysisError("");
@@ -154,7 +164,7 @@ export default function AnalysisResultsPage({
     };
 
     fetchBothAnalyses();
-  }, [id, prompt]);
+  }, [id, prompt, isUserLoading, user]);
 
   // Create combined messages when analyses are ready
   useEffect(() => {
@@ -247,6 +257,7 @@ export default function AnalysisResultsPage({
 
   return (
     <div className="min-h-screen bg-slate-50">
+      <LoginRequiredDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />
       <div className="container mx-auto p-8 max-w-6xl">
         <Card className="mb-10 shadow-lg border-slate-200">
           <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-50 border-b border-slate-200 px-6 py-5 flex flex-col md:flex-row md:items-center md:justify-between">
