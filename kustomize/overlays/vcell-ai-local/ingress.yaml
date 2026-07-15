@@ -31,6 +31,10 @@ metadata:
   name: frontend-ingress
   labels:
     app: frontend-ingress
+  annotations:
+    # Auth0 sets a large encrypted session cookie on /auth/callback; bump the
+    # nginx proxy buffer so it doesn't 502 ("upstream sent too big header").
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
 spec:
   ingressClassName: nginx
   rules:
