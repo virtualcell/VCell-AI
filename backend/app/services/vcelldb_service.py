@@ -204,6 +204,126 @@ async def get_vcml_file(
     )
 
 
+def _has_defined_molecules(bngl_content: str) -> bool:
+    """
+    Checks whether the "molecule types" block in BNGL content defines any
+    molecules. VCell's BNGL export always names this block
+    "begin molecule types" / "end molecule types" (confirmed against several
+    real exported models).
+
+    Args:
+        bngl_content (str): Raw BNGL content.
+    Returns:
+        bool: True if the block exists and lists at least one molecule;
+        False if the block is missing or empty.
+    """
+    match = re.search(
+        r"begin\s+molecule types\s*\n(.*?)\n\s*end\s+molecule types",
+        bngl_content,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+    if not match:
+        return False
+
+    lines = [
+        line for line in match.group(1).splitlines()
+        if line.strip() and not line.strip().startswith("#")
+    ]
+    return bool(lines)
+
+
+@observe(name="GET_BNGL_FILE")
+async def get_bngl_file(
+    biomodel_id: str, max_retries: int = 3
+) -> str:
+    """
+    Fetches the BNGL file content for a given biomodel with retry logic.
+
+    Args:
+        biomodel_id (str): ID of the biomodel.
+        max_retries (int): Maximum number of retry attempts.
+    Returns:
+        str: BNGL content of the biomodel, or empty string if not rule-based.
+    """
+    logger.info(f"Fetching BNGL file for biomodel: {biomodel_id}")
+
+    # Check connectivity first
+    if not await check_vcell_connectivity():
+        logger.error(
+            "VCell API is not reachable. Please check your network connection and DNS settings."
+        )
+        raise Exception(
+            "VCell API is not reachable. Please check your network connection and DNS settings."
+        )
+
+    for attempt in range(max_retries + 1):
+        try:
+            url = f"{VCELL_API_BASE_URL}/biomodel/{biomodel_id}/biomodel.bngl"
+            logger.info(
+                f"Requesting URL: {url} (attempt {attempt + 1}/{max_retries + 1})"
+            )
+
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.get(url)
+                logger.info(f"Response status: {response.status_code}")
+                logger.info(f"Response headers: {dict(response.headers)}")
+
+                if response.status_code == 404:
+                    logger.info(f"BNGL not available for biomodel {biomodel_id}")
+                    return ""
+
+                response.raise_for_status()
+                bngl_content = response.text.strip()
+
+                # Check if content is empty or minimal (some models might return empty BNGL)
+                if not bngl_content or len(bngl_content) < 50:
+                    logger.info(f"Empty or minimal BNGL content for biomodel {biomodel_id}")
+                    return ""
+
+                # Skip visualization if the molecule-definitions block is missing or empty
+                if not _has_defined_molecules(bngl_content):
+                    logger.info(
+                        f"No molecule definitions found for biomodel {biomodel_id}, skipping visualization"
+                    )
+                    return ""
+
+                return bngl_content
+
+        except httpx.HTTPStatusError as e:
+            # Note: a 404 is already handled above via the manual status
+            # check before raise_for_status(), so it can't land here.
+            logger.error(
+                f"HTTP error fetching BNGL file for biomodel {biomodel_id}: {e.response.status_code} - {e.response.text}"
+            )
+            if attempt == max_retries:
+                raise e
+            logger.warning(f"Retrying in {2 ** attempt} seconds...")
+            await asyncio.sleep(2**attempt)
+
+        except httpx.RequestError as e:
+            logger.error(
+                f"Request error fetching BNGL file for biomodel {biomodel_id}: {str(e)}"
+            )
+            if attempt == max_retries:
+                raise e
+            logger.warning(f"Retrying in {2 ** attempt} seconds...")
+            await asyncio.sleep(2**attempt)
+
+        except Exception as e:
+            logger.error(
+                f"Unexpected error fetching BNGL file for biomodel {biomodel_id}: {str(e)}"
+            )
+            if attempt == max_retries:
+                raise e
+            logger.warning(f"Retrying in {2 ** attempt} seconds...")
+            await asyncio.sleep(2**attempt)
+
+    # This should never be reached, but just in case
+    raise Exception(
+        f"Failed to fetch BNGL file for biomodel {biomodel_id} after {max_retries + 1} attempts"
+    )
+
+
 @observe(name="GET_SBML_FILE")
 async def get_sbml_file(biomodel_id: str) -> str:
     """

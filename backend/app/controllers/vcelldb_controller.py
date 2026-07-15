@@ -6,6 +6,7 @@ from app.services.vcelldb_service import (
     fetch_biomodels,
     fetch_simulation_details,
     get_vcml_file,
+    get_bngl_file,
     get_sbml_file,
     get_diagram_url,
     get_diagram_image,
@@ -67,6 +68,22 @@ async def get_vcml_controller(biomodel_id: str, truncate: bool = False) -> str:
         return await get_vcml_file(biomodel_id, truncate)
     except Exception as e:
         raise HTTPException(status_code=500, detail="Error fetching VCML URL.")
+
+
+async def get_bngl_controller(biomodel_id: str) -> dict:
+    """
+    Controller function to fetch the contents of the BNGL file for a biomodel.
+    Returns:
+        dict: Contains the BNGL data, or empty data if the model is not rule-based
+        (get_bngl_file already returns "" for that case).
+    Raises:
+        HTTPException: If the VCell API request fails.
+    """
+    try:
+        bngl_content = await get_bngl_file(biomodel_id)
+        return {"data": bngl_content}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Error fetching BNGL file.")
 
 
 async def get_sbml_controller(biomodel_id: str) -> str:
