@@ -8,11 +8,16 @@ WORKDIR /app
 COPY package.json package-lock.json* pnpm-lock.yaml* ./
 RUN npm install
 
-# 4. Copy .env file
-COPY .env ./
-
-# 5. Copy the rest of the app
+# 4. Copy the rest of the app
 COPY . .
+
+# 5. NEXT_PUBLIC_* vars are inlined into the browser bundle at build time. Default
+# to a RELATIVE "/api" so the browser calls the same origin it's served from — the
+# ingress routes /api -> backend — which makes ONE image work in every environment
+# (dev/prod/local). Override with --build-arg NEXT_PUBLIC_API_URL=<absolute-url>
+# only if the frontend is served on a different origin than the API.
+ARG NEXT_PUBLIC_API_URL=/api
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 
 # 6. Expose the dev server port
 EXPOSE 3000
