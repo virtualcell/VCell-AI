@@ -2,8 +2,18 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { auth0 } from './lib/auth0';
 
 const publicRoutes = new Set(['/']);
+const publicRoutePrefixes = ['/search', '/chat', '/analyze'];
 
 const publicFilePattern = /\.(.*)$/;
+
+function isPublicRoute(pathname: string): boolean {
+  return (
+    publicRoutes.has(pathname) ||
+    publicRoutePrefixes.some(
+      (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+    )
+  );
+}
 
 export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
@@ -11,7 +21,7 @@ export async function middleware(request: NextRequest) {
   const authResponse = await auth0.middleware(request);
 
   if (
-    publicRoutes.has(pathname) ||
+    isPublicRoute(pathname) ||
     pathname.startsWith('/auth/') ||
     publicFilePattern.test(pathname)
   ) {

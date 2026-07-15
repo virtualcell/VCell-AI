@@ -3,13 +3,10 @@
 import { useEffect, useState } from "react";
 import {
   Search,
-  History,
   Sparkles,
   FlaskConical,
   LogOut,
-  Shield,
   FolderOpen,
-  Settings,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -32,14 +29,6 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
-
-const historyItems = [
-  "Calcium Biomodel Comparison",
-  "Protein Details on Tutorial Models",
-  "Biomodels authored by ModelBrick",
-  "Count of Rule-based models",
-  "VCML File Analysis of Calcium Models",
-];
 
 interface BudgetInfo {
   spend: number;
@@ -117,19 +106,30 @@ export function AppSidebar() {
     return null;
   }
 
+  const isLoggedOut = !isUserLoading && !user;
+
   const usagePercent =
     budget?.max_budget && budget.max_budget > 0
       ? Math.min((budget.spend / budget.max_budget) * 100, 100)
       : 0;
-  const remainingText = !budget
-    ? "Loading..."
-    : `${formatBudget(budget.remaining_budget)} remaining`;
-  const budgetSummary = !budget
-    ? "Loading..."
-    : budget.max_budget === null
-      ? `${formatBudget(budget.spend)} spent, unlimited budget`
-      : `${formatBudget(budget.spend)} spent of ${formatBudget(budget.max_budget)} budget`;
-  const budgetCollapsedText = !budget ? "--" : formatBudget(budget.spend);
+  const remainingText = isLoggedOut
+    ? "Log in to see your token usage"
+    : !budget
+      ? "Loading..."
+      : `${formatBudget(budget.remaining_budget)} remaining`;
+  const budgetSummary = isLoggedOut
+    ? "Log in to see your token usage"
+    : !budget
+      ? "Loading..."
+      : budget.max_budget === null
+        ? `${formatBudget(budget.spend)} spent, unlimited budget`
+        : `${formatBudget(budget.spend)} spent of ${formatBudget(budget.max_budget)} budget`;
+  const budgetCollapsedText = isLoggedOut
+    ? "Log in"
+    : !budget
+      ? "--"
+      : formatBudget(budget.spend);
+  const loginReturnHref = `/auth/login?returnTo=${encodeURIComponent(pathname)}`;
 
   return (
     <Sidebar className="border-r border-slate-200" collapsible="icon">
@@ -228,35 +228,6 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Configuration Section */}
-        <SidebarGroup>
-          {!isCollapsed && (
-            <SidebarGroupLabel className="text-slate-700 font-medium">
-              Configuration
-            </SidebarGroupLabel>
-          )}
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem key="AdminSettings">
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === "/admin/settings"}
-                  className="data-[active=true]:bg-blue-50 data-[active=true]:text-blue-700 data-[active=true]:border-r-2 data-[active=true]:border-blue-600"
-                  tooltip={isCollapsed ? "Settings" : undefined}
-                >
-                  <Link
-                    href="/admin/settings"
-                    className="flex items-center gap-3"
-                  >
-                    <Settings className="h-4 w-4" />
-                    {!isCollapsed && <span>Settings</span>}
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
         <SidebarSeparator />
 
         {/* Admin Section */}
@@ -268,19 +239,6 @@ export function AppSidebar() {
           )}
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem key="AdminDashboard">
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === "/admin"}
-                  className="data-[active=true]:bg-purple-50 data-[active=true]:text-purple-700 data-[active=true]:border-r-2 data-[active=true]:border-purple-500"
-                  tooltip={isCollapsed ? "Admin Dashboard" : undefined}
-                >
-                  <Link href="/admin" className="flex items-center gap-3">
-                    <Shield className="h-4 w-4 text-purple-500" />
-                    {!isCollapsed && <span>Admin Dashboard</span>}
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
               <SidebarMenuItem key="KnowledgeBase">
                 <SidebarMenuButton
                   asChild
@@ -300,29 +258,6 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
-        {!isCollapsed && (
-          <>
-            <SidebarSeparator />
-            <SidebarGroup>
-              <SidebarGroupLabel className="text-slate-700 font-medium flex items-center gap-2">
-                <History className="h-4 w-4" />
-                Recent History
-              </SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {historyItems.map((item, index) => (
-                    <SidebarMenuItem key={index}>
-                      <SidebarMenuButton className="text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-50">
-                        <span className="truncate">{item}</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </>
-        )}
       </SidebarContent>
 
       <SidebarFooter className="border-t border-slate-200 p-4">
@@ -332,7 +267,13 @@ export function AppSidebar() {
             {!isCollapsed && (
               <div className="flex justify-between items-center text-xs text-slate-600">
                 <span>Budget</span>
-                <span>{remainingText}</span>
+                {isLoggedOut ? (
+                  <Link href={loginReturnHref} className="text-blue-600 hover:underline">
+                    {remainingText}
+                  </Link>
+                ) : (
+                  <span>{remainingText}</span>
+                )}
               </div>
             )}
             <div className="w-full bg-slate-200 rounded-full h-2">
@@ -343,11 +284,23 @@ export function AppSidebar() {
             </div>
             {isCollapsed ? (
               <div className="text-xs text-slate-500 text-center">
-                {budgetCollapsedText}
+                {isLoggedOut ? (
+                  <Link href={loginReturnHref} className="text-blue-600 hover:underline">
+                    {budgetCollapsedText}
+                  </Link>
+                ) : (
+                  budgetCollapsedText
+                )}
               </div>
             ) : (
               <div className="text-xs text-slate-500 text-center">
-                {budgetSummary}
+                {isLoggedOut ? (
+                  <Link href={loginReturnHref} className="text-blue-600 hover:underline">
+                    {budgetSummary}
+                  </Link>
+                ) : (
+                  budgetSummary
+                )}
               </div>
             )}
           </div>
