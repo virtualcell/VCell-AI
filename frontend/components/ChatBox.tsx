@@ -12,7 +12,8 @@ import {
 } from "@/components/ui/select";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { MessageSquare, Send, Bot, User, Loader2 } from "lucide-react";
-import { getAccessToken } from "@auth0/nextjs-auth0/client";
+import { getAccessToken, useUser } from "@auth0/nextjs-auth0/client";
+import { LoginRequiredDialog } from "@/components/login-required-dialog";
 
 type ModelId = "openai-model" | "local-model";
 
@@ -89,6 +90,8 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedModel, setSelectedModel] = useState<ModelId>("openai-model");
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const { user, isLoading: isUserLoading } = useUser();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -139,6 +142,11 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
   const handleSendMessage = async (overrideMessage?: string) => {
     const msg = overrideMessage ?? inputMessage;
     if (!msg.trim()) return;
+    if (isUserLoading) return;
+    if (!user) {
+      setShowLoginDialog(true);
+      return;
+    }
     // Build parameter context string
     let parameterContext = "";
     if (parameters) {
@@ -249,6 +257,8 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
   };
 
   return (
+    <>
+    <LoginRequiredDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />
     <Card className="h-full flex flex-col shadow-sm border-slate-200">
       <CardHeader className="bg-slate-50 border-b border-slate-200 flex-shrink-0">
         <CardTitle className="flex items-center gap-2 text-slate-900">
@@ -406,5 +416,6 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
         )}
       </div>
     </Card>
+    </>
   );
 };

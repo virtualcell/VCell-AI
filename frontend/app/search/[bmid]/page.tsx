@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -28,7 +28,8 @@ import {
   Briefcase,
   Cog,
 } from "lucide-react";
-import { getAccessToken } from "@auth0/nextjs-auth0/client";
+import { getAccessToken, useUser } from "@auth0/nextjs-auth0/client";
+import { LoginRequiredDialog } from "@/components/login-required-dialog";
 
 interface Simulation {
   key: string;
@@ -89,6 +90,9 @@ export default function BiomodelDetailPage() {
   const [diagramAnalysis, setDiagramAnalysis] = useState("");
   const [analysisError, setAnalysisError] = useState("");
   const [combinedMessages, setCombinedMessages] = useState<string[]>([]);
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const { user, isLoading: isUserLoading } = useUser();
+  const diagramFetchTriggeredRef = useRef(false);
 
   const quickActions = [
     {
@@ -150,7 +154,11 @@ export default function BiomodelDetailPage() {
 
   useEffect(() => {
     if (!data?.bmKey) return;
-    
+    if (activeTab !== "analysis") return;
+    if (isUserLoading || !user) return;
+    if (diagramFetchTriggeredRef.current) return;
+    diagramFetchTriggeredRef.current = true;
+
     const fetchDiagramAnalysis = async () => {
       try {
         const token = await getAccessToken();
@@ -176,7 +184,7 @@ export default function BiomodelDetailPage() {
     };
 
     fetchDiagramAnalysis();
-  }, [data?.bmKey]);
+  }, [data?.bmKey, activeTab, isUserLoading, user]);
 
   // Create combined messages when diagram analysis is ready
   useEffect(() => {
@@ -191,8 +199,22 @@ export default function BiomodelDetailPage() {
 
   const biomodelDiagramUrl = `https://vcell.cam.uchc.edu/api/v0/biomodel/${data.bmKey}/diagram`;
 
+  const handleTabChange = (value: string) => {
+    if (value !== "analysis") {
+      setActiveTab(value);
+      return;
+    }
+    if (isUserLoading) return;
+    if (!user) {
+      setShowLoginDialog(true);
+      return;
+    }
+    setActiveTab(value);
+  };
+
   return (
     <div className="min-h-screen bg-slate-50">
+      <LoginRequiredDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />
       <div className="container mx-auto p-8 max-w-6xl">
         <Card className="mb-8 shadow-lg border-slate-200">
           <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-50 border-b border-slate-200 px-5 py-4 flex flex-col md:flex-row md:items-center md:justify-between">
@@ -261,7 +283,7 @@ export default function BiomodelDetailPage() {
             </div>
           </CardHeader>
           <CardContent className="p-6 bg-white">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="overview" className="flex items-center gap-2 font-bold text-white">
                   <FileText className="h-4 w-4" />

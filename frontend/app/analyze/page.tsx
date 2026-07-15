@@ -18,6 +18,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useUser } from "@auth0/nextjs-auth0/client";
+import { LoginRequiredDialog } from "@/components/login-required-dialog";
 
 interface PromptTemplate {
   title: string;
@@ -30,6 +32,8 @@ export default function AnalyzePage() {
   const router = useRouter();
   const [biomodelId, setBiomodelId] = useState("");
   const [prompt, setPrompt] = useState("");
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const { user, isLoading: isUserLoading } = useUser();
 
   const promptTemplates: PromptTemplate[] = [
     {
@@ -76,11 +80,17 @@ export default function AnalyzePage() {
 
   const handleAnalyze = () => {
     if (!biomodelId.trim() || !prompt.trim()) return;
+    if (isUserLoading) return;
+    if (!user) {
+      setShowLoginDialog(true);
+      return;
+    }
     router.push(`/analyze/${biomodelId}?prompt=${encodeURIComponent(prompt)}`);
   };
 
   return (
     <div className="min-h-screen bg-slate-50">
+      <LoginRequiredDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />
       <div className="container mx-auto p-6 max-w-7xl">
         {/* Header */}
         <div className="mb-8">
