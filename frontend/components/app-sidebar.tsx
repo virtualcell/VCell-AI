@@ -3,13 +3,10 @@
 import { useEffect, useState } from "react";
 import {
   Search,
-  History,
   Sparkles,
   FlaskConical,
   LogOut,
-  Shield,
   FolderOpen,
-  Settings,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -32,14 +29,6 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
-
-const historyItems = [
-  "Calcium Biomodel Comparison",
-  "Protein Details on Tutorial Models",
-  "Biomodels authored by ModelBrick",
-  "Count of Rule-based models",
-  "VCML File Analysis of Calcium Models",
-];
 
 interface BudgetInfo {
   spend: number;
@@ -239,35 +228,6 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Configuration Section */}
-        <SidebarGroup>
-          {!isCollapsed && (
-            <SidebarGroupLabel className="text-slate-700 font-medium">
-              Configuration
-            </SidebarGroupLabel>
-          )}
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem key="AdminSettings">
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === "/admin/settings"}
-                  className="data-[active=true]:bg-blue-50 data-[active=true]:text-blue-700 data-[active=true]:border-r-2 data-[active=true]:border-blue-600"
-                  tooltip={isCollapsed ? "Settings" : undefined}
-                >
-                  <Link
-                    href="/admin/settings"
-                    className="flex items-center gap-3"
-                  >
-                    <Settings className="h-4 w-4" />
-                    {!isCollapsed && <span>Settings</span>}
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
         <SidebarSeparator />
 
         {/* Admin Section */}
@@ -279,19 +239,6 @@ export function AppSidebar() {
           )}
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem key="AdminDashboard">
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === "/admin"}
-                  className="data-[active=true]:bg-purple-50 data-[active=true]:text-purple-700 data-[active=true]:border-r-2 data-[active=true]:border-purple-500"
-                  tooltip={isCollapsed ? "Admin Dashboard" : undefined}
-                >
-                  <Link href="/admin" className="flex items-center gap-3">
-                    <Shield className="h-4 w-4 text-purple-500" />
-                    {!isCollapsed && <span>Admin Dashboard</span>}
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
               <SidebarMenuItem key="KnowledgeBase">
                 <SidebarMenuButton
                   asChild
@@ -311,29 +258,6 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
-        {!isCollapsed && (
-          <>
-            <SidebarSeparator />
-            <SidebarGroup>
-              <SidebarGroupLabel className="text-slate-700 font-medium flex items-center gap-2">
-                <History className="h-4 w-4" />
-                Recent History
-              </SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {historyItems.map((item, index) => (
-                    <SidebarMenuItem key={index}>
-                      <SidebarMenuButton className="text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-50">
-                        <span className="truncate">{item}</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </>
-        )}
       </SidebarContent>
 
       <SidebarFooter className="border-t border-slate-200 p-4">
