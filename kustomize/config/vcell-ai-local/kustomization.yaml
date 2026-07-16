@@ -8,3 +8,6 @@ configMapGenerator:
   - name: frontend-config
     envs:
       - frontend.env
+  - name: litellm-config
+    envs:
+      - litellm.env

@@ -49,6 +49,12 @@ spec:
                 secretKeyRef:
                   name: backend-secrets
                   key: supabase-service-role-key
+            # Backend provisions per-user LiteLLM virtual keys using the master key.
+            - name: LITELLM_MASTER_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: litellm-master-key
           resources:
             requests:
               memory: "512Mi"

@@ -21,7 +21,7 @@ spec:
   tls:
     - hosts:
         - vcell-ai-dev.cam.uchc.edu
-      secretName: letsencrypt-staging-vcell-ai-dev-tls
+      secretName: letsencrypt-prod-vcell-ai-dev-tls
   rules:
     - host: vcell-ai-dev.cam.uchc.edu
       http:
@@ -41,13 +41,17 @@ metadata:
   labels:
     app: frontend-ingress
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-staging"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    # Auth0 (@auth0/nextjs-auth0) sets a large encrypted session cookie on
+    # /auth/callback; the default 4k nginx proxy buffer overflows on that
+    # Set-Cookie response header -> 502 "upstream sent too big header". Bump it.
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
 spec:
   ingressClassName: nginx
   tls:
     - hosts:
         - vcell-ai-dev.cam.uchc.edu
-      secretName: letsencrypt-staging-vcell-ai-dev-tls
+      secretName: letsencrypt-prod-vcell-ai-dev-tls
   rules:
     - host: vcell-ai-dev.cam.uchc.edu
       http:

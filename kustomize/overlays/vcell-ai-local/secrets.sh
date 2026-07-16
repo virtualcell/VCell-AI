@@ -43,7 +43,7 @@ echo "Generating backend secrets..."
 ${SCRIPTS_DIR}/sealed_secret_backend.sh \
     --controller-name ${SEALED_SECRETS_CONTROLLER_NAME} \
     --controller-namespace ${SEALED_SECRETS_CONTROLLER_NAMESPACE} \
-    ${NAMESPACE} "${AZURE_API_KEY}" "${LANGFUSE_SECRET_KEY}" "${LANGFUSE_PUBLIC_KEY}" "${SUPABASE_SERVICE_ROLE_KEY}" \
+    ${NAMESPACE} "${AZURE_API_KEY}" "${LANGFUSE_SECRET_KEY}" "${LANGFUSE_PUBLIC_KEY}" "${SUPABASE_SERVICE_ROLE_KEY}" "${LITELLM_MASTER_KEY}" \
     > ${SECRETS_DIR}/secret-backend.yaml
 echo "✓ secret-backend.yaml generated"
 
@@ -64,6 +64,15 @@ ${SCRIPTS_DIR}/sealed_secret_ghcr.sh \
     ${NAMESPACE} ${GH_USER_NAME} ${GH_USER_EMAIL} ${GH_PAT} \
     > ${SECRETS_DIR}/secret-ghcr.yaml
 echo "✓ secret-ghcr.yaml generated"
+
+# litellm-secrets: <namespace> <master_key> <azure_api_key> <openai_api_key> <langfuse_secret_key> <langfuse_public_key> <database_url>
+echo "Generating LiteLLM secrets..."
+${SCRIPTS_DIR}/sealed_secret_litellm.sh \
+    --controller-name ${SEALED_SECRETS_CONTROLLER_NAME} \
+    --controller-namespace ${SEALED_SECRETS_CONTROLLER_NAMESPACE} \
+    ${NAMESPACE} "${LITELLM_MASTER_KEY}" "${AZURE_API_KEY}" "${OPENAI_API_KEY}" "${LANGFUSE_SECRET_KEY}" "${LANGFUSE_PUBLIC_KEY}" "${DATABASE_URL}" \
+    > ${SECRETS_DIR}/secret-litellm.yaml
+echo "✓ secret-litellm.yaml generated"
 
 echo ""
 echo "=== All sealed secrets generated successfully! ==="
