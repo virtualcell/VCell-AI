@@ -157,6 +157,34 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
+        {/* Database Tools Section */}
+        <SidebarGroup>
+          {!isCollapsed && (
+            <SidebarGroupLabel className="text-slate-700 font-medium">
+              Database tools
+            </SidebarGroupLabel>
+          )}
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem key="BiomodelSearch">
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === "/search"}
+                  className="data-[active=true]:bg-blue-50 data-[active=true]:text-blue-700 data-[active=true]:border-r-2 data-[active=true]:border-blue-600"
+                  tooltip={isCollapsed ? "Biomodel Search" : undefined}
+                >
+                  <Link href="/search" className="flex items-center gap-3">
+                    <Search className="h-4 w-4" />
+                    {!isCollapsed && <span>Biomodel Search</span>}
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarSeparator />
+
         {/* AI Tools Section */}
         <SidebarGroup>
           {!isCollapsed && (
@@ -193,34 +221,6 @@ export function AppSidebar() {
                       <FlaskConical className="h-4 w-4 text-yellow-400" />
                     </span>
                     {!isCollapsed && <span>Biomodel Explorer</span>}
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarSeparator />
-
-        {/* Database Tools Section */}
-        <SidebarGroup>
-          {!isCollapsed && (
-            <SidebarGroupLabel className="text-slate-700 font-medium">
-              Database tools
-            </SidebarGroupLabel>
-          )}
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem key="BiomodelSearch">
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === "/search"}
-                  className="data-[active=true]:bg-blue-50 data-[active=true]:text-blue-700 data-[active=true]:border-r-2 data-[active=true]:border-blue-600"
-                  tooltip={isCollapsed ? "Biomodel Search" : undefined}
-                >
-                  <Link href="/search" className="flex items-center gap-3">
-                    <Search className="h-4 w-4" />
-                    {!isCollapsed && <span>Biomodel Search</span>}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
