@@ -116,19 +116,18 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
 
     let formattedContent = content;
 
-    // Replace biomodel IDs with hyperlinks
+    // Replace biomodel IDs with hyperlinks, skipping IDs already inside a
+    // markdown link's URL (e.g. the /search/${bmId} link the LLM already renders
+    // for the model name) to avoid corrupting that link and duplicating the ID.
     bmkeys.forEach((bmId) => {
-      const searchString = `${bmId}`;
       const encodedPrompt = encodeURIComponent(`Describe model`);
       /* const ai_link = `[AI Analysis](/analyze/${bmId}?prompt=${encodedPrompt})`;
       const db_link = `[Database](/search/${bmId})`;
       const replacementString = `**${bmId}** -- ${ai_link} &nbsp;|&nbsp; ${db_link}`; */
       const db_link = `[Database Details](/search/${bmId})`;
       const replacementString = `**${bmId}** || ${db_link}`;
-      formattedContent = formattedContent.replaceAll(
-        searchString,
-        replacementString,
-      );
+      const idRegex = new RegExp(`(?<!/search/)\\b${bmId}\\b`, "g");
+      formattedContent = formattedContent.replace(idRegex, replacementString);
     });
 
     return formattedContent;
