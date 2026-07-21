@@ -1,18 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  Search,
-  Sparkles,
-  FlaskConical,
-  LogIn,
-  LogOut,
-  FolderOpen,
-} from "lucide-react";
+import { Search, Sparkles, FlaskConical, FolderOpen } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
 import { getAccessToken, useUser } from "@auth0/nextjs-auth0/client";
 
 import {
@@ -303,38 +295,6 @@ export function AppSidebar() {
                   budgetSummary
                 )}
               </div>
-            )}
-          </div>
-
-          <div
-            className={`flex ${isCollapsed ? "flex-col space-y-1" : ""} gap-2`}
-          >
-            {isLoggedOut ? (
-              <Button
-                variant="default"
-                size={isCollapsed ? "icon" : "sm"}
-                className={`${isCollapsed ? "h-8 w-8 rounded-md" : "w-full"} flex items-center gap-2`}
-                asChild
-                title={isCollapsed ? "Login" : undefined}
-              >
-                <Link href={loginReturnHref}>
-                  <LogIn className="h-3 w-3" />
-                  {!isCollapsed && "Login"}
-                </Link>
-              </Button>
-            ) : (
-              <Button
-                variant="default"
-                size={isCollapsed ? "icon" : "sm"}
-                className={`${isCollapsed ? "h-8 w-8 rounded-md" : "w-full"} flex items-center gap-2`}
-                asChild
-                title={isCollapsed ? "Logout" : undefined}
-              >
-                <a href="/auth/logout">
-                  <LogOut className="h-3 w-3" />
-                  {!isCollapsed && "Logout"}
-                </a>
-              </Button>
             )}
           </div>
 
