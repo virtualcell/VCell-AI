@@ -12,6 +12,7 @@ import {
   FlaskConical,
   Hash,
   ArrowRight,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -69,18 +70,20 @@ const categoryOptions = [
   { value: "educational", label: "Educational" },
 ];
 
+const defaultFilters: SearchFilters = {
+  bmId: "",
+  bmName: "",
+  category: "all",
+  owner: "",
+  savedLow: "",
+  savedHigh: "",
+  startRow: 1,
+  maxRows: 1000,
+  orderBy: "date_desc",
+};
+
 export default function BiomodelSearchPage() {
-  const [filters, setFilters] = useState<SearchFilters>({
-    bmId: "",
-    bmName: "",
-    category: "all",
-    owner: "",
-    savedLow: "",
-    savedHigh: "",
-    startRow: 1,
-    maxRows: 1000,
-    orderBy: "date_desc",
-  });
+  const [filters, setFilters] = useState<SearchFilters>(defaultFilters);
 
   const [results, setResults] = useState<BiomodelResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -130,6 +133,13 @@ export default function BiomodelSearchPage() {
       setIsLoading(false);
       setHasSearched(true);
     }
+  };
+
+  const handleClear = () => {
+    setFilters(defaultFilters);
+    setResults([]);
+    setHasSearched(false);
+    setIsAdvancedSearchOpen(false);
   };
 
   const formatDate = (dateString: string) => {
@@ -390,7 +400,7 @@ export default function BiomodelSearchPage() {
               </CollapsibleContent>
             </Collapsible>
 
-            <div className="mt-5 pt-4 border-t border-slate-200">
+            <div className="mt-5 pt-4 border-t border-slate-200 flex gap-2">
               <Button
                 onClick={handleSearch}
                 disabled={isLoading}
@@ -398,6 +408,15 @@ export default function BiomodelSearchPage() {
               >
                 <Search className="h-4 w-4 mr-2" />
                 {isLoading ? "Searching..." : "Search"}
+              </Button>
+              <Button
+                onClick={handleClear}
+                disabled={isLoading}
+                variant="outline"
+                className="border-slate-300 text-slate-600 hover:text-slate-900 px-6 h-10"
+              >
+                <X className="h-4 w-4 mr-2" />
+                Clear
               </Button>
             </div>
           </CardContent>
