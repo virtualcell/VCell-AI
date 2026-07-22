@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
-import { MessageSquare, Send, Bot, User, Loader2 } from "lucide-react";
+import { MessageSquare, Send, Square, Bot, User, Loader2 } from "lucide-react";
 import { getAccessToken, useUser } from "@auth0/nextjs-auth0/client";
 import { LoginRequiredDialog } from "@/components/login-required-dialog";
 
@@ -94,6 +94,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
   const { user, isLoading: isUserLoading } = useUser();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -190,6 +191,8 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
     setMessages((prev) => [...prev, userMessage]);
     setInputMessage("");
     setIsLoading(true);
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
     try {
       const token = await getAccessToken();
       const finalPrompt = promptPrefix
@@ -214,6 +217,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
             })),
             model: selectedModel,
           }),
+          signal: controller.signal,
         },
       );
       const data = await res.json();
@@ -233,19 +237,36 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
       };
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: (Date.now() + 2).toString(),
-          role: "assistant",
-          content:
-            "There was an error connecting to the backend. Please try again.",
-          timestamp: new Date(),
-        },
-      ]);
+      if (error instanceof DOMException && error.name === "AbortError") {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: (Date.now() + 2).toString(),
+            role: "assistant",
+            content: "_Response cancelled._",
+            timestamp: new Date(),
+          },
+        ]);
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: (Date.now() + 2).toString(),
+            role: "assistant",
+            content:
+              "There was an error connecting to the backend. Please try again.",
+            timestamp: new Date(),
+          },
+        ]);
+      }
     } finally {
+      abortControllerRef.current = null;
       setIsLoading(false);
     }
+  };
+
+  const handleStopRequest = () => {
+    abortControllerRef.current?.abort();
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -373,11 +394,20 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
             disabled={isLoading || isInitialLoading}
           />
           <Button
-            onClick={() => handleSendMessage()}
-            disabled={isLoading || isInitialLoading || !inputMessage.trim()}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4"
+            onClick={() => (isLoading ? handleStopRequest() : handleSendMessage())}
+            disabled={isInitialLoading || (!isLoading && !inputMessage.trim())}
+            title={isLoading ? "Stop generating" : "Send message"}
+            className={
+              isLoading
+                ? "bg-red-600 hover:bg-red-700 text-white px-4"
+                : "bg-blue-600 hover:bg-blue-700 text-white px-4"
+            }
           >
-            <Send className="h-4 w-4" />
+            {isLoading ? (
+              <Square className="h-4 w-4 fill-current" />
+            ) : (
+              <Send className="h-4 w-4" />
+            )}
           </Button>
         </div>
 
