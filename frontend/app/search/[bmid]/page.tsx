@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import { getAccessToken, useUser } from "@auth0/nextjs-auth0/client";
 import { LoginRequiredDialog } from "@/components/login-required-dialog";
+import { SignInOutButton } from "@/components/sign-in-out-button";
 
 interface Simulation {
   key: string;
@@ -235,6 +236,7 @@ export default function BiomodelDetailPage() {
                   >
                     <FileText className="h-4 w-4" /> Download VCML
                   </button>
+                  <SignInOutButton />
                   {/* <button
                     onClick={() => {
                       window.open(

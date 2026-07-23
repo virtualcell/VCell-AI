@@ -14,6 +14,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Download, FileText, Code, User, Hash } from "lucide-react";
+import { SignInOutButton } from "@/components/sign-in-out-button";
 
 interface Application {
   key: string;
@@ -74,15 +75,18 @@ export default function SBMLPage() {
     <div className="min-h-screen bg-slate-50">
       <div className="container mx-auto p-6 max-w-7xl">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2 flex items-center gap-3">
-            <Code className="h-8 w-8 text-blue-600" />
-            Biomodel Applications
-          </h1>
-          <p className="text-slate-600">
-            Retrieve and download SBML and BNGL files for all applications
-            within a biomodel.
-          </p>
+        <div className="mb-8 flex items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900 mb-2 flex items-center gap-3">
+              <Code className="h-8 w-8 text-blue-600" />
+              Biomodel Applications
+            </h1>
+            <p className="text-slate-600">
+              Retrieve and download SBML and BNGL files for all applications
+              within a biomodel.
+            </p>
+          </div>
+          <SignInOutButton />
         </div>
 
         {/* Input Form */}

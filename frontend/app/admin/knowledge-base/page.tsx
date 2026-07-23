@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
+import { SignInOutButton } from "@/components/sign-in-out-button";
 import { Input } from "@/components/ui/input";
 import {
   FileText,
@@ -210,6 +211,7 @@ export default function KnowledgeBasePage() {
               >
                 <Plus className="h-4 w-4" /> Upload File
               </Button>
+              <SignInOutButton />
             </div>
           </div>
         </div>

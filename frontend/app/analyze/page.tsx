@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { LoginRequiredDialog } from "@/components/login-required-dialog";
+import { SignInOutButton } from "@/components/sign-in-out-button";
 
 interface PromptTemplate {
   title: string;
@@ -93,14 +94,17 @@ export default function AnalyzePage() {
       <LoginRequiredDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />
       <div className="container mx-auto p-6 max-w-7xl">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">
-            Biomodel AI Analysis
-          </h1>
-          <p className="text-slate-600">
-            Unlock insights from your biomodels with the power of AI-driven
-            analysis.
-          </p>
+        <div className="mb-8 flex items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900 mb-2">
+              Biomodel AI Analysis
+            </h1>
+            <p className="text-slate-600">
+              Unlock insights from your biomodels with the power of AI-driven
+              analysis.
+            </p>
+          </div>
+          <SignInOutButton />
         </div>
 
         {/* Analysis Form */}

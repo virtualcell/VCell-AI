@@ -4,7 +4,6 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/app-sidebar';
-import { TopBar } from '@/components/top-bar';
 import { Auth0Provider } from '@auth0/nextjs-auth0/client';
 import { AuthSync } from '@/components/auth-sync';
 import { auth0 } from '@/lib/auth0';
@@ -31,10 +30,7 @@ export default async function RootLayout({
           <AuthSync />
           <SidebarProvider defaultOpen={true}>
             <AppSidebar />
-            <main className="flex-1 overflow-auto flex flex-col">
-              <TopBar />
-              <div className="flex-1">{children}</div>
-            </main>
+            <main className="flex-1 overflow-auto">{children}</main>
           </SidebarProvider>
         </Auth0Provider>
       </body>
