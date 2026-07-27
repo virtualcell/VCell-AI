@@ -24,6 +24,7 @@ import { ChatBox } from "@/components/ChatBox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAccessToken, useUser } from "@auth0/nextjs-auth0/client";
 import { LoginRequiredDialog } from "@/components/login-required-dialog";
+import { SignInOutButton } from "@/components/sign-in-out-button";
 
 interface AnalysisResults {
   title: string;
@@ -280,6 +281,7 @@ export default function AnalysisResultsPage({
                   >
                     <FlaskConical className="h-4 w-4" /> Biomodel Page
                   </button>
+                  <SignInOutButton />
                 </div>
               </div>
               {biomodelData && (

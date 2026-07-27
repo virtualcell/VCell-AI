@@ -1,17 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  Search,
-  Sparkles,
-  FlaskConical,
-  LogOut,
-  FolderOpen,
-} from "lucide-react";
+import { Search, Sparkles, FlaskConical, FolderOpen } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
 import { getAccessToken, useUser } from "@auth0/nextjs-auth0/client";
 
 import {
@@ -157,6 +150,34 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
+        {/* Database Tools Section */}
+        <SidebarGroup>
+          {!isCollapsed && (
+            <SidebarGroupLabel className="text-slate-700 font-medium">
+              Database tools
+            </SidebarGroupLabel>
+          )}
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem key="BiomodelSearch">
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === "/search"}
+                  className="data-[active=true]:bg-blue-50 data-[active=true]:text-blue-700 data-[active=true]:border-r-2 data-[active=true]:border-blue-600"
+                  tooltip={isCollapsed ? "Biomodel Search" : undefined}
+                >
+                  <Link href="/search" className="flex items-center gap-3">
+                    <Search className="h-4 w-4" />
+                    {!isCollapsed && <span>Biomodel Search</span>}
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarSeparator />
+
         {/* AI Tools Section */}
         <SidebarGroup>
           {!isCollapsed && (
@@ -193,34 +214,6 @@ export function AppSidebar() {
                       <FlaskConical className="h-4 w-4 text-yellow-400" />
                     </span>
                     {!isCollapsed && <span>Biomodel Explorer</span>}
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarSeparator />
-
-        {/* Database Tools Section */}
-        <SidebarGroup>
-          {!isCollapsed && (
-            <SidebarGroupLabel className="text-slate-700 font-medium">
-              Database tools
-            </SidebarGroupLabel>
-          )}
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem key="BiomodelSearch">
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === "/search"}
-                  className="data-[active=true]:bg-blue-50 data-[active=true]:text-blue-700 data-[active=true]:border-r-2 data-[active=true]:border-blue-600"
-                  tooltip={isCollapsed ? "Biomodel Search" : undefined}
-                >
-                  <Link href="/search" className="flex items-center gap-3">
-                    <Search className="h-4 w-4" />
-                    {!isCollapsed && <span>Biomodel Search</span>}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -303,23 +296,6 @@ export function AppSidebar() {
                 )}
               </div>
             )}
-          </div>
-
-          <div
-            className={`flex ${isCollapsed ? "flex-col space-y-1" : ""} gap-2`}
-          >
-            <Button
-              variant="default"
-              size={isCollapsed ? "icon" : "sm"}
-              className={`${isCollapsed ? "h-8 w-8 rounded-md" : "w-full"} flex items-center gap-2`}
-              asChild
-              title={isCollapsed ? "Logout" : undefined}
-            >
-              <a href="/auth/logout">
-                <LogOut className="h-3 w-3" />
-                {!isCollapsed && "Logout"}
-              </a>
-            </Button>
           </div>
 
           {!isCollapsed && (

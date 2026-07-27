@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { OnboardingModal } from "@/components/onboarding-modal";
 import { ChatBox } from "@/components/ChatBox";
+import { SignInOutButton } from "@/components/sign-in-out-button";
 
 export default function ChatPage() {
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -113,6 +114,7 @@ export default function ChatPage() {
                 <HelpCircle className="h-4 w-4" />
                 How to Use
               </Button>
+              <SignInOutButton />
             </div>
           </div>
         </div>
