@@ -36,6 +36,7 @@ import {
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { SignInOutButton } from "@/components/sign-in-out-button";
+import { getOptionalAccessToken } from "@/lib/get-optional-access-token";
 
 interface SearchFilters {
   bmId: string;
@@ -106,7 +107,10 @@ export default function BiomodelSearchPage() {
       params.append("maxRows", filters.maxRows.toString());
       params.append("orderBy", filters.orderBy);
       const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/biomodel?${params.toString()}`;
-      const res = await fetch(apiUrl);
+      const token = await getOptionalAccessToken();
+      const res = await fetch(apiUrl, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
       if (!res.ok) throw new Error("Failed to fetch biomodels");
       const data = await res.json();
       // Map API response to BiomodelResult[]
