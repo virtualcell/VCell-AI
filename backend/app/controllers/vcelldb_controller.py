@@ -1,5 +1,5 @@
 import httpx
-from typing import List
+from typing import List, Optional
 from fastapi import HTTPException, Response
 from app.schemas.vcelldb_schema import BiomodelRequestParams, SimulationRequestParams
 from app.services.vcelldb_service import (
@@ -15,14 +15,16 @@ from app.services.vcelldb_service import (
 )
 
 
-async def get_biomodels_controller(params: BiomodelRequestParams) -> dict:
+async def get_biomodels_controller(
+    params: BiomodelRequestParams, auth0_token: Optional[str] = None
+) -> dict:
     """
     Controller function to retrieve biomodels based on filters and sorting.
     Raises:
         HTTPException: If the VCell API request fails.
     """
     try:
-        biomodels = await fetch_biomodels(params)
+        biomodels = await fetch_biomodels(params, auth0_token)
         return biomodels
     except httpx.HTTPStatusError as e:
         raise HTTPException(

@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Response
-from typing import List
+from typing import List, Optional
+from app.core.auth import get_optional_auth0_token
 from app.schemas.vcelldb_schema import BiomodelRequestParams, SimulationRequestParams
 from app.controllers.vcelldb_controller import (
     get_biomodels_controller,
@@ -17,12 +18,17 @@ router = APIRouter()
 
 
 @router.get("/biomodel", response_model=dict)
-async def get_biomodels(params: BiomodelRequestParams = Depends()):
+async def get_biomodels(
+    params: BiomodelRequestParams = Depends(),
+    auth0_token: Optional[str] = Depends(get_optional_auth0_token),
+):
     """
     Endpoint to retrieve biomodels based on provided filters and sorting.
+    If a valid Authorization bearer token is sent, results also include
+    the logged-in user's private and shared biomodels.
     """
     try:
-        return await get_biomodels_controller(params)
+        return await get_biomodels_controller(params, auth0_token)
     except HTTPException as e:
         raise e
 
