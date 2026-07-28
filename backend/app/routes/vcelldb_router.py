@@ -93,11 +93,16 @@ async def get_diagram_url(biomodel_id: str):
 
 
 @router.get("/biomodel/{biomodel_id}/diagram/image")
-async def get_diagram_image(biomodel_id: str):
+async def get_diagram_image(
+    biomodel_id: str,
+    auth0_token: Optional[str] = Depends(get_optional_auth0_token),
+):
     """
-    Endpoint to get the diagram image (PNG) for a given biomodel.
+    Endpoint to get the diagram image (PNG) for a given biomodel. If a
+    valid Authorization bearer token is sent, this also works for private
+    and shared biomodels.
     """
-    return await get_diagram_image_controller(biomodel_id)
+    return await get_diagram_image_controller(biomodel_id, auth0_token)
 
 
 @router.get("/biomodel/{biomodel_id}/applications/files", response_model=dict)

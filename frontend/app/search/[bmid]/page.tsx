@@ -32,6 +32,7 @@ import {
 import { getAccessToken, useUser } from "@auth0/nextjs-auth0/client";
 import { LoginRequiredDialog } from "@/components/login-required-dialog";
 import { SignInOutButton } from "@/components/sign-in-out-button";
+import { getOptionalAccessToken } from "@/lib/get-optional-access-token";
 
 interface Simulation {
   key: string;
@@ -93,6 +94,8 @@ export default function BiomodelDetailPage() {
   const [analysisError, setAnalysisError] = useState("");
   const [combinedMessages, setCombinedMessages] = useState<string[]>([]);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const [diagramImageUrl, setDiagramImageUrl] = useState("");
+  const [diagramError, setDiagramError] = useState("");
   const { user, isLoading: isUserLoading } = useUser();
   const diagramFetchTriggeredRef = useRef(false);
 
@@ -138,21 +141,46 @@ export default function BiomodelDetailPage() {
     if (!bmid) return;
     setLoading(true);
     setError("");
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/biomodel?bmId=${bmid}`)
-      .then((res) => {
+    (async () => {
+      try {
+        const token = await getOptionalAccessToken();
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/biomodel?bmId=${bmid}`,
+          { headers: token ? { Authorization: `Bearer ${token}` } : undefined },
+        );
         if (!res.ok) throw new Error("Failed to fetch biomodel details");
-        return res.json();
-      })
-      .then((json) => {
+        const json = await res.json();
         if (json.data && Array.isArray(json.data) && json.data.length > 0) {
           setData(json.data[0]);
         } else {
           setError("Biomodel not found.");
         }
-      })
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, [bmid]);
+
+  useEffect(() => {
+    if (!data?.bmKey) return;
+    setDiagramError("");
+    (async () => {
+      try {
+        const token = await getOptionalAccessToken();
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/biomodel/${data.bmKey}/diagram/image`,
+          { headers: token ? { Authorization: `Bearer ${token}` } : undefined },
+        );
+        if (!res.ok) throw new Error("Failed to load diagram image.");
+        const blob = await res.blob();
+        setDiagramImageUrl(URL.createObjectURL(blob));
+      } catch (err: any) {
+        setDiagramError(err.message || "Failed to load diagram image.");
+      }
+    })();
+  }, [data?.bmKey]);
 
   useEffect(() => {
     if (!data?.bmKey) return;
@@ -198,8 +226,6 @@ export default function BiomodelDetailPage() {
 
   if (error) return <div className="p-8 text-center text-red-600">{error}</div>;
   if (!data) return null;
-
-  const biomodelDiagramUrl = `https://vcell.cam.uchc.edu/api/v0/biomodel/${data.bmKey}/diagram`;
 
   const handleTabChange = (value: string) => {
     if (value !== "analysis") {
@@ -301,13 +327,17 @@ export default function BiomodelDetailPage() {
               <TabsContent value="overview" className="space-y-6">
                 {/* Biomodel Diagram block */}
                 <div className="mb-6">
-                  <img
-                    src={biomodelDiagramUrl || "/placeholder.svg"}
-                    alt="Biomodel Diagram"
-                    className="max-w-full h-[350px] mx-auto border border-slate-200 rounded shadow"
-                    onError={() => setError("Failed to load diagram image.")}
-                    onLoad={() => setError("")}
-                  />
+                  {diagramError ? (
+                    <div className="text-center text-red-600 py-8">
+                      {diagramError}
+                    </div>
+                  ) : (
+                    <img
+                      src={diagramImageUrl || "/placeholder.svg"}
+                      alt="Biomodel Diagram"
+                      className="max-w-full h-[350px] mx-auto border border-slate-200 rounded shadow"
+                    />
+                  )}
                 </div>
 
                 {/* BNGL Visualization Section */}

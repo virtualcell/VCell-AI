@@ -411,19 +411,29 @@ async def get_diagram_url(biomodel_id: str) -> str:
 
 
 @observe(name="GET_DIAGRAM_IMAGE")
-async def get_diagram_image(biomodel_id: str) -> bytes:
+async def get_diagram_image(
+    biomodel_id: str, auth0_token: Optional[str] = None
+) -> bytes:
     """
     Fetches the diagram image for a given biomodel from the VCell API and returns the image bytes.
 
     Args:
         biomodel_id (str): ID of the biomodel.
+        auth0_token (Optional[str]): Verified Auth0 access token for the
+            logged-in user, if any. Required to fetch the diagram for a
+            private or shared biomodel.
 
     Returns:
         bytes: The image content (PNG) of the biomodel diagram.
     """
+    headers = {}
+    if auth0_token:
+        legacy_token = await get_legacy_vcell_token(auth0_token)
+        headers["Authorization"] = f"Bearer {legacy_token}"
+
     async with httpx.AsyncClient() as client:
         response = await client.get(
-            f"{VCELL_API_BASE_URL}/biomodel/{biomodel_id}/diagram"
+            f"{VCELL_API_BASE_URL}/biomodel/{biomodel_id}/diagram", headers=headers
         )
         response.raise_for_status()
         return response.content
