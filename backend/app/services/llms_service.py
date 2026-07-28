@@ -95,6 +95,7 @@ async def get_response_with_tools(
     conversation_history: list[dict],
     virtual_key: str,
     model: str,
+    auth0_token: str | None = None,
 ) -> tuple[str, list, str]:
     messages = [
         {
@@ -138,7 +139,7 @@ async def get_response_with_tools(
         logger.info(f"Tool Call: {name} with args: {args}")
 
         # Execute the tool function
-        result = await execute_tool(name, args)
+        result = await execute_tool(name, args, auth0_token)
 
         logger.info(f"Tool Result: {str(result)[:500]}")
 
