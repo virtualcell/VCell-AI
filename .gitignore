@@ -15,12 +15,18 @@ backend/.venv
 # Kubernetes / kustomize secret material
 # secrets.dat holds PLAINTEXT secrets — never commit it.
 kustomize/overlays/*/secrets.dat
-# Generated SealedSecret manifests (encrypted, but cluster-specific — generated
-# per-overlay by secrets.sh; not committed in this repo).
+# Generated SealedSecret manifests (encrypted). Ignored by default...
 kustomize/overlays/*/secret-backend.yaml
 kustomize/overlays/*/secret-frontend.yaml
 kustomize/overlays/*/secret-ghcr.yaml
 kustomize/overlays/*/secret-litellm.yaml
+# ...EXCEPT the vcell-ai-rke-dev overlay, whose sealed secrets ARE committed so
+# FluxCD can build the overlay from git. Safe: SealedSecrets are encrypted against
+# the vxrails controller key — only that cluster can decrypt them.
+!kustomize/overlays/vcell-ai-rke-dev/secret-backend.yaml
+!kustomize/overlays/vcell-ai-rke-dev/secret-frontend.yaml
+!kustomize/overlays/vcell-ai-rke-dev/secret-ghcr.yaml
+!kustomize/overlays/vcell-ai-rke-dev/secret-litellm.yaml
 
 qdrant_storage
 # repo-root docker-compose secrets file — anchored with a leading slash so it does
