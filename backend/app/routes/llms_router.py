@@ -75,6 +75,7 @@ async def analyse_diagram(
     biomodel_id: str,
     model: LLMModel = "openai-model",
     payload: dict = Depends(verify_auth0_token),
+    access_token: str = Depends(get_bearer_token),
 ):
     """
     Endpoint to analyze diagram for a given biomodel.
@@ -83,5 +84,5 @@ async def analyse_diagram(
     Returns:
         dict: The diagram analysis response.
     """
-    result = await analyse_diagram_controller(biomodel_id, model, payload)
+    result = await analyse_diagram_controller(biomodel_id, model, payload, access_token)
     return {"response": result}
