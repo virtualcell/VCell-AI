@@ -216,7 +216,10 @@ export default function BiomodelDetailPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <LoginRequiredDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />
+      <LoginRequiredDialog
+        open={showLoginDialog}
+        onOpenChange={setShowLoginDialog}
+      />
       <div className="container mx-auto p-8 max-w-6xl">
         <Card className="mb-8 shadow-lg border-slate-200">
           <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-50 border-b border-slate-200 px-5 py-4 flex flex-col md:flex-row md:items-center md:justify-between">
@@ -286,13 +289,23 @@ export default function BiomodelDetailPage() {
             </div>
           </CardHeader>
           <CardContent className="p-6 bg-white">
-            <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+            <Tabs
+              value={activeTab}
+              onValueChange={handleTabChange}
+              className="w-full"
+            >
               <TabsList className="grid w-full grid-cols-2 mb-6">
-                <TabsTrigger value="overview" className="flex items-center gap-2 font-bold text-white">
+                <TabsTrigger
+                  value="overview"
+                  className="flex items-center gap-2 font-bold text-slate-600 data-[state=active]:text-foreground"
+                >
                   <FileText className="h-4 w-4" />
                   Overview
                 </TabsTrigger>
-                <TabsTrigger value="analysis" className="flex items-center gap-2 font-bold text-white">
+                <TabsTrigger
+                  value="analysis"
+                  className="flex items-center gap-2 font-bold text-slate-600 data-[state=active]:text-foreground"
+                >
                   <Search className="h-4 w-4" />
                   AI Analysis
                 </TabsTrigger>
@@ -332,7 +345,7 @@ export default function BiomodelDetailPage() {
                     </div>
                   </CollapsibleContent>
                 </Collapsible>
-                
+
                 {/* Applications Section */}
                 <Collapsible className="mb-6" defaultOpen>
                   <CollapsibleTrigger asChild>
@@ -347,7 +360,9 @@ export default function BiomodelDetailPage() {
                   <CollapsibleContent>
                     <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-1">
                       {data.applications?.map((app) => {
-                        const encodedAppName = encodeURIComponent(app.name || "");
+                        const encodedAppName = encodeURIComponent(
+                          app.name || "",
+                        );
                         const bnglUrl = `https://vcell.cam.uchc.edu/api/v0/biomodel/${data.bmKey}/biomodel.bngl?appname=${encodedAppName}`;
                         const sbmlUrl = `https://vcell.cam.uchc.edu/api/v0/biomodel/${data.bmKey}/biomodel.sbml?appname=${encodedAppName}`;
                         return (
@@ -389,7 +404,7 @@ export default function BiomodelDetailPage() {
                     </ul>
                   </CollapsibleContent>
                 </Collapsible>
-                
+
                 {/* Simulations Section */}
                 <Collapsible defaultOpen>
                   <CollapsibleTrigger asChild>
@@ -440,7 +455,9 @@ export default function BiomodelDetailPage() {
                                   <li key={i}>
                                     {ov.name} ({ov.type}):{" "}
                                     <span className="font-mono text-blue-700">
-                                      {ov.values ? ov.values.join(", ") : "No values"}
+                                      {ov.values
+                                        ? ov.values.join(", ")
+                                        : "No values"}
                                     </span>{" "}
                                     (Cardinality: {ov.cardinality})
                                   </li>
