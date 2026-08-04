@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Search,
@@ -83,6 +83,8 @@ const defaultFilters: SearchFilters = {
   orderBy: "date_desc",
 };
 
+const SEARCH_STATE_KEY = "vcell-search-state";
+
 export default function BiomodelSearchPage() {
   const router = useRouter();
   const [filters, setFilters] = useState<SearchFilters>(defaultFilters);
@@ -91,6 +93,34 @@ export default function BiomodelSearchPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [isAdvancedSearchOpen, setIsAdvancedSearchOpen] = useState(false);
+  const isHydrated = useRef(false);
+
+  // Restore filters/results saved before navigating away (e.g. to a result's detail page)
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem(SEARCH_STATE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.filters) setFilters(parsed.filters);
+        if (parsed.results) setResults(parsed.results);
+        if (typeof parsed.hasSearched === "boolean")
+          setHasSearched(parsed.hasSearched);
+        if (typeof parsed.isAdvancedSearchOpen === "boolean")
+          setIsAdvancedSearchOpen(parsed.isAdvancedSearchOpen);
+      }
+    } catch {
+      // ignore malformed/unavailable storage
+    }
+    isHydrated.current = true;
+  }, []);
+
+  useEffect(() => {
+    if (!isHydrated.current) return;
+    sessionStorage.setItem(
+      SEARCH_STATE_KEY,
+      JSON.stringify({ filters, results, hasSearched, isAdvancedSearchOpen }),
+    );
+  }, [filters, results, hasSearched, isAdvancedSearchOpen]);
 
   const handleSearch = async () => {
     setIsLoading(true);
