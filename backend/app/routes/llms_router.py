@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 
 from app.controllers.llms_controller import (
     get_llm_response,
+    get_faq_llm_response,
     analyse_biomodel_controller,
     analyse_vcml_controller,
     analyse_diagram_controller,
@@ -29,6 +30,26 @@ async def query_llm(
         request.model,
         payload,
     )
+    return {"response": result, "bmkeys": bmkeys, "model_used": model_used}
+
+
+@router.post("/query/faq/{faq_id}", response_model=ChatResponse)
+async def query_faq(
+    faq_id: str,
+    model: LLMModel = "openai-model",
+    payload: dict = Depends(verify_auth0_token),
+):
+    """
+    Endpoint to answer a hardcoded /chat quick-action FAQ. The tool call is
+    looked up from a static registry instead of asking the LLM to decide,
+    so this skips the tool-selection completion call that /query makes.
+    Args:
+        faq_id (str): Key identifying which FAQ quick action was clicked.
+        model (LLMModel): The LiteLLM model alias to use.
+    Returns:
+        dict: The final response after executing the FAQ's tool and formatting the result.
+    """
+    result, bmkeys, model_used = await get_faq_llm_response(faq_id, model, payload)
     return {"response": result, "bmkeys": bmkeys, "model_used": model_used}
 
 

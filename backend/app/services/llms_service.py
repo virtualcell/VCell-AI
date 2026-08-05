@@ -10,6 +10,7 @@ from app.services.vcelldb_service import (
 )
 
 from app.utils.system_prompt import SYSTEM_PROMPT
+from app.utils.faq_registry import FAQ_REGISTRY
 
 from app.schemas.vcelldb_schema import BiomodelRequestParams
 from app.core.litellm import get_litellm_client
@@ -165,6 +166,57 @@ async def get_response_with_tools(
     logger.info(f"LLM Response: {final_response}")
 
     return final_response, bmkeys, completion.model
+
+
+async def get_faq_response(
+    faq_id: str,
+    virtual_key: str,
+    model: str,
+) -> tuple[str, list, str]:
+    """
+    Answer a hardcoded /chat quick-action FAQ. The tool and its arguments are
+    looked up from FAQ_REGISTRY instead of letting the LLM decide, so this
+    skips the tool-selection completion call entirely and only spends one
+    LLM call formatting the tool result into a response.
+
+    args:
+        faq_id (str): Key into FAQ_REGISTRY identifying which quick action was clicked.
+        virtual_key (str): The caller's LiteLLM virtual key.
+        model (str): The LiteLLM model alias to use.
+    returns:
+        tuple[str, list, str]: The final response, bmkeys list, and model actually used.
+    """
+    faq = FAQ_REGISTRY.get(faq_id)
+    if faq is None:
+        raise ValueError(f"Unknown FAQ id: {faq_id}")
+
+    logger.info(f"FAQ fast-path: {faq_id} -> tool {faq['tool']} args {faq['args']}")
+
+    # execute_tool may mutate the args dict it's given (e.g. fetch_biomodels forces maxRows); pass a copy so FAQ_REGISTRY's entries stay untouched.
+    result = await execute_tool(faq["tool"], dict(faq["args"]))
+
+    logger.info(f"FAQ tool result: {str(result)[:500]}")
+
+    bmkeys = []
+    if isinstance(result, dict):
+        bmkeys = result.get("unique_model_keys (bmkey)", [])
+
+    user_prompt = f"Here is the data retrieved for this request: {result}\n\n{faq['question']}"
+
+    response = await _create_chat_completion(
+        virtual_key,
+        model,
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": user_prompt},
+        ],
+    )
+
+    final_response = response.choices[0].message.content
+
+    logger.info(f"FAQ LLM Response: {final_response}")
+
+    return final_response, bmkeys, response.model
 
 
 async def analyse_vcml(biomodel_id: str, virtual_key: str, model: str):
