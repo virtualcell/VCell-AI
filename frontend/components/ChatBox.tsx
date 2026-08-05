@@ -126,7 +126,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
       const db_link = `[Database](/search/${bmId})`;
       const replacementString = `**${bmId}** -- ${ai_link} &nbsp;|&nbsp; ${db_link}`; */
       const db_link = `[Database Details](/search/${bmId})`;
-      const replacementString = `**${bmId}** || ${db_link}`;
+      const replacementString = `**${bmId}**`;
       const idRegex = new RegExp(`(?<!/search/)\\b${bmId}\\b`, "g");
       formattedContent = formattedContent.replace(idRegex, replacementString);
     });

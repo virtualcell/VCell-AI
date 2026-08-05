@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Search,
   Filter,
@@ -33,7 +34,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { SignInOutButton } from "@/components/sign-in-out-button";
 
@@ -83,13 +83,44 @@ const defaultFilters: SearchFilters = {
   orderBy: "date_desc",
 };
 
+const SEARCH_STATE_KEY = "vcell-search-state";
+
 export default function BiomodelSearchPage() {
+  const router = useRouter();
   const [filters, setFilters] = useState<SearchFilters>(defaultFilters);
 
   const [results, setResults] = useState<BiomodelResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [isAdvancedSearchOpen, setIsAdvancedSearchOpen] = useState(false);
+  const isHydrated = useRef(false);
+
+  // Restore filters/results saved before navigating away (e.g. to a result's detail page)
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem(SEARCH_STATE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.filters) setFilters(parsed.filters);
+        if (parsed.results) setResults(parsed.results);
+        if (typeof parsed.hasSearched === "boolean")
+          setHasSearched(parsed.hasSearched);
+        if (typeof parsed.isAdvancedSearchOpen === "boolean")
+          setIsAdvancedSearchOpen(parsed.isAdvancedSearchOpen);
+      }
+    } catch {
+      // ignore malformed/unavailable storage
+    }
+    isHydrated.current = true;
+  }, []);
+
+  useEffect(() => {
+    if (!isHydrated.current) return;
+    sessionStorage.setItem(
+      SEARCH_STATE_KEY,
+      JSON.stringify({ filters, results, hasSearched, isAdvancedSearchOpen }),
+    );
+  }, [filters, results, hasSearched, isAdvancedSearchOpen]);
 
   const handleSearch = async () => {
     setIsLoading(true);
@@ -167,8 +198,8 @@ export default function BiomodelSearchPage() {
                 Biomodel Database Search
               </h1>
               <p className="text-slate-600 mt-1">
-                Search and explore biomodels from the VCell database with advanced
-                filtering options.
+                Search and explore biomodels from the VCell database with
+                advanced filtering options.
               </p>
             </div>
           </div>
@@ -460,78 +491,82 @@ export default function BiomodelSearchPage() {
 
             <div className="grid gap-4">
               {results.map((model) => (
-                <Link
+                <Card
                   key={model.bmId}
-                  href={`/search/${model.bmId}`}
-                  className="block group"
+                  onClick={() => {
+                    const selection = window.getSelection();
+                    if (selection && selection.toString().length > 0) {
+                      return;
+                    }
+                    router.push(`/search/${model.bmId}`);
+                  }}
+                  className="group shadow-sm border-slate-200 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer"
                 >
-                  <Card className="shadow-sm border-slate-200 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer">
-                    <CardContent className="p-6">
-                      <div className="flex items-start gap-4">
-                        <div
-                          className={cn(
-                            "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0",
-                            model.privacy === 1 ? "bg-red-50" : "bg-green-50",
-                          )}
-                        >
-                          {model.privacy === 1 ? (
-                            <Lock className="h-5 w-5 text-red-500" />
-                          ) : (
-                            <Globe className="h-5 w-5 text-green-600" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-3">
-                            <h3 className="text-lg font-semibold text-slate-900 group-hover:text-blue-700 transition-colors">
-                              {model.name}
-                            </h3>
-                            <ArrowRight className="h-4 w-4 text-slate-300 group-hover:text-blue-500 group-hover:translate-x-0.5 transition-all flex-shrink-0 mt-1.5" />
-                          </div>
-                          <p className="text-slate-600 text-sm mt-1 mb-3 leading-relaxed line-clamp-2">
-                            {model.annot || "No description available."}
-                          </p>
-
-                          <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-sm text-slate-500">
-                            <span className="flex items-center gap-1.5">
-                              <User className="h-3.5 w-3.5 text-slate-400" />
-                              {model.ownerName}
-                            </span>
-                            <span className="flex items-center gap-1.5">
-                              <Calendar className="h-3.5 w-3.5 text-slate-400" />
-                              {formatDate(model.savedDate)}
-                            </span>
-                            <span className="flex items-center gap-1.5">
-                              <FlaskConical className="h-3.5 w-3.5 text-slate-400" />
-                              {model.simulations} simulation
-                              {model.simulations === 1 ? "" : "s"}
-                            </span>
-                            <span className="flex items-center gap-1.5">
-                              <Hash className="h-3.5 w-3.5 text-slate-400" />
-                              {model.bmId}
-                            </span>
-                          </div>
-
-                          {model.groupUsers.length > 0 && (
-                            <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                              <span className="text-xs text-slate-500 mr-1">
-                                Shared with:
-                              </span>
-                              {model.groupUsers.map((user, index) => (
-                                <Badge
-                                  key={index}
-                                  variant="outline"
-                                  className="text-xs font-normal border-slate-300 text-slate-600"
-                                >
-                                  {user}
-                                </Badge>
-                              ))}
-                            </div>
-                          )}
-                        </div>
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-4">
+                      <div
+                        className={cn(
+                          "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0",
+                          model.privacy === 1 ? "bg-red-50" : "bg-green-50",
+                        )}
+                      >
+                        {model.privacy === 1 ? (
+                          <Lock className="h-5 w-5 text-red-500" />
+                        ) : (
+                          <Globe className="h-5 w-5 text-green-600" />
+                        )}
                       </div>
-                    </CardContent>
-                  </Card>
-                </Link>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-3">
+                          <h3 className="text-lg font-semibold text-slate-900 group-hover:text-blue-700 transition-colors">
+                            {model.name}
+                          </h3>
+                          <ArrowRight className="h-4 w-4 text-slate-300 group-hover:text-blue-500 group-hover:translate-x-0.5 transition-all flex-shrink-0 mt-1.5" />
+                        </div>
+                        <p className="text-slate-600 text-sm mt-1 mb-3 leading-relaxed line-clamp-2">
+                          {model.annot || "No description available."}
+                        </p>
+
+                        <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-sm text-slate-500">
+                          <span className="flex items-center gap-1.5">
+                            <User className="h-3.5 w-3.5 text-slate-400" />
+                            {model.ownerName}
+                          </span>
+                          <span className="flex items-center gap-1.5">
+                            <Calendar className="h-3.5 w-3.5 text-slate-400" />
+                            {formatDate(model.savedDate)}
+                          </span>
+                          <span className="flex items-center gap-1.5">
+                            <FlaskConical className="h-3.5 w-3.5 text-slate-400" />
+                            {model.simulations} simulation
+                            {model.simulations === 1 ? "" : "s"}
+                          </span>
+                          <span className="flex items-center gap-1.5">
+                            <Hash className="h-3.5 w-3.5 text-slate-400" />
+                            {model.bmId}
+                          </span>
+                        </div>
+
+                        {model.groupUsers.length > 0 && (
+                          <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                            <span className="text-xs text-slate-500 mr-1">
+                              Shared with:
+                            </span>
+                            {model.groupUsers.map((user, index) => (
+                              <Badge
+                                key={index}
+                                variant="outline"
+                                className="text-xs font-normal border-slate-300 text-slate-600"
+                              >
+                                {user}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           </div>
