@@ -41,23 +41,27 @@ export default function ChatPage() {
       label: "List all tutorial models",
       icon: <Search className="h-3 w-3 mr-2" />,
       value: "List all tutorial models",
+      faqId: "list-tutorial-models",
     },
     {
       label: "List Calcium models",
       icon: <FileText className="h-3 w-3 mr-2" />,
       value: "List all Calcium models",
+      faqId: "list-calcium-models",
     },
     {
       label: "List all models by ModelBrick",
       icon: <User className="h-3 w-3 mr-2" />,
       value: "List all models by ModelBrick",
+      faqId: "list-modelbrick-models",
     },
     {
       label: "What solvers are used in tutorial models",
       icon: <Diagram3 className="h-3 w-3 mr-2" />,
       value: "What solvers are used in tutorial models",
+      faqId: "tutorial-models-solvers",
     },
-/*     {
+    /*     {
       label:
         "What are different types of VCell applications used in Tutorial models",
       icon: <MessageSquare className="h-3 w-3 mr-2" />,
@@ -68,6 +72,7 @@ export default function ChatPage() {
       label: "What Tutorial models use Spatial Stochastic applications?",
       icon: <Bot className="h-3 w-3 mr-2" />,
       value: "What Tutorial models use Spatial Stochastic applications?",
+      faqId: "tutorial-models-spatial-stochastic",
     },
   ];
 
@@ -76,16 +81,19 @@ export default function ChatPage() {
       label: "How to create an account on VCell Software?",
       icon: <User className="h-3 w-3 mr-2" />,
       value: "How to create an account on VCell Software?",
+      faqId: "how-to-create-account",
     },
     {
       label: "How to model FrapBindings in VCell Software?",
       icon: <FileText className="h-3 w-3 mr-2" />,
-      value: "How to model FragBindings in VCell Software?",
+      value: "How to model FrapBindings in VCell Software?",
+      faqId: "how-to-frap-bindings",
     },
     {
       label: "How to model Moving Boundaries in VCell Software?",
       icon: <FlaskConical className="h-3 w-3 mr-2" />,
       value: "How to model Moving Boundaries in VCell Software?",
+      faqId: "how-to-moving-boundaries",
     },
   ];
 
@@ -101,10 +109,11 @@ export default function ChatPage() {
               {/* Warning Alert - takes most of the space */}
               <Alert className="border-amber-200 bg-amber-50 py-2 flex-1">
                 <AlertDescription className="text-amber-800 text-sm">
-                  <strong>⚠️ Important:</strong> Responses are AI generated and may contain errors, or hallucinations.
+                  <strong>⚠️ Important:</strong> Responses are AI generated and
+                  may contain errors, or hallucinations.
                 </AlertDescription>
               </Alert>
-              
+
               <Button
                 variant="outline"
                 size="sm"
