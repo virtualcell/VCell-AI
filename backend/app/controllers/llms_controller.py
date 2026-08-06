@@ -27,6 +27,7 @@ async def get_llm_response(
     conversation_history: list[dict],
     model: str,
     payload: dict,
+    access_token: str,
 ) -> tuple[str, list, str]:
     """
     Controller function to interact with the LLM service.
@@ -34,6 +35,9 @@ async def get_llm_response(
         conversation_history (list[dict]): The conversation history containing user prompts and responses.
         model (str): The LiteLLM model alias to use.
         payload (dict): The verified Auth0 token payload for the caller.
+        access_token (str): The caller's raw Auth0 access token, forwarded
+            to tool calls that need it (e.g. to include the user's
+            private/shared biomodels in fetch_biomodels results).
     Returns:
         tuple[str, list, str]: The final response, bmkeys list, and model actually used.
     """
@@ -41,7 +45,7 @@ async def get_llm_response(
         supabase = get_supabase_client()
         virtual_key = await _get_virtual_key(payload, supabase)
         result, bmkeys, model_used = await get_response_with_tools(
-            conversation_history, virtual_key, model
+            conversation_history, virtual_key, model, access_token
         )
         return result, bmkeys, model_used
     except Exception as e:
@@ -74,20 +78,24 @@ async def analyse_vcml_controller(biomodel_id: str, model: str, payload: dict) -
         )
 
 
-async def analyse_diagram_controller(biomodel_id: str, model: str, payload: dict) -> str:
+async def analyse_diagram_controller(
+    biomodel_id: str, model: str, payload: dict, access_token: str
+) -> str:
     """
     Controller function to analyze diagram for a given biomodel.
     Args:
         biomodel_id (str): The ID of the biomodel to analyze.
         model (str): The LiteLLM model alias to use.
         payload (dict): The verified Auth0 token payload for the caller.
+        access_token (str): The caller's raw Auth0 access token, needed to
+            fetch a private or shared biomodel's diagram.
     Returns:
         str: The diagram analysis response.
     """
     try:
         supabase = get_supabase_client()
         virtual_key = await _get_virtual_key(payload, supabase)
-        result = await analyse_diagram(biomodel_id, virtual_key, model)
+        result = await analyse_diagram(biomodel_id, virtual_key, model, access_token)
         return result
     except Exception as e:
         if isinstance(e, HTTPException):

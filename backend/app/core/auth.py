@@ -47,28 +47,20 @@ async def get_bearer_token(
     return credentials.credentials
 
 
-async def verify_auth0_token(
-    access_token: str = Depends(get_bearer_token),
-) -> dict[str, Any]:
-    """
-    Verify Auth0 JWT access token and return decoded payload.
-    """
-
+def _decode_and_verify(access_token: str) -> dict[str, Any]:
     try:
         issuer, audience, jwks_client = _get_auth0_config()
         signing_key = jwks_client.get_signing_key_from_jwt(
             access_token
         ).key
 
-        payload = jwt.decode(
+        return jwt.decode(
             access_token,
             signing_key,
             algorithms=["RS256"],
             audience=audience,
             issuer=issuer,
         )
-
-        return payload
 
     except jwt.ExpiredSignatureError:
         raise HTTPException(
@@ -81,3 +73,31 @@ async def verify_auth0_token(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication token",
         )
+
+
+async def verify_auth0_token(
+    access_token: str = Depends(get_bearer_token),
+) -> dict[str, Any]:
+    """
+    Verify Auth0 JWT access token and return decoded payload.
+    """
+    return _decode_and_verify(access_token)
+
+
+async def get_optional_auth0_token(
+    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
+) -> str | None:
+    """
+    Extract and verify an Auth0 access token if one was sent, without
+    requiring one.
+
+    Returns None when no Authorization header is present at all, so routes
+    can serve logged-out users public-only results. Still raises 401 if a
+    token IS present but invalid/expired, rather than silently treating a
+    bad token the same as being logged out.
+    """
+    if credentials is None:
+        return None
+
+    _decode_and_verify(credentials.credentials)
+    return credentials.credentials

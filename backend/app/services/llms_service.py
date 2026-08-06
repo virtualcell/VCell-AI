@@ -6,7 +6,7 @@ from app.utils.tools_utils import (
 from app.services.vcelldb_service import (
     fetch_biomodels,
     get_vcml_file,
-    get_diagram_url,
+    get_diagram_image,
 )
 
 from app.utils.system_prompt import SYSTEM_PROMPT
@@ -14,6 +14,7 @@ from app.utils.system_prompt import SYSTEM_PROMPT
 from app.schemas.vcelldb_schema import BiomodelRequestParams
 from app.core.litellm import get_litellm_client
 from app.core.config import settings
+import base64
 import json
 from app.core.logger import get_logger
 
@@ -95,6 +96,7 @@ async def get_response_with_tools(
     conversation_history: list[dict],
     virtual_key: str,
     model: str,
+    auth0_token: str | None = None,
 ) -> tuple[str, list, str]:
     messages = [
         {
@@ -138,7 +140,7 @@ async def get_response_with_tools(
         logger.info(f"Tool Call: {name} with args: {args}")
 
         # Execute the tool function
-        result = await execute_tool(name, args)
+        result = await execute_tool(name, args, auth0_token)
 
         logger.info(f"Tool Result: {str(result)[:500]}")
 
@@ -241,7 +243,9 @@ async def analyse_biomodel(
         return f"An error occurred during AI analysis: {str(e)}"
 
 
-async def analyse_diagram(biomodel_id: str, virtual_key: str, model: str):
+async def analyse_diagram(
+    biomodel_id: str, virtual_key: str, model: str, auth0_token: str | None = None
+):
     """
     Analyze diagram for a given biomodel.
 
@@ -249,6 +253,9 @@ async def analyse_diagram(biomodel_id: str, virtual_key: str, model: str):
         biomodel_id (str): The ID of the biomodel to analyze.
         virtual_key (str): The caller's LiteLLM virtual key.
         model (str): The LiteLLM model alias to use.
+        auth0_token (str | None): Verified Auth0 access token for the
+            logged-in user, if any. Required to analyze a private or
+            shared biomodel's diagram.
     returns:
         str: The diagram analysis response.
     """
@@ -266,11 +273,15 @@ async def analyse_diagram(biomodel_id: str, virtual_key: str, model: str):
             "orderBy": "date_desc",
         }
         biomodel_params = BiomodelRequestParams(**params_dict)
-        biomodels_info = await fetch_biomodels(biomodel_params)
+        biomodels_info = await fetch_biomodels(biomodel_params, auth0_token)
         biomodel_info = f"Here is some information about Biomodel {biomodel_id}: {str(biomodels_info)}"
 
-        # Fetch Diagram URL
-        diagram_url = await get_diagram_url(biomodel_id)
+        # Fetch the diagram image ourselves and inline it as base64: the
+        # LLM provider fetches image_url URLs from its own infrastructure,
+        # with no way for it to send our Authorization header, so a plain
+        # VCell URL can never work for a private/shared biomodel.
+        image_bytes = await get_diagram_image(biomodel_id, auth0_token)
+        image_data_uri = f"data:image/png;base64,{base64.b64encode(image_bytes).decode('utf-8')}"
         # Diagram Analysis
         diagram_analysis_prompt = (
             "You are a VCell BioModel Assistant, designed to help users understand and interact with biological models in VCell. "
@@ -279,7 +290,7 @@ async def analyse_diagram(biomodel_id: str, virtual_key: str, model: str):
         )
         diagram_analysis_prompt = [
             {"type": "text", "text": diagram_analysis_prompt},
-            {"type": "image_url", "image_url": {"url": diagram_url}},
+            {"type": "image_url", "image_url": {"url": image_data_uri}},
         ]
         response = await _create_chat_completion(
             virtual_key,

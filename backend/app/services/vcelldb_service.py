@@ -5,9 +5,10 @@ import re
 from app.schemas.vcelldb_schema import BiomodelRequestParams, SimulationRequestParams
 from urllib.parse import urlencode, quote
 from langfuse import observe
-from typing import List
+from typing import List, Optional
 
 VCELL_API_BASE_URL = "https://vcell.cam.uchc.edu/api/v0"
+VCELL_API_V1_BASE_URL = "https://vcell.cam.uchc.edu/api/v1"
 
 logger = get_logger("vcelldb_service")
 
@@ -64,13 +65,43 @@ async def check_vcell_connectivity() -> bool:
         return False
 
 
+@observe(name="GET_LEGACY_VCELL_TOKEN")
+async def get_legacy_vcell_token(auth0_token: str) -> str:
+    """
+    Exchanges a verified Auth0 access token for a legacy VCell (v0) API
+    bearer token, which the v0 API requires to identify the user and
+    include their private/shared biomodels in results.
+
+    Args:
+        auth0_token (str): Verified Auth0 access token.
+
+    Returns:
+        str: Legacy VCell bearer token to send to the v0 API.
+    """
+    url = f"{VCELL_API_V1_BASE_URL}/users/bearerToken"
+
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            url, headers={"Authorization": f"Bearer {auth0_token}"}
+        )
+        response.raise_for_status()
+        return response.json()["token"]
+
+
 @observe(name="FETCH_BIOMODELS")
-async def fetch_biomodels(params: BiomodelRequestParams) -> dict:
+async def fetch_biomodels(
+    params: BiomodelRequestParams, auth0_token: Optional[str] = None
+) -> dict:
     """
     Fetch a list of biomodels from the VCell API based on filtering and sorting parameters.
 
     Args:
         params (BiomodelRequestParams): Request parameters for filtering biomodels.
+        auth0_token (Optional[str]): Verified Auth0 access token for the
+            logged-in user, if any. When provided, it is exchanged for a
+            legacy VCell token so the results include the user's private
+            and shared biomodels in addition to public ones. When omitted,
+            only public biomodels are returned.
 
     Returns:
         dict: A dictionary containing a list of biomodels with metadata.
@@ -89,9 +120,14 @@ async def fetch_biomodels(params: BiomodelRequestParams) -> dict:
     # Log the URL being queried
     logger.info(f"Querying URL: {url}")
 
+    headers = {}
+    if auth0_token:
+        legacy_token = await get_legacy_vcell_token(auth0_token)
+        headers["Authorization"] = f"Bearer {legacy_token}"
+
     # Perform the API request
     async with httpx.AsyncClient() as client:
-        response = await client.get(url)
+        response = await client.get(url, headers=headers)
         response.raise_for_status()
         raw_data = response.json()
 
@@ -375,19 +411,29 @@ async def get_diagram_url(biomodel_id: str) -> str:
 
 
 @observe(name="GET_DIAGRAM_IMAGE")
-async def get_diagram_image(biomodel_id: str) -> bytes:
+async def get_diagram_image(
+    biomodel_id: str, auth0_token: Optional[str] = None
+) -> bytes:
     """
     Fetches the diagram image for a given biomodel from the VCell API and returns the image bytes.
 
     Args:
         biomodel_id (str): ID of the biomodel.
+        auth0_token (Optional[str]): Verified Auth0 access token for the
+            logged-in user, if any. Required to fetch the diagram for a
+            private or shared biomodel.
 
     Returns:
         bytes: The image content (PNG) of the biomodel diagram.
     """
+    headers = {}
+    if auth0_token:
+        legacy_token = await get_legacy_vcell_token(auth0_token)
+        headers["Authorization"] = f"Bearer {legacy_token}"
+
     async with httpx.AsyncClient() as client:
         response = await client.get(
-            f"{VCELL_API_BASE_URL}/biomodel/{biomodel_id}/diagram"
+            f"{VCELL_API_BASE_URL}/biomodel/{biomodel_id}/diagram", headers=headers
         )
         response.raise_for_status()
         return response.content

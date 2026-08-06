@@ -6,7 +6,7 @@ from app.controllers.llms_controller import (
     analyse_vcml_controller,
     analyse_diagram_controller,
 )
-from app.core.auth import verify_auth0_token
+from app.core.auth import verify_auth0_token, get_bearer_token
 from app.schemas.llms_schema import AnalysisResponse, ChatRequest, ChatResponse, LLMModel
 
 router = APIRouter()
@@ -16,6 +16,7 @@ router = APIRouter()
 async def query_llm(
     request: ChatRequest,
     payload: dict = Depends(verify_auth0_token),
+    access_token: str = Depends(get_bearer_token),
 ):
     """
     Endpoint to query the LLM and execute the necessary tools.
@@ -28,6 +29,7 @@ async def query_llm(
         request.conversation_history,
         request.model,
         payload,
+        access_token,
     )
     return {"response": result, "bmkeys": bmkeys, "model_used": model_used}
 
@@ -73,6 +75,7 @@ async def analyse_diagram(
     biomodel_id: str,
     model: LLMModel = "openai-model",
     payload: dict = Depends(verify_auth0_token),
+    access_token: str = Depends(get_bearer_token),
 ):
     """
     Endpoint to analyze diagram for a given biomodel.
@@ -81,5 +84,5 @@ async def analyse_diagram(
     Returns:
         dict: The diagram analysis response.
     """
-    result = await analyse_diagram_controller(biomodel_id, model, payload)
+    result = await analyse_diagram_controller(biomodel_id, model, payload, access_token)
     return {"response": result}

@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Response
-from typing import List
+from typing import List, Optional
+from app.core.auth import get_optional_auth0_token
 from app.schemas.vcelldb_schema import BiomodelRequestParams, SimulationRequestParams
 from app.controllers.vcelldb_controller import (
     get_biomodels_controller,
@@ -17,12 +18,17 @@ router = APIRouter()
 
 
 @router.get("/biomodel", response_model=dict)
-async def get_biomodels(params: BiomodelRequestParams = Depends()):
+async def get_biomodels(
+    params: BiomodelRequestParams = Depends(),
+    auth0_token: Optional[str] = Depends(get_optional_auth0_token),
+):
     """
     Endpoint to retrieve biomodels based on provided filters and sorting.
+    If a valid Authorization bearer token is sent, results also include
+    the logged-in user's private and shared biomodels.
     """
     try:
-        return await get_biomodels_controller(params)
+        return await get_biomodels_controller(params, auth0_token)
     except HTTPException as e:
         raise e
 
@@ -87,11 +93,16 @@ async def get_diagram_url(biomodel_id: str):
 
 
 @router.get("/biomodel/{biomodel_id}/diagram/image")
-async def get_diagram_image(biomodel_id: str):
+async def get_diagram_image(
+    biomodel_id: str,
+    auth0_token: Optional[str] = Depends(get_optional_auth0_token),
+):
     """
-    Endpoint to get the diagram image (PNG) for a given biomodel.
+    Endpoint to get the diagram image (PNG) for a given biomodel. If a
+    valid Authorization bearer token is sent, this also works for private
+    and shared biomodels.
     """
-    return await get_diagram_image_controller(biomodel_id)
+    return await get_diagram_image_controller(biomodel_id, auth0_token)
 
 
 @router.get("/biomodel/{biomodel_id}/applications/files", response_model=dict)

@@ -25,6 +25,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAccessToken, useUser } from "@auth0/nextjs-auth0/client";
 import { LoginRequiredDialog } from "@/components/login-required-dialog";
 import { SignInOutButton } from "@/components/sign-in-out-button";
+import { getOptionalAccessToken } from "@/lib/get-optional-access-token";
 
 interface AnalysisResults {
   title: string;
@@ -66,6 +67,8 @@ export default function AnalysisResultsPage({
   const [biomodelData, setBiomodelData] = useState<BiomodelDetail | null>(null);
   const [biomodelLoading, setBiomodelLoading] = useState(true);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const [diagramImageUrl, setDiagramImageUrl] = useState("");
+  const [diagramError, setDiagramError] = useState("");
   const { user, isLoading: isUserLoading } = useUser();
 
   useEffect(() => {
@@ -73,8 +76,11 @@ export default function AnalysisResultsPage({
       setBiomodelLoading(true);
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-        const res = await fetch(`${apiUrl}/biomodel?bmId=${id}`);
-        
+        const token = await getOptionalAccessToken();
+        const res = await fetch(`${apiUrl}/biomodel?bmId=${id}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        });
+
         if (res.ok) {
           const json = await res.json();
           if (json.data && Array.isArray(json.data) && json.data.length > 0) {
@@ -89,6 +95,24 @@ export default function AnalysisResultsPage({
     };
 
     fetchBiomodelData();
+  }, [id]);
+
+  useEffect(() => {
+    setDiagramError("");
+    (async () => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+        const token = await getOptionalAccessToken();
+        const res = await fetch(`${apiUrl}/biomodel/${id}/diagram/image`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        });
+        if (!res.ok) throw new Error("Failed to load diagram image.");
+        const blob = await res.blob();
+        setDiagramImageUrl(URL.createObjectURL(blob));
+      } catch (err: any) {
+        setDiagramError(err.message || "Failed to load diagram image.");
+      }
+    })();
   }, [id]);
 
   useEffect(() => {
@@ -254,8 +278,6 @@ export default function AnalysisResultsPage({
     return <div className="min-h-screen bg-slate-50 p-8 text-center">Loading biomodel...</div>;
   }
 
-  const biomodelDiagramUrl = `https://vcell.cam.uchc.edu/api/v0/biomodel/${id}/diagram`;
-
   return (
     <div className="min-h-screen bg-slate-50">
       <LoginRequiredDialog open={showLoginDialog} onOpenChange={setShowLoginDialog} />
@@ -330,13 +352,15 @@ export default function AnalysisResultsPage({
                   Biomodel Diagram
                 </span>
               </div>
-              <img
-                src={biomodelDiagramUrl || "/placeholder.svg"}
-                alt="Biomodel Diagram"
-                className="max-w-2xl h-auto mx-auto border border-slate-200 rounded shadow"
-                onError={() => setError("Failed to load diagram image.")}
-                onLoad={() => setError("")}
-              />
+              {diagramError ? (
+                <div className="text-center text-red-600 py-8">{diagramError}</div>
+              ) : (
+                <img
+                  src={diagramImageUrl || "/placeholder.svg"}
+                  alt="Biomodel Diagram"
+                  className="max-w-2xl h-auto mx-auto border border-slate-200 rounded shadow"
+                />
+              )}
             </div>
 
             {/* Chat Box */}
