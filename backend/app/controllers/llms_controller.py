@@ -5,6 +5,7 @@ from app.core.singleton import get_supabase_client
 from app.services.litellm_service import get_or_create_virtual_key
 from app.services.llms_service import (
     get_response_with_tools,
+    get_faq_response,
     analyse_biomodel,
     analyse_vcml,
     analyse_diagram,
@@ -48,6 +49,33 @@ async def get_llm_response(
             conversation_history, virtual_key, model, access_token
         )
         return result, bmkeys, model_used
+    except Exception as e:
+        if isinstance(e, HTTPException):
+            raise e
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+async def get_faq_llm_response(
+    faq_id: str,
+    model: str,
+    payload: dict,
+) -> tuple[str, list, str]:
+    """
+    Controller function to answer a hardcoded /chat quick-action FAQ.
+    Args:
+        faq_id (str): Key identifying which FAQ quick action was clicked.
+        model (str): The LiteLLM model alias to use.
+        payload (dict): The verified Auth0 token payload for the caller.
+    Returns:
+        tuple[str, list, str]: The final response, bmkeys list, and model actually used.
+    """
+    try:
+        supabase = get_supabase_client()
+        virtual_key = await _get_virtual_key(payload, supabase)
+        result, bmkeys, model_used = await get_faq_response(faq_id, virtual_key, model)
+        return result, bmkeys, model_used
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         if isinstance(e, HTTPException):
             raise e
