@@ -10,8 +10,6 @@ class User(BaseModel):
     email: Optional[str] = None
     name: Optional[str] = None
     role: str
-    token_limit: int
-    tokens_used: int
     created_at: datetime
     last_login: datetime
     litellm_virtual_key: Optional[str] = Field(default=None, exclude=True)
