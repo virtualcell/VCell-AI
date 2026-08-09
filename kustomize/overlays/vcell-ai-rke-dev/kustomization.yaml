@@ -5,9 +5,9 @@ namespace: vcell-ai-rke-dev
 
 images:
   - name: ghcr.io/virtualcell/vcell-ai-backend
-    newTag: 0.1.12
+    newTag: 0.1.13
   - name: ghcr.io/virtualcell/vcell-ai-frontend
-    newTag: 0.1.12
+    newTag: 0.1.13
 
 replicas:
   - count: 1
