@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { getAccessToken } from "@auth0/nextjs-auth0/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -45,8 +46,12 @@ export default function KnowledgeBasePage() {
     const fetchFiles = async () => {
       try {
         setLoading(true);
+        const token = await getAccessToken();
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/kb/files`, {
-          headers: { accept: "application/json" },
+          headers: {
+            accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         });
         if (!res.ok) throw new Error("Failed to fetch files");
         const data = await res.json();
@@ -109,8 +114,10 @@ export default function KnowledgeBasePage() {
     const formData = new FormData();
     formData.append("file", file);
     try {
+      const token = await getAccessToken();
       const res = await fetch(endpoint, {
         method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
         body: formData,
       });
       if (!res.ok) throw new Error("Failed to upload file");
@@ -133,11 +140,15 @@ export default function KnowledgeBasePage() {
   const handleDeleteFile = async (fileName: string) => {
     if (!confirm("Are you sure you want to delete this file?")) return;
     try {
+      const token = await getAccessToken();
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/kb/files/${encodeURIComponent(fileName)}`,
         {
           method: "DELETE",
-          headers: { accept: "application/json" },
+          headers: {
+            accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         },
       );
       if (!res.ok) throw new Error("Failed to delete file");
@@ -159,10 +170,14 @@ export default function KnowledgeBasePage() {
     setSelectedFile(file);
     setFileContent({ content: "", loading: true, error: "" });
     try {
+      const token = await getAccessToken();
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/kb/files/${encodeURIComponent(file.name)}/chunks`,
         {
-          headers: { accept: "application/json" },
+          headers: {
+            accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         },
       );
       if (!res.ok) throw new Error("Failed to fetch file content");

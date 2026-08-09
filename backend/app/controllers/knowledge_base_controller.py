@@ -44,7 +44,9 @@ async def get_files_controller():
         raise HTTPException(status_code=500, detail=f"Error getting files: {str(e)}")
 
 
-async def upload_pdf_controller(file: UploadFile = File(...)):
+async def upload_pdf_controller(
+    file: UploadFile = File(...), source_url: Optional[str] = None
+):
     """
     Upload a PDF file to the knowledge base.
     """
@@ -63,7 +65,7 @@ async def upload_pdf_controller(file: UploadFile = File(...)):
         file_name = file.filename
 
         # Upload to knowledge base
-        result = upload_pdf_file(temp_file_path, file_name)
+        result = upload_pdf_file(temp_file_path, file_name, source_url)
 
         if result["status"] == "success":
             return JSONResponse(content=result, status_code=200)
@@ -83,7 +85,9 @@ async def upload_pdf_controller(file: UploadFile = File(...)):
                 pass  # Ignore cleanup errors
 
 
-async def upload_text_controller(file: UploadFile = File(...)):
+async def upload_text_controller(
+    file: UploadFile = File(...), source_url: Optional[str] = None
+):
     """
     Upload a text file to the knowledge base.
     """
@@ -102,7 +106,7 @@ async def upload_text_controller(file: UploadFile = File(...)):
         file_name = file.filename
 
         # Upload to knowledge base
-        result = upload_text_file(temp_file_path, file_name)
+        result = upload_text_file(temp_file_path, file_name, source_url)
 
         if result["status"] == "success":
             return JSONResponse(content=result, status_code=200)

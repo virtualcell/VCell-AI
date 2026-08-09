@@ -50,10 +50,12 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const { user, isLoading: isUserLoading } = useUser();
   const [budget, setBudget] = useState<BudgetInfo | null>(null);
+  const [role, setRole] = useState<string | null>(null);
   const isCollapsed = state === "collapsed";
 
   useEffect(() => {
     if (isUserLoading || !user) {
+      setRole(null);
       return;
     }
 
@@ -88,7 +90,38 @@ export function AppSidebar() {
       }
     };
 
+    const fetchRole = async () => {
+      try {
+        const token = await getAccessToken();
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+        if (!apiUrl) {
+          throw new Error("NEXT_PUBLIC_API_URL is not configured");
+        }
+
+        const response = await fetch(`${apiUrl}/users/me/role`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            accept: "application/json",
+          },
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error(`Role request failed with status ${response.status}`);
+        }
+
+        const data = (await response.json()) as { role: string | null };
+        setRole(data.role);
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          console.error("Failed to fetch role", error);
+        }
+      }
+    };
+
     fetchBudget();
+    fetchRole();
 
     return () => {
       controller.abort();
@@ -221,36 +254,40 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarSeparator />
+        {role === "admin" && (
+          <>
+            <SidebarSeparator />
 
-        {/* Admin Section */}
-        <SidebarGroup>
-          {!isCollapsed && (
-            <SidebarGroupLabel className="text-slate-700 font-medium">
-              Admin
-            </SidebarGroupLabel>
-          )}
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem key="KnowledgeBase">
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === "/admin/knowledge-base"}
-                  className="data-[active=true]:bg-purple-50 data-[active=true]:text-purple-700 data-[active=true]:border-r-2 data-[active=true]:border-purple-500"
-                  tooltip={isCollapsed ? "Knowledge Base" : undefined}
-                >
-                  <Link
-                    href="/admin/knowledge-base"
-                    className="flex items-center gap-3"
-                  >
-                    <FolderOpen className="h-4 w-4 text-purple-500" />
-                    {!isCollapsed && <span>Knowledge Base</span>}
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+            {/* Admin Section */}
+            <SidebarGroup>
+              {!isCollapsed && (
+                <SidebarGroupLabel className="text-slate-700 font-medium">
+                  Admin
+                </SidebarGroupLabel>
+              )}
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <SidebarMenuItem key="KnowledgeBase">
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname === "/admin/knowledge-base"}
+                      className="data-[active=true]:bg-purple-50 data-[active=true]:text-purple-700 data-[active=true]:border-r-2 data-[active=true]:border-purple-500"
+                      tooltip={isCollapsed ? "Knowledge Base" : undefined}
+                    >
+                      <Link
+                        href="/admin/knowledge-base"
+                        className="flex items-center gap-3"
+                      >
+                        <FolderOpen className="h-4 w-4 text-purple-500" />
+                        {!isCollapsed && <span>Knowledge Base</span>}
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </>
+        )}
       </SidebarContent>
 
       <SidebarFooter className="border-t border-slate-200 p-4">

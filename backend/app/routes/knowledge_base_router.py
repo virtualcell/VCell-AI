@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File
+from fastapi import APIRouter, Depends, Form, UploadFile, File
 from app.controllers.knowledge_base_controller import (
     create_collection_controller,
     get_files_controller,
@@ -8,8 +8,10 @@ from app.controllers.knowledge_base_controller import (
     get_similar_controller,
     get_file_chunks_controller,
 )
+from app.core.auth import require_admin
 
-router = APIRouter()
+# All knowledge base endpoints are admin-only.
+router = APIRouter(dependencies=[Depends(require_admin)])
 
 
 @router.post("/create-collection")
@@ -35,23 +37,27 @@ async def get_files_endpoint():
 
 
 @router.post("/upload-pdf")
-async def upload_pdf_endpoint(file: UploadFile = File(...)):
+async def upload_pdf_endpoint(
+    file: UploadFile = File(...), source_url: str = Form(None)
+):
     """
     Upload a PDF file to the knowledge base.
     """
     try:
-        return await upload_pdf_controller(file)
+        return await upload_pdf_controller(file, source_url)
     except Exception as e:
         raise e
 
 
 @router.post("/upload-text")
-async def upload_text_endpoint(file: UploadFile = File(...)):
+async def upload_text_endpoint(
+    file: UploadFile = File(...), source_url: str = Form(None)
+):
     """
     Upload a text file to the knowledge base.
     """
     try:
-        return await upload_text_controller(file)
+        return await upload_text_controller(file, source_url)
     except Exception as e:
         raise e
 

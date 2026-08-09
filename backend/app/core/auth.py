@@ -7,6 +7,7 @@ from jwt import PyJWKClient
 from jwt.exceptions import PyJWKClientError
 
 from app.core.config import settings
+from app.services.users_service import get_user_role
 
 bearer_scheme = HTTPBearer(auto_error=False)
 _jwks_client: PyJWKClient | None = None
@@ -82,6 +83,21 @@ async def verify_auth0_token(
     Verify Auth0 JWT access token and return decoded payload.
     """
     return _decode_and_verify(access_token)
+
+
+async def require_admin(
+    payload: dict = Depends(verify_auth0_token),
+) -> dict[str, Any]:
+    """
+    Require the authenticated user to have the "admin" role in Supabase.
+    """
+    if get_user_role(payload["sub"]) != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin privileges required",
+        )
+
+    return payload
 
 
 async def get_optional_auth0_token(

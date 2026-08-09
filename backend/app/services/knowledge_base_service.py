@@ -1,5 +1,6 @@
 import os
 import uuid
+from datetime import datetime, timezone
 from markitdown import MarkItDown
 from typing import List, Dict, Any, Optional
 from app.core.config import settings
@@ -62,12 +63,12 @@ def embed_text(text: str):
 def chunk_text(text: str):
     """
     Chunk a text string into smaller chunks using LangChain RecursiveCharacterTextSplitter.
-    The chunk size is 1000 characters and the overlap is 200 characters.
+    The chunk size is 2000 characters and the overlap is 300 characters.
 
     Args:
         text (str): The text to chunk.
     """
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1250, chunk_overlap=250)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=300)
     return text_splitter.split_text(text)
 
 
@@ -114,7 +115,7 @@ def extract_text_from_pdf(file_path: str) -> str:
         raise Exception(f"Error extracting text from PDF: {str(e)}")
 
 
-def upload_pdf_file(file_path: str, file_name: str = None):
+def upload_pdf_file(file_path: str, file_name: str = None, source_url: str = None):
     """
     Upload a PDF file to a collection in Qdrant.
     The file is converted to text and then chunked into smaller chunks.
@@ -123,6 +124,7 @@ def upload_pdf_file(file_path: str, file_name: str = None):
     Args:
         file_path (str): Path to the PDF file to upload.
         file_name (str): Name to use for the file in the collection. If None, uses the original filename.
+        source_url (str): Optional source URL to record on each chunk.
     """
     try:
         # Ensure collection exists
@@ -138,6 +140,9 @@ def upload_pdf_file(file_path: str, file_name: str = None):
         # Chunk the text
         chunks = chunk_text(text)
 
+        # Shared by every chunk from this upload
+        uploaded_at = datetime.now(timezone.utc).isoformat()
+
         # Embed and upload each chunk
         for i, chunk in enumerate(chunks):
             # Create unique point ID
@@ -152,6 +157,8 @@ def upload_pdf_file(file_path: str, file_name: str = None):
                 "chunk": chunk,
                 "chunk_index": i,
                 "total_chunks": len(chunks),
+                "source_url": source_url or "",
+                "uploaded_at": uploaded_at,
             }
 
             # Insert into Qdrant
@@ -170,7 +177,7 @@ def upload_pdf_file(file_path: str, file_name: str = None):
         return {"status": "error", "message": f"Error uploading PDF file: {str(e)}"}
 
 
-def upload_text_file(file_path: str, file_name: str = None):
+def upload_text_file(file_path: str, file_name: str = None, source_url: str = None):
     """
     Upload a text file to a collection in Qdrant.
     The file is converted to text and then chunked into smaller chunks.
@@ -179,6 +186,7 @@ def upload_text_file(file_path: str, file_name: str = None):
     Args:
         file_path (str): Path to the text file to upload.
         file_name (str): Name to use for the file in the collection. If None, uses the original filename.
+        source_url (str): Optional source URL to record on each chunk.
     """
     try:
         # Ensure collection exists
@@ -195,6 +203,9 @@ def upload_text_file(file_path: str, file_name: str = None):
         # Chunk the text
         chunks = chunk_text(text)
 
+        # Shared by every chunk from this upload
+        uploaded_at = datetime.now(timezone.utc).isoformat()
+
         # Embed and upload each chunk
         for i, chunk in enumerate(chunks):
             # Create unique point ID
@@ -209,6 +220,8 @@ def upload_text_file(file_path: str, file_name: str = None):
                 "chunk": chunk,
                 "chunk_index": i,
                 "total_chunks": len(chunks),
+                "source_url": source_url or "",
+                "uploaded_at": uploaded_at,
             }
 
             # Insert into Qdrant
