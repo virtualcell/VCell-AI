@@ -2,10 +2,15 @@ from fastapi import APIRouter, Depends
 
 from app.controllers.users_controller import (
     get_current_user_budget_controller,
+    get_current_user_role_controller,
     sync_current_user_controller,
 )
 from app.core.auth import verify_auth0_token
-from app.schemas.users_schema import SyncUserResponse, UserBudgetResponse
+from app.schemas.users_schema import (
+    SyncUserResponse,
+    UserBudgetResponse,
+    UserRoleResponse,
+)
 
 router = APIRouter()
 
@@ -30,3 +35,14 @@ async def get_current_user_budget(
     """
 
     return await get_current_user_budget_controller(payload)
+
+
+@router.get("/users/me/role", response_model=UserRoleResponse)
+async def get_current_user_role(
+    payload: dict = Depends(verify_auth0_token),
+):
+    """
+    Endpoint to retrieve the authenticated user's role.
+    """
+
+    return await get_current_user_role_controller(payload)

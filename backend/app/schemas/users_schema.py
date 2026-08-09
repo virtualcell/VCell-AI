@@ -24,3 +24,7 @@ class UserBudgetResponse(BaseModel):
     spend: float
     max_budget: Optional[float] = None
     remaining_budget: Optional[float] = None
+
+
+class UserRoleResponse(BaseModel):
+    role: Optional[str] = None
