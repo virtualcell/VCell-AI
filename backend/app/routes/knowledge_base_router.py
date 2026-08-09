@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File
+from fastapi import APIRouter, Depends, UploadFile, File
 from app.controllers.knowledge_base_controller import (
     create_collection_controller,
     get_files_controller,
@@ -8,8 +8,10 @@ from app.controllers.knowledge_base_controller import (
     get_similar_controller,
     get_file_chunks_controller,
 )
+from app.core.auth import require_admin
 
-router = APIRouter()
+# All knowledge base endpoints are admin-only.
+router = APIRouter(dependencies=[Depends(require_admin)])
 
 
 @router.post("/create-collection")
