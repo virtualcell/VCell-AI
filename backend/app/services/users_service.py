@@ -35,6 +35,23 @@ def sync_auth0_user(payload: dict) -> dict | None:
     return response.data[0] if response.data else None
 
 
+def get_user_role(auth0_sub: str) -> str | None:
+    """
+    Look up a synced user's role in Supabase.
+    """
+    supabase = get_supabase_client()
+
+    response = (
+        supabase.table("users")
+        .select("role")
+        .eq("auth0_sub", auth0_sub)
+        .limit(1)
+        .execute()
+    )
+
+    return response.data[0].get("role") if response.data else None
+
+
 async def sync_current_user(payload: dict) -> dict:
     """
     Ensure the user has a LiteLLM virtual key, then sync them into Supabase.
