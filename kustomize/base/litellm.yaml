@@ -28,6 +28,17 @@ spec:
                 name: litellm-config
           # Secrets come from the sealed "litellm-secrets" secret.
           env:
+            # Don't publish the API surface. These are three separate switches in
+            # LiteLLM (_get_docs_url/_get_redoc_url/_get_openapi_url) — NO_DOCS
+            # alone only hides Swagger and leaves ReDoc + the full openapi.json
+            # (500+ paths) readable. Values are parsed by str_to_bool(), which
+            # recognizes only "true"/"false" — "1" would silently leave docs on.
+            - name: NO_DOCS
+              value: "True"
+            - name: NO_REDOC
+              value: "True"
+            - name: NO_OPENAPI
+              value: "True"
             - name: LITELLM_MASTER_KEY
               valueFrom:
                 secretKeyRef:
