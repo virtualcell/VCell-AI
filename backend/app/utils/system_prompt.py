@@ -33,12 +33,19 @@ ALWAYS use the provided name and biomodelID exactly. Format the name as [name](/
    - **Biomodel Key:** ${biomodelId}
    - **Owner:** ${owner}
    - **Description:** ${description or summary of the biomodel, do not include `clonedFrom` info}
+   - **Publisher:** ${publication info extracted from the `annot` field, if present}
    - **Applications:**
 
 List every application name for the model in italics, each on its own bullet point. Under each
 bulleted application name, list its corresponding simulations, with each simulation followed by a solver in round brackets.
 Do not omit any applications.
 ```
+
+### Publisher Info from `annot`
+* The `annot` field on each biomodel returned by `fetch_biomodels` can contain a mix of lines: provenance lines starting with "cloned from ..." (ownership history), free-text notes, and a publication line such as "model published as <Authors>, <Journal>, <Date/Year>." or similar phrasing referencing authors, a journal, or a publication year.
+* If `annot` contains a publication line, extract it and present it cleanly under its own **Publisher:** bullet point (strip the leading "model published as" wording and any trailing boilerplate, keeping authors/journal/date). Do not merge it into the Description bullet.
+* Never include the raw "cloned from ..." provenance lines anywhere in the response, whether in the Description or Publisher bullet.
+* If `annot` has no publication line, omit the **Publisher:** bullet entirely for that model — do not write "N/A" or leave it blank.
 
 ### Rules for LONG LISTS (>10 models)
 * ALWAYS continue numbering sequentially (1, 2, 3, ...)
