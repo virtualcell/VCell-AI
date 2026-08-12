@@ -1,8 +1,11 @@
-# Two Ingress objects share the host vcell-ai-dev.cam.uchc.edu:
-#   /api/*     -> backend:8000  (the /api prefix is stripped via rewrite-target,
+# Three Ingress objects share the host vcell-ai-dev.cam.uchc.edu:
+#   /api/*     -> backend:8000  (the /api prefix IS stripped via rewrite-target,
 #                because the FastAPI routes are served at the root, e.g. /biomodel)
-#   /kartik/*  -> litellm:4000  (same rewrite; the LiteLLM proxy serves at root)
+#   /kartik/*  -> litellm:4000  (the prefix is NOT stripped -- see litellm-ingress)
 #   /*         -> frontend:3000 (Next.js app, incl. /auth/* Auth0 routes)
+#
+# The two proxied services want opposite things, which is why /kartik can't ride
+# along on backend-ingress: rewrite-target is an ingress-wide annotation.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -34,11 +37,42 @@ spec:
                 name: backend
                 port:
                   number: 8000
-          # Direct access to the LiteLLM proxy for manual testing. Shares this
-          # Ingress because the /$2 rewrite strips the prefix, which is what
-          # LiteLLM needs (its routes are at the root: /v1/*, /health, /key/*).
-          - path: /kartik(/|$)(.*)
-            pathType: ImplementationSpecific
+---
+# Direct access to the LiteLLM proxy for manual testing, at /kartik.
+#
+# Deliberately NOT on backend-ingress: that one carries a rewrite-target, and
+# LiteLLM needs the /kartik prefix left INTACT. It's told about the prefix via
+# SERVER_ROOT_PATH (config/vcell-ai-rke-dev/litellm.env) and strips it itself.
+# If the proxy strips it too, Starlette's mounted StaticFiles ends up with a
+# child root_path of /kartik/ui against a real path of /ui/, resolves the wrong
+# file, and the dashboard 404s while the API keeps working.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: litellm-ingress
+  labels:
+    app: litellm-ingress
+  annotations:
+    # No rewrite-target here -- that is the whole point of the separate object.
+    # Long timeouts because chat completions stream.
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    # The dashboard login sets a JWT session cookie; give nginx the same header
+    # headroom the Auth0 callback needed on frontend-ingress, or it 502s.
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - vcell-ai-dev.cam.uchc.edu
+      secretName: letsencrypt-prod-vcell-ai-dev-tls
+  rules:
+    - host: vcell-ai-dev.cam.uchc.edu
+      http:
+        paths:
+          - path: /kartik
+            pathType: Prefix
             backend:
               service:
                 name: litellm
