@@ -78,6 +78,20 @@ spec:
                 name: litellm
                 port:
                   number: 4000
+          # The dashboard asks for its favicon at an absolute /get_favicon.
+          # LiteLLM only prefix-rewrites assets built under its asset prefix
+          # ("/litellm-asset-prefix"), and this href isn't one of them, so it
+          # escapes /kartik and hits the frontend. Exact match, and the name is
+          # LiteLLM-specific, so nothing of the Next.js app is shadowed.
+          # Reaching LiteLLM unprefixed is fine: root_path only strips /kartik
+          # when it's actually present.
+          - path: /get_favicon
+            pathType: Exact
+            backend:
+              service:
+                name: litellm
+                port:
+                  number: 4000
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
