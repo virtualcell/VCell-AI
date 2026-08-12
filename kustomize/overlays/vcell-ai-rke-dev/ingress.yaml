@@ -1,7 +1,8 @@
 # Two Ingress objects share the host vcell-ai-dev.cam.uchc.edu:
-#   /api/*  -> backend:8000  (the /api prefix is stripped via rewrite-target,
-#             because the FastAPI routes are served at the root, e.g. /biomodel)
-#   /*      -> frontend:3000 (Next.js app, incl. /auth/* Auth0 routes)
+#   /api/*     -> backend:8000  (the /api prefix is stripped via rewrite-target,
+#                because the FastAPI routes are served at the root, e.g. /biomodel)
+#   /kartik/*  -> litellm:4000  (same rewrite; the LiteLLM proxy serves at root)
+#   /*         -> frontend:3000 (Next.js app, incl. /auth/* Auth0 routes)
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -33,6 +34,16 @@ spec:
                 name: backend
                 port:
                   number: 8000
+          # Direct access to the LiteLLM proxy for manual testing. Shares this
+          # Ingress because the /$2 rewrite strips the prefix, which is what
+          # LiteLLM needs (its routes are at the root: /v1/*, /health, /key/*).
+          - path: /kartik(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: litellm
+                port:
+                  number: 4000
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
