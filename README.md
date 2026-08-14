@@ -18,7 +18,7 @@ This is a monolithic repository containing both frontend and backend services:
 
 ## Project Structure
 ```
-VCell-GSoC/
+VCell-AI/
 ├── frontend/               # Next.js frontend application
 │   ├── app/                  # App router pages and components
 │   ├── components/           # Reusable UI components
@@ -69,7 +69,7 @@ VCell-GSoC/
 1. **Clone the repository**
    ```bash
    git clone https://github.com/virtualcell/VCell-AI.git
-   cd VCell-GSoC
+   cd VCell-AI
    ```
 
 2. **Set up environment variables**
