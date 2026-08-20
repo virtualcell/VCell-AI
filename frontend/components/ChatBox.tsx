@@ -12,10 +12,10 @@ import {
 } from "@/components/ui/select";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { MessageSquare, Send, Square, Bot, User, Loader2 } from "lucide-react";
-import { getAccessToken, useUser } from "@auth0/nextjs-auth0/client";
+import { useUser } from "@auth0/nextjs-auth0/client";
 import { LoginRequiredDialog } from "@/components/login-required-dialog";
 import { useChatHistory } from "@/hooks/use-chat-history";
-import type { ConversationSurface } from "@/lib/chat-history";
+import type { ConversationSurface, StoredMessage } from "@/lib/chat-history";
 
 type ModelId = "openai-model" | "local-model";
 
@@ -57,9 +57,46 @@ interface ChatBoxProps {
   surface: ConversationSurface;
   contextId?: string;
   conversationId?: string | null;
-  initialMessages?: Message[];
   onConversationSaved?: (id: string) => void;
 }
+
+// Pure helpers — no dependency on component state/props.
+const createInitialMessages = (startMsg: string | string[]): Message[] => {
+  if (Array.isArray(startMsg)) {
+    return startMsg.map((content, index) => ({
+      id: (index + 1).toString(),
+      role: "assistant" as const,
+      content,
+      timestamp: new Date(),
+    }));
+  } else if (startMsg) {
+    return [
+      {
+        id: "1",
+        role: "assistant" as const,
+        content: startMsg,
+        timestamp: new Date(),
+      },
+    ];
+  }
+  return [];
+};
+
+const toMessage = (stored: StoredMessage): Message => ({
+  id: stored.id,
+  role: stored.role,
+  content: stored.content,
+  timestamp: new Date(stored.timestamp),
+  modelUsed: stored.modelUsed,
+});
+
+const toStoredMessage = (message: Message): StoredMessage => ({
+  id: message.id,
+  role: message.role,
+  content: message.content,
+  timestamp: message.timestamp.toISOString(),
+  modelUsed: message.modelUsed,
+});
 
 export const ChatBox: React.FC<ChatBoxProps> = ({
   startMessage,
@@ -72,46 +109,46 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
   surface,
   contextId,
   conversationId,
-  initialMessages,
   onConversationSaved,
 }) => {
-  // Helper function to create initial messages from startMessage
-  const createInitialMessages = (startMsg: string | string[]): Message[] => {
-    if (Array.isArray(startMsg)) {
-      return startMsg.map((content, index) => ({
-        id: (index + 1).toString(),
-        role: "assistant" as const,
-        content,
-        timestamp: new Date(),
-      }));
-    } else if (startMsg) {
-      return [
-        {
-          id: "1",
-          role: "assistant" as const,
-          content: startMsg,
-          timestamp: new Date(),
-        },
-      ];
-    }
-    return [];
-  };
+  const chatHistory = useChatHistory();
 
-  const [messages, setMessages] = useState<Message[]>(() =>
-    initialMessages && initialMessages.length > 0
-      ? initialMessages
-      : createInitialMessages(startMessage),
+  // The conversation this ChatBox instance is bound to. Starts as whatever
+  // the parent resolved from the URL; once a brand-new conversation is
+  // created (first send), this updates immediately — synchronously ahead of
+  // the parent's own re-render — so rendering switches over to the shared
+  // store right away instead of waiting on props.
+  const [boundConversationId, setBoundConversationId] = useState<
+    string | null
+  >(conversationId ?? null);
+
+  // Only used before a conversation exists yet (nothing to read from the
+  // shared store). The moment a conversation is created/bound, this is
+  // ignored — the store becomes the single source of truth for messages.
+  const [localSeedMessages, setLocalSeedMessages] = useState<Message[]>(() =>
+    createInitialMessages(startMessage),
   );
+
   const [inputMessage, setInputMessage] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [selectedModel, setSelectedModel] = useState<ModelId>("openai-model");
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const { user, isLoading: isUserLoading } = useUser();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const chatHistory = useChatHistory();
-  const savedConversationIdRef = useRef<string | null>(conversationId ?? null);
+
+  const storedConversation = boundConversationId
+    ? chatHistory.getConversation(boundConversationId)
+    : undefined;
+  const messages: Message[] = storedConversation
+    ? storedConversation.messages.map(toMessage)
+    : localSeedMessages;
+  // Reflects the shared store's pending state for this conversation, so the
+  // spinner is correct even right after navigating back to a chat whose
+  // reply kept generating in the background while this instance wasn't
+  // mounted.
+  const isLoading = boundConversationId
+    ? chatHistory.isPending(boundConversationId)
+    : false;
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -121,101 +158,19 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
     scrollToBottom();
   }, [messages]);
 
-  // Update messages when startMessage changes (when analysis completes).
-  // Uses a functional update so the decision is always based on the actual
-  // live messages at apply time, not a snapshot from when this effect was
-  // scheduled: if the user has already sent something (restored from a
-  // saved conversation, or typed during this session), this never
-  // overwrites it, no matter when/how many times startMessage changes.
+  // Seed messages (the welcome text / an in-progress auto-summary) only
+  // apply before any conversation exists. Once bound to a conversation, the
+  // store is authoritative and this is skipped entirely — no timing
+  // coordination needed since boundConversationId flips synchronously the
+  // moment a conversation is created.
   useEffect(() => {
+    if (boundConversationId) return;
     if (!startMessage || isInitialLoading) return;
-    setMessages((prev) => {
+    setLocalSeedMessages((prev) => {
       if (prev.some((m) => m.role === "user")) return prev;
       return createInitialMessages(startMessage);
     });
-  }, [startMessage, isInitialLoading]);
-
-  // Read via a ref inside the effect below so that unstable identities (e.g.
-  // an inline onConversationSaved passed by the parent, or chatHistory's
-  // functions whose containing object changes whenever ANY conversation
-  // changes) never re-trigger the effect themselves. Only a genuine
-  // `messages` change should cause a save; re-running on every prop churn
-  // caused the effect's own save call to retrigger itself indefinitely.
-  const latestRef = useRef({
-    surface,
-    contextId,
-    onConversationSaved,
-    create: chatHistory.create,
-    updateMessages: chatHistory.updateMessages,
-  });
-  latestRef.current = {
-    surface,
-    contextId,
-    onConversationSaved,
-    create: chatHistory.create,
-    updateMessages: chatHistory.updateMessages,
-  };
-
-  // Persist to local chat history once the user has actually sent something.
-  // Auto-generated seed/summary messages (assistant-only) are never saved.
-  useEffect(() => {
-    const hasUserMessage = messages.some((m) => m.role === "user");
-    if (!hasUserMessage) return;
-
-    const storedMessages = messages.map((m) => ({
-      id: m.id,
-      role: m.role,
-      content: m.content,
-      timestamp: m.timestamp.toISOString(),
-      modelUsed: m.modelUsed,
-    }));
-
-    const {
-      surface: currentSurface,
-      contextId: currentContextId,
-      onConversationSaved: currentOnConversationSaved,
-      create,
-      updateMessages,
-    } = latestRef.current;
-
-    if (savedConversationIdRef.current) {
-      updateMessages(savedConversationIdRef.current, storedMessages);
-      return;
-    }
-
-    const firstUserMessage = messages.find((m) => m.role === "user");
-    const created = create({
-      surface: currentSurface,
-      contextId: currentContextId,
-      title: firstUserMessage?.content.trim() || "New conversation",
-      messages: storedMessages,
-    });
-    savedConversationIdRef.current = created.id;
-    currentOnConversationSaved?.(created.id);
-  }, [messages]);
-
-  // Helper function to format biomodel IDs as hyperlinks
-  const formatBiomodelIds = (content: string, bmkeys: string[]): string => {
-    if (!bmkeys || bmkeys.length === 0) return content;
-
-    let formattedContent = content;
-
-    // Replace biomodel IDs with hyperlinks, skipping IDs already inside a
-    // markdown link's URL (e.g. the /search/${bmId} link the LLM already renders
-    // for the model name) to avoid corrupting that link and duplicating the ID.
-    bmkeys.forEach((bmId) => {
-      const encodedPrompt = encodeURIComponent(`Describe model`);
-      /* const ai_link = `[AI Analysis](/analyze/${bmId}?prompt=${encodedPrompt})`;
-      const db_link = `[Database](/search/${bmId})`;
-      const replacementString = `**${bmId}** -- ${ai_link} &nbsp;|&nbsp; ${db_link}`; */
-      const db_link = `[Database Details](/search/${bmId})`;
-      const replacementString = `**${bmId}**`;
-      const idRegex = new RegExp(`(?<!/search/)\\b${bmId}\\b`, "g");
-      formattedContent = formattedContent.replace(idRegex, replacementString);
-    });
-
-    return formattedContent;
-  };
+  }, [startMessage, isInitialLoading, boundConversationId]);
 
   const handleQuickAction = (action: QuickAction) => {
     setInputMessage("");
@@ -226,76 +181,25 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
     }
   };
 
-  // Shared by handleSendMessage and handleFaqAction: pushes the user bubble,
-  // runs the request, and handles the response/abort/error the same way
-  // regardless of which endpoint doFetch actually hits.
-  const runQuery = async (
-    userDisplayContent: string,
-    doFetch: (
-      token: string | undefined,
-      signal: AbortSignal,
-    ) => Promise<Response>,
+  // A stale boundConversationId (e.g. the conversation was deleted from
+  // another tab) shouldn't silently swallow the next message — fall back to
+  // starting a fresh conversation instead.
+  const resolveExistingConversationId = (): string | null =>
+    boundConversationId && chatHistory.getConversation(boundConversationId)
+      ? boundConversationId
+      : null;
+
+  const bindIfNewConversation = (
+    existingId: string | null,
+    resultId: string,
   ) => {
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content: userDisplayContent,
-      timestamp: new Date(),
-    };
-    setMessages((prev) => [...prev, userMessage]);
-    setInputMessage("");
-    setIsLoading(true);
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
-    try {
-      const token = await getAccessToken();
-      const res = await doFetch(token, controller.signal);
-      const data = await res.json();
-      const aiResponse =
-        data.response || "Sorry, I didn't get a response from the server.";
-      const bmkeys = data.bmkeys || [];
-
-      // Format the response to include hyperlinks for biomodel IDs
-      const formattedResponse = formatBiomodelIds(aiResponse, bmkeys);
-
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: formattedResponse,
-        timestamp: new Date(),
-        modelUsed: data.model_used,
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
-    } catch (error) {
-      if (error instanceof DOMException && error.name === "AbortError") {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: (Date.now() + 2).toString(),
-            role: "assistant",
-            content: "_Response cancelled._",
-            timestamp: new Date(),
-          },
-        ]);
-      } else {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: (Date.now() + 2).toString(),
-            role: "assistant",
-            content:
-              "There was an error connecting to the backend. Please try again.",
-            timestamp: new Date(),
-          },
-        ]);
-      }
-    } finally {
-      abortControllerRef.current = null;
-      setIsLoading(false);
+    if (resultId !== existingId) {
+      setBoundConversationId(resultId);
+      onConversationSaved?.(resultId);
     }
   };
 
-  const handleSendMessage = async (overrideMessage?: string) => {
+  const handleSendMessage = (overrideMessage?: string) => {
     const msg = overrideMessage ?? inputMessage;
     if (!msg.trim()) return;
     if (isUserLoading) return;
@@ -342,55 +246,80 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
       ? `${promptPrefix} ${msg}${parameterContext}`
       : `${msg}${parameterContext}`;
 
-    await runQuery(msg, (token, signal) =>
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/query`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-          accept: "application/json",
-        },
-        body: JSON.stringify({
-          conversation_history: [
-            ...messages,
-            { role: "user", content: finalPrompt },
-          ].map((m) => ({
-            role: m.role,
-            content: m.content,
-          })),
-          model: selectedModel,
+    const priorForApi = messages.map((m) => ({
+      role: m.role,
+      content: m.content,
+    }));
+    const existingId = resolveExistingConversationId();
+
+    setInputMessage("");
+
+    const resultId = chatHistory.sendMessage({
+      conversationId: existingId,
+      surface,
+      contextId,
+      seedMessages: existingId ? [] : localSeedMessages.map(toStoredMessage),
+      userContent: msg,
+      fetcher: (token, signal) =>
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/query`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            accept: "application/json",
+          },
+          body: JSON.stringify({
+            conversation_history: [
+              ...priorForApi,
+              { role: "user", content: finalPrompt },
+            ],
+            model: selectedModel,
+          }),
+          signal,
         }),
-        signal,
-      }),
-    );
+    });
+
+    bindIfNewConversation(existingId, resultId);
   };
 
-  const handleFaqAction = async (faqId: string, displayText: string) => {
+  const handleFaqAction = (faqId: string, displayText: string) => {
     if (isUserLoading) return;
     if (!user) {
       setShowLoginDialog(true);
       return;
     }
 
-    await runQuery(displayText, (token, signal) =>
-      fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/query/faq/${faqId}?${new URLSearchParams(
-          { model: selectedModel },
-        ).toString()}`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            accept: "application/json",
+    const existingId = resolveExistingConversationId();
+
+    const resultId = chatHistory.sendMessage({
+      conversationId: existingId,
+      surface,
+      contextId,
+      seedMessages: existingId ? [] : localSeedMessages.map(toStoredMessage),
+      userContent: displayText,
+      fetcher: (token, signal) =>
+        fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/query/faq/${faqId}?${new URLSearchParams(
+            { model: selectedModel },
+          ).toString()}`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              accept: "application/json",
+            },
+            signal,
           },
-          signal,
-        },
-      ),
-    );
+        ),
+    });
+
+    bindIfNewConversation(existingId, resultId);
   };
 
   const handleStopRequest = () => {
-    abortControllerRef.current?.abort();
+    if (boundConversationId) {
+      chatHistory.stopGenerating(boundConversationId);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {

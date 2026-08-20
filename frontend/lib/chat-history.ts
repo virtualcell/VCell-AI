@@ -23,7 +23,7 @@ const STORAGE_KEY_PREFIX = "vcell-ai-chat-history";
 const getStorageKey = (userSub: string): string =>
   `${STORAGE_KEY_PREFIX}:${userSub}`;
 
-const generateId = (): string => {
+export const generateId = (): string => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
     return crypto.randomUUID();
   }
@@ -75,14 +75,18 @@ export const buildConversation = (params: {
   };
 };
 
-export const updateConversationMessages = (
+export const appendMessage = (
   conversations: Conversation[],
   id: string,
-  messages: StoredMessage[],
+  message: StoredMessage,
 ): Conversation[] =>
   conversations.map((conv) =>
     conv.id === id
-      ? { ...conv, messages, updatedAt: new Date().toISOString() }
+      ? {
+          ...conv,
+          messages: [...conv.messages, message],
+          updatedAt: new Date().toISOString(),
+        }
       : conv,
   );
 
@@ -101,3 +105,22 @@ export const deleteConversation = (
   conversations: Conversation[],
   id: string,
 ): Conversation[] => conversations.filter((conv) => conv.id !== id);
+
+// Replaces biomodel IDs in an assistant reply with markdown, skipping IDs
+// already inside a markdown link's URL (e.g. the /search/${bmId} link the
+// LLM already renders for the model name) to avoid corrupting that link.
+export const formatBiomodelIds = (
+  content: string,
+  bmkeys: string[],
+): string => {
+  if (!bmkeys || bmkeys.length === 0) return content;
+
+  let formattedContent = content;
+  bmkeys.forEach((bmId) => {
+    const replacementString = `**${bmId}**`;
+    const idRegex = new RegExp(`(?<!/search/)\\b${bmId}\\b`, "g");
+    formattedContent = formattedContent.replace(idRegex, replacementString);
+  });
+
+  return formattedContent;
+};
