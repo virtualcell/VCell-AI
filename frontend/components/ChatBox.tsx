@@ -14,10 +14,12 @@ import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { MessageSquare, Send, Square, Bot, User, Loader2 } from "lucide-react";
 import { getAccessToken, useUser } from "@auth0/nextjs-auth0/client";
 import { LoginRequiredDialog } from "@/components/login-required-dialog";
+import { useChatHistory } from "@/hooks/use-chat-history";
+import type { ConversationSurface } from "@/lib/chat-history";
 
 type ModelId = "openai-model" | "local-model";
 
-interface Message {
+export interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
@@ -52,6 +54,11 @@ interface ChatBoxProps {
   promptPrefix?: string;
   isLoading?: boolean;
   parameters?: ChatParameters;
+  surface: ConversationSurface;
+  contextId?: string;
+  conversationId?: string | null;
+  initialMessages?: Message[];
+  onConversationSaved?: (id: string) => void;
 }
 
 export const ChatBox: React.FC<ChatBoxProps> = ({
@@ -62,6 +69,11 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
   promptPrefix,
   isLoading: isInitialLoading = false,
   parameters,
+  surface,
+  contextId,
+  conversationId,
+  initialMessages,
+  onConversationSaved,
 }) => {
   // Helper function to create initial messages from startMessage
   const createInitialMessages = (startMsg: string | string[]): Message[] => {
@@ -85,8 +97,10 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
     return [];
   };
 
-  const [messages, setMessages] = useState<Message[]>(
-    createInitialMessages(startMessage),
+  const [messages, setMessages] = useState<Message[]>(() =>
+    initialMessages && initialMessages.length > 0
+      ? initialMessages
+      : createInitialMessages(startMessage),
   );
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -96,6 +110,8 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const chatHistory = useChatHistory();
+  const savedConversationIdRef = useRef<string | null>(conversationId ?? null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -105,12 +121,78 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
     scrollToBottom();
   }, [messages]);
 
-  // Update messages when startMessage changes (when analysis completes)
+  // Update messages when startMessage changes (when analysis completes).
+  // Uses a functional update so the decision is always based on the actual
+  // live messages at apply time, not a snapshot from when this effect was
+  // scheduled: if the user has already sent something (restored from a
+  // saved conversation, or typed during this session), this never
+  // overwrites it, no matter when/how many times startMessage changes.
   useEffect(() => {
-    if (startMessage && !isInitialLoading) {
-      setMessages(createInitialMessages(startMessage));
-    }
+    if (!startMessage || isInitialLoading) return;
+    setMessages((prev) => {
+      if (prev.some((m) => m.role === "user")) return prev;
+      return createInitialMessages(startMessage);
+    });
   }, [startMessage, isInitialLoading]);
+
+  // Read via a ref inside the effect below so that unstable identities (e.g.
+  // an inline onConversationSaved passed by the parent, or chatHistory's
+  // functions whose containing object changes whenever ANY conversation
+  // changes) never re-trigger the effect themselves. Only a genuine
+  // `messages` change should cause a save; re-running on every prop churn
+  // caused the effect's own save call to retrigger itself indefinitely.
+  const latestRef = useRef({
+    surface,
+    contextId,
+    onConversationSaved,
+    create: chatHistory.create,
+    updateMessages: chatHistory.updateMessages,
+  });
+  latestRef.current = {
+    surface,
+    contextId,
+    onConversationSaved,
+    create: chatHistory.create,
+    updateMessages: chatHistory.updateMessages,
+  };
+
+  // Persist to local chat history once the user has actually sent something.
+  // Auto-generated seed/summary messages (assistant-only) are never saved.
+  useEffect(() => {
+    const hasUserMessage = messages.some((m) => m.role === "user");
+    if (!hasUserMessage) return;
+
+    const storedMessages = messages.map((m) => ({
+      id: m.id,
+      role: m.role,
+      content: m.content,
+      timestamp: m.timestamp.toISOString(),
+      modelUsed: m.modelUsed,
+    }));
+
+    const {
+      surface: currentSurface,
+      contextId: currentContextId,
+      onConversationSaved: currentOnConversationSaved,
+      create,
+      updateMessages,
+    } = latestRef.current;
+
+    if (savedConversationIdRef.current) {
+      updateMessages(savedConversationIdRef.current, storedMessages);
+      return;
+    }
+
+    const firstUserMessage = messages.find((m) => m.role === "user");
+    const created = create({
+      surface: currentSurface,
+      contextId: currentContextId,
+      title: firstUserMessage?.content.trim() || "New conversation",
+      messages: storedMessages,
+    });
+    savedConversationIdRef.current = created.id;
+    currentOnConversationSaved?.(created.id);
+  }, [messages]);
 
   // Helper function to format biomodel IDs as hyperlinks
   const formatBiomodelIds = (content: string, bmkeys: string[]): string => {

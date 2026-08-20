@@ -1,7 +1,8 @@
 "use client";
 
 import type React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   MessageSquare,
   Bot,
@@ -15,11 +16,53 @@ import {
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { OnboardingModal } from "@/components/onboarding-modal";
-import { ChatBox } from "@/components/ChatBox";
+import { ChatBox, type Message } from "@/components/ChatBox";
 import { SignInOutButton } from "@/components/sign-in-out-button";
+import { useChatHistory } from "@/hooks/use-chat-history";
 
 export default function ChatPage() {
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const conversationId = searchParams.get("c");
+  const { getConversation, isHydrated } = useChatHistory();
+
+  const initialMessages = useMemo<Message[] | undefined>(() => {
+    if (!conversationId) return undefined;
+    const conversation = getConversation(conversationId);
+    if (!conversation) return undefined;
+    return conversation.messages.map((m) => ({
+      ...m,
+      timestamp: new Date(m.timestamp),
+    }));
+  }, [conversationId, getConversation]);
+
+  // Chat history hydrates from localStorage asynchronously. If we're
+  // resuming a specific conversation, wait for that to finish before
+  // mounting ChatBox — otherwise it would mount with an empty seed chat
+  // and never pick up the real history (it only reads initialMessages once,
+  // at mount).
+  const isResumingConversation = !!conversationId && !isHydrated;
+
+  // ChatBox is remounted (via its `key`) whenever we need to load a
+  // *different* conversation's history, but NOT just because the URL
+  // synced to reflect a conversation the currently-mounted instance itself
+  // just created (onConversationSaved below) — remounting mid-send would
+  // orphan its in-flight request and silently drop the reply. mountKey only
+  // follows conversationId when the id wasn't the one we just self-assigned.
+  const [mountKey, setMountKey] = useState<string>(conversationId ?? "new");
+  const selfAssignedIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (conversationId) {
+      if (conversationId !== selfAssignedIdRef.current) {
+        setMountKey(conversationId);
+      }
+    } else {
+      selfAssignedIdRef.current = null;
+      setMountKey("new");
+    }
+  }, [conversationId]);
 
   useEffect(() => {
     // Check if user has seen onboarding before
@@ -130,12 +173,26 @@ export default function ChatPage() {
 
         {/* Chat Interface - takes remaining space */}
         <div className="flex-1 w-full min-h-0">
-          <ChatBox
-            startMessage={[startMessage]}
-            quickActions={quickActions}
-            supplementalActions={supplementalActions}
-            cardTitle={cardTitle}
-          />
+          {isResumingConversation ? (
+            <div className="h-full flex items-center justify-center text-slate-500 text-sm">
+              Loading conversation...
+            </div>
+          ) : (
+            <ChatBox
+              key={mountKey}
+              startMessage={[startMessage]}
+              quickActions={quickActions}
+              supplementalActions={supplementalActions}
+              cardTitle={cardTitle}
+              surface="chat"
+              conversationId={conversationId}
+              initialMessages={initialMessages}
+              onConversationSaved={(id) => {
+                selfAssignedIdRef.current = id;
+                router.replace(`/chat?c=${id}`);
+              }}
+            />
+          )}
         </div>
       </div>
       {/* Onboarding Modal */}
