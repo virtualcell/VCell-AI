@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Collapsible,
@@ -33,6 +33,7 @@ import { getAccessToken, useUser } from "@auth0/nextjs-auth0/client";
 import { LoginRequiredDialog } from "@/components/login-required-dialog";
 import { SignInOutButton } from "@/components/sign-in-out-button";
 import { getOptionalAccessToken } from "@/lib/get-optional-access-token";
+import { useChatHistory } from "@/hooks/use-chat-history";
 
 interface Simulation {
   key: string;
@@ -86,10 +87,16 @@ interface BiomodelDetail {
 export default function BiomodelDetailPage() {
   const params = useParams<{ bmid: string }>();
   const bmid = params?.bmid;
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const conversationId = searchParams.get("c");
+  const { isHydrated } = useChatHistory();
   const [data, setData] = useState<BiomodelDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState(
+    conversationId ? "analysis" : "overview",
+  );
   const [diagramAnalysis, setDiagramAnalysis] = useState("");
   const [analysisError, setAnalysisError] = useState("");
   const [combinedMessages, setCombinedMessages] = useState<string[]>([]);
@@ -98,6 +105,12 @@ export default function BiomodelDetailPage() {
   const [diagramError, setDiagramError] = useState("");
   const { user, isLoading: isUserLoading } = useUser();
   const diagramFetchTriggeredRef = useRef(false);
+
+  // Chat history hydrates from localStorage asynchronously. If we're
+  // resuming a specific conversation, wait for that to finish before
+  // mounting ChatBox — otherwise a getConversation() miss would look like
+  // "conversation not found" even though it just hasn't loaded yet.
+  const isResumingConversation = !!conversationId && !isHydrated;
 
   const quickActions = [
     {
@@ -186,6 +199,9 @@ export default function BiomodelDetailPage() {
     if (!data?.bmKey) return;
     if (activeTab !== "analysis") return;
     if (isUserLoading || !user) return;
+    // Resuming a saved conversation — its diagram analysis (if any) is
+    // already part of the stored history, no need to regenerate it.
+    if (conversationId) return;
     if (diagramFetchTriggeredRef.current) return;
     diagramFetchTriggeredRef.current = true;
 
@@ -214,7 +230,7 @@ export default function BiomodelDetailPage() {
     };
 
     fetchDiagramAnalysis();
-  }, [data?.bmKey, activeTab, isUserLoading, user]);
+  }, [data?.bmKey, activeTab, isUserLoading, user, conversationId]);
 
   // Create combined messages when diagram analysis is ready
   useEffect(() => {
@@ -512,13 +528,26 @@ export default function BiomodelDetailPage() {
                     </span>
                   </div>
                   <div className="bg-slate-50 border border-slate-200 rounded shadow-sm h-[600px] overflow-hidden">
-                    <ChatBox
-                      startMessage={combinedMessages}
-                      quickActions={quickActions}
-                      cardTitle="VCell AI Assistant"
-                      promptPrefix={`Analyze the biomodel with the bmId ${data.bmKey}`}
-                      isLoading={false}
-                    />
+                    {isResumingConversation ? (
+                      <div className="h-full flex items-center justify-center text-slate-500 text-sm">
+                        Loading conversation...
+                      </div>
+                    ) : (
+                      <ChatBox
+                        key={conversationId ?? "new"}
+                        startMessage={combinedMessages}
+                        quickActions={quickActions}
+                        cardTitle="VCell AI Assistant"
+                        promptPrefix={`Analyze the biomodel with the bmId ${data.bmKey}`}
+                        isLoading={false}
+                        surface="search"
+                        contextId={data.bmKey}
+                        conversationId={conversationId}
+                        onConversationSaved={(id) =>
+                          router.replace(`/search/${data.bmKey}?c=${id}`)
+                        }
+                      />
+                    )}
                   </div>
                 </div>
               </TabsContent>

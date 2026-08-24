@@ -7,6 +7,7 @@ import { AppSidebar } from '@/components/app-sidebar';
 import { Auth0Provider } from '@auth0/nextjs-auth0/client';
 import { AuthSync } from '@/components/auth-sync';
 import { auth0 } from '@/lib/auth0';
+import { ChatHistoryProvider } from '@/hooks/use-chat-history';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -28,10 +29,12 @@ export default async function RootLayout({
       <body className={inter.className}>
         <Auth0Provider user={session?.user}>
           <AuthSync />
-          <SidebarProvider defaultOpen={true}>
-            <AppSidebar />
-            <main className="flex-1 overflow-auto">{children}</main>
-          </SidebarProvider>
+          <ChatHistoryProvider>
+            <SidebarProvider defaultOpen={true}>
+              <AppSidebar />
+              <main className="flex-1 overflow-auto">{children}</main>
+            </SidebarProvider>
+          </ChatHistoryProvider>
         </Auth0Provider>
       </body>
     </html>

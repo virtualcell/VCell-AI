@@ -26,6 +26,7 @@ import { getAccessToken, useUser } from "@auth0/nextjs-auth0/client";
 import { LoginRequiredDialog } from "@/components/login-required-dialog";
 import { SignInOutButton } from "@/components/sign-in-out-button";
 import { getOptionalAccessToken } from "@/lib/get-optional-access-token";
+import { useChatHistory } from "@/hooks/use-chat-history";
 
 interface AnalysisResults {
   title: string;
@@ -54,13 +55,15 @@ export default function AnalysisResultsPage({
   const router = useRouter();
   const searchParams = useSearchParams();
   const prompt = searchParams.get("prompt") || "";
+  const conversationId = searchParams.get("c");
+  const { isHydrated } = useChatHistory();
 
   // Unwrap the params Promise
   const { id } = React.use(params);
 
   const [error, setError] = useState("");
   const [results, setResults] = useState<AnalysisResults | null>(null);
-  const [isAnalysisLoading, setIsAnalysisLoading] = useState(true);
+  const [isAnalysisLoading, setIsAnalysisLoading] = useState(!conversationId);
   const [diagramAnalysis, setDiagramAnalysis] = useState("");
   const [analysisError, setAnalysisError] = useState("");
   const [combinedMessages, setCombinedMessages] = useState<string[]>([]);
@@ -70,6 +73,12 @@ export default function AnalysisResultsPage({
   const [diagramImageUrl, setDiagramImageUrl] = useState("");
   const [diagramError, setDiagramError] = useState("");
   const { user, isLoading: isUserLoading } = useUser();
+
+  // Chat history hydrates from localStorage asynchronously. If we're
+  // resuming a specific conversation, wait for that to finish before
+  // mounting ChatBox — otherwise a getConversation() miss would look like
+  // "conversation not found" even though it just hasn't loaded yet.
+  const isResumingConversation = !!conversationId && !isHydrated;
 
   useEffect(() => {
     const fetchBiomodelData = async () => {
@@ -122,6 +131,9 @@ export default function AnalysisResultsPage({
       setIsAnalysisLoading(false);
       return;
     }
+    // Resuming a saved conversation — its diagram/biomodel analysis (if any)
+    // is already part of the stored history, no need to regenerate it.
+    if (conversationId) return;
 
     const fetchDiagramAnalysis = async () => {
       setIsAnalysisLoading(true);
@@ -189,7 +201,7 @@ export default function AnalysisResultsPage({
     };
 
     fetchBothAnalyses();
-  }, [id, prompt, isUserLoading, user]);
+  }, [id, prompt, isUserLoading, user, conversationId]);
 
   // Create combined messages when analyses are ready
   useEffect(() => {
@@ -372,13 +384,26 @@ export default function AnalysisResultsPage({
                 </span>
               </div>
               <div className="bg-slate-50 border border-slate-200 rounded shadow-sm h-[900px] overflow-hidden">
-                <ChatBox
-                  startMessage={combinedMessages}
-                  quickActions={quickActions}
-                  cardTitle="VCell AI Assistant"
-                  promptPrefix={`Analyze the biomodel with the bmId ${id} for the following question: ${prompt}`}
-                  isLoading={isAnalysisLoading}
-                />
+                {isResumingConversation ? (
+                  <div className="h-full flex items-center justify-center text-slate-500 text-sm">
+                    Loading conversation...
+                  </div>
+                ) : (
+                  <ChatBox
+                    key={conversationId ?? "new"}
+                    startMessage={combinedMessages}
+                    quickActions={quickActions}
+                    cardTitle="VCell AI Assistant"
+                    promptPrefix={`Analyze the biomodel with the bmId ${id} for the following question: ${prompt}`}
+                    isLoading={isAnalysisLoading}
+                    surface="analyze"
+                    contextId={id}
+                    conversationId={conversationId}
+                    onConversationSaved={(newId) =>
+                      router.replace(`/analyze/${id}?c=${newId}`)
+                    }
+                  />
+                )}
               </div>
             </div>
           </CardContent>

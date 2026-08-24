@@ -2,6 +2,7 @@
 
 import type React from "react";
 import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   MessageSquare,
   Bot,
@@ -17,9 +18,20 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { OnboardingModal } from "@/components/onboarding-modal";
 import { ChatBox } from "@/components/ChatBox";
 import { SignInOutButton } from "@/components/sign-in-out-button";
+import { useChatHistory } from "@/hooks/use-chat-history";
 
 export default function ChatPage() {
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const conversationId = searchParams.get("c");
+  const { isHydrated } = useChatHistory();
+
+  // Chat history hydrates from localStorage asynchronously. If we're
+  // resuming a specific conversation, wait for that to finish before
+  // mounting ChatBox — otherwise a getConversation() miss would look like
+  // "conversation not found" even though it just hasn't loaded yet.
+  const isResumingConversation = !!conversationId && !isHydrated;
 
   useEffect(() => {
     // Check if user has seen onboarding before
@@ -130,12 +142,22 @@ export default function ChatPage() {
 
         {/* Chat Interface - takes remaining space */}
         <div className="flex-1 w-full min-h-0">
-          <ChatBox
-            startMessage={[startMessage]}
-            quickActions={quickActions}
-            supplementalActions={supplementalActions}
-            cardTitle={cardTitle}
-          />
+          {isResumingConversation ? (
+            <div className="h-full flex items-center justify-center text-slate-500 text-sm">
+              Loading conversation...
+            </div>
+          ) : (
+            <ChatBox
+              key={conversationId ?? "new"}
+              startMessage={[startMessage]}
+              quickActions={quickActions}
+              supplementalActions={supplementalActions}
+              cardTitle={cardTitle}
+              surface="chat"
+              conversationId={conversationId}
+              onConversationSaved={(id) => router.replace(`/chat?c=${id}`)}
+            />
+          )}
         </div>
       </div>
       {/* Onboarding Modal */}

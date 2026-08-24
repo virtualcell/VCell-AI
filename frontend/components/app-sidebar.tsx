@@ -1,9 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Search, Sparkles, FlaskConical, FolderOpen } from "lucide-react";
+import {
+  Search,
+  Sparkles,
+  FlaskConical,
+  FolderOpen,
+  MessageSquare,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { getAccessToken, useUser } from "@auth0/nextjs-auth0/client";
 
@@ -16,12 +24,16 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarSeparator,
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { Input } from "@/components/ui/input";
+import { useChatHistory } from "@/hooks/use-chat-history";
+import type { Conversation } from "@/lib/chat-history";
 
 interface BudgetInfo {
   spend: number;
@@ -45,13 +57,54 @@ const formatBudget = (value: number | null): string => {
   }).format(value);
 };
 
+const buildConversationHref = (conversation: Conversation): string => {
+  switch (conversation.surface) {
+    case "search":
+      return `/search/${conversation.contextId}?c=${conversation.id}`;
+    case "analyze":
+      return `/analyze/${conversation.contextId}?c=${conversation.id}`;
+    case "chat":
+    default:
+      return `/chat?c=${conversation.id}`;
+  }
+};
+
 export function AppSidebar() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const activeConversationId = searchParams.get("c");
   const { state } = useSidebar();
   const { user, isLoading: isUserLoading } = useUser();
   const [budget, setBudget] = useState<BudgetInfo | null>(null);
   const [role, setRole] = useState<string | null>(null);
   const isCollapsed = state === "collapsed";
+  const { conversations, rename, remove } = useChatHistory();
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [draftTitle, setDraftTitle] = useState("");
+
+  const startRename = (conversation: Conversation) => {
+    setEditingId(conversation.id);
+    setDraftTitle(conversation.title);
+  };
+
+  const commitRename = () => {
+    if (!editingId) return;
+    const trimmed = draftTitle.trim();
+    if (trimmed) {
+      rename(editingId, trimmed);
+    }
+    setEditingId(null);
+  };
+
+  const cancelRename = () => {
+    setEditingId(null);
+  };
+
+  const handleDelete = (id: string) => {
+    if (window.confirm("Delete this conversation?")) {
+      remove(id);
+    }
+  };
 
   useEffect(() => {
     if (isUserLoading || !user) {
@@ -223,7 +276,7 @@ export function AppSidebar() {
               <SidebarMenuItem key="Chatbot">
                 <SidebarMenuButton
                   asChild
-                  isActive={pathname === "/chat"}
+                  isActive={pathname === "/chat" && !activeConversationId}
                   className="data-[active=true]:bg-yellow-50 data-[active=true]:text-yellow-700 data-[active=true]:border-r-2 data-[active=true]:border-yellow-500"
                   tooltip={isCollapsed ? "VCell assistant" : undefined}
                 >
@@ -253,6 +306,88 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {!isCollapsed && conversations.length > 0 && (
+          <>
+            <SidebarSeparator />
+
+            {/* Conversation History Section */}
+            <SidebarGroup>
+              <SidebarGroupLabel className="text-slate-700 font-medium">
+                Conversation History
+              </SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {conversations.map((conversation) => {
+                    const isEditing = editingId === conversation.id;
+                    const isActive = activeConversationId === conversation.id;
+
+                    if (isEditing) {
+                      return (
+                        <SidebarMenuItem key={conversation.id}>
+                          <div className="px-2 py-1">
+                            <Input
+                              autoFocus
+                              value={draftTitle}
+                              onChange={(e) => setDraftTitle(e.target.value)}
+                              onBlur={commitRename}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") commitRename();
+                                if (e.key === "Escape") cancelRename();
+                              }}
+                              className="h-7 text-sm"
+                            />
+                          </div>
+                        </SidebarMenuItem>
+                      );
+                    }
+
+                    return (
+                      <SidebarMenuItem key={conversation.id}>
+                        <SidebarMenuButton
+                          asChild
+                          isActive={isActive}
+                          className="data-[active=true]:bg-yellow-50 data-[active=true]:text-yellow-700 data-[active=true]:border-r-2 data-[active=true]:border-yellow-500"
+                        >
+                          <Link
+                            href={buildConversationHref(conversation)}
+                            className="flex items-center gap-3"
+                          >
+                            <MessageSquare className="h-4 w-4 shrink-0 text-slate-400" />
+                            <span className="truncate">
+                              {conversation.title}
+                            </span>
+                          </Link>
+                        </SidebarMenuButton>
+                        <SidebarMenuAction
+                          showOnHover
+                          className="right-6"
+                          title="Rename conversation"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            startRename(conversation);
+                          }}
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </SidebarMenuAction>
+                        <SidebarMenuAction
+                          showOnHover
+                          title="Delete conversation"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleDelete(conversation.id);
+                          }}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </SidebarMenuAction>
+                      </SidebarMenuItem>
+                    );
+                  })}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </>
+        )}
 
         {role === "admin" && (
           <>
