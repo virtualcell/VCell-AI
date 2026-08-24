@@ -65,8 +65,9 @@ export default function AnalysisResultsPage({
   const [results, setResults] = useState<AnalysisResults | null>(null);
   const [isAnalysisLoading, setIsAnalysisLoading] = useState(!conversationId);
   const [diagramAnalysis, setDiagramAnalysis] = useState("");
-  const [analysisError, setAnalysisError] = useState("");
-  const [combinedMessages, setCombinedMessages] = useState<string[]>([]);
+  const [combinedMessages, setCombinedMessages] = useState<
+    { role: "user" | "assistant"; content: string }[]
+  >([]);
   const [biomodelData, setBiomodelData] = useState<BiomodelDetail | null>(null);
   const [biomodelLoading, setBiomodelLoading] = useState(true);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
@@ -135,32 +136,15 @@ export default function AnalysisResultsPage({
     // is already part of the stored history, no need to regenerate it.
     if (conversationId) return;
 
+    // Diagram analyses are being precomputed and stored for all biomodels
+    // instead of generated on demand per request, so skip the /diagram
+    // call for now and show a placeholder instead.
     const fetchDiagramAnalysis = async () => {
       setIsAnalysisLoading(true);
-      setAnalysisError("");
-      try {
-        const token = await getAccessToken();
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-        const res = await fetch(`${apiUrl}/analyse/${id}/diagram`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          setDiagramAnalysis(data.response || "");
-        } else {
-          const errorData = await res.json();
-          setAnalysisError(errorData.detail || "Failed to analyze diagram.");
-        }
-      } catch (err) {
-        setAnalysisError("Failed to fetch diagram analysis.");
-      } finally {
-        setIsAnalysisLoading(false);
-      }
+      setDiagramAnalysis(
+        "AI generated summary/analysis of this biomodel will be displayed here.",
+      );
+      setIsAnalysisLoading(false);
     };
 
     const fetchAnalysis = async () => {
@@ -206,21 +190,27 @@ export default function AnalysisResultsPage({
   // Create combined messages when analyses are ready
   useEffect(() => {
     if (diagramAnalysis || results?.aiAnalysis) {
-      const messageParts: string[] = [];
+      const newMessages: { role: "user" | "assistant"; content: string }[] = [];
 
       if (diagramAnalysis) {
-        const diagramMessage = `# Diagram Analysis \n ${diagramAnalysis}`;
-        messageParts.push(diagramMessage);
+        newMessages.push({
+          role: "assistant",
+          content: `# Diagram Analysis \n ${diagramAnalysis}`,
+        });
+      }
+
+      if (prompt.trim()) {
+        newMessages.push({ role: "user", content: prompt });
       }
 
       if (results?.aiAnalysis) {
-        const aiMessage = `# Biomodel Analysis \n ${results.aiAnalysis}`;
-        messageParts.push(aiMessage);
+        newMessages.push({
+          role: "assistant",
+          content: `# Biomodel Analysis \n ${results.aiAnalysis}`,
+        });
       }
 
-      const joined_messages = messageParts.join("\n\n");
-
-      setCombinedMessages([joined_messages]);
+      setCombinedMessages(newMessages);
     }
   }, [diagramAnalysis, results?.aiAnalysis, id]);
 
