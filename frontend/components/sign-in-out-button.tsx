@@ -17,12 +17,17 @@ export function SignInOutButton() {
   const loginReturnHref = `/auth/login?returnTo=${encodeURIComponent(pathname)}`;
 
   return user ? (
-    <Button variant="outline" size="sm" asChild>
-      <a href="/auth/logout" className="flex items-center gap-2">
-        <LogOut className="h-4 w-4" />
-        Sign Out
-      </a>
-    </Button>
+    <div className="flex items-center gap-3">
+      <span className="text-sm font-medium text-slate-700">
+        {user.name ?? user.nickname ?? user.email}
+      </span>
+      <Button variant="outline" size="sm" asChild>
+        <a href="/auth/logout" className="flex items-center gap-2">
+          <LogOut className="h-4 w-4" />
+          Sign Out
+        </a>
+      </Button>
+    </div>
   ) : (
     <Button variant="outline" size="sm" asChild>
       <Link href={loginReturnHref} className="flex items-center gap-2">
