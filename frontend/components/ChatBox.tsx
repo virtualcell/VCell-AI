@@ -46,8 +46,10 @@ interface ChatParameters {
   llmMode: string;
 }
 
+type SeedMessage = string | { role: "user" | "assistant"; content: string };
+
 interface ChatBoxProps {
-  startMessage: string | string[];
+  startMessage: string | SeedMessage[];
   quickActions: QuickAction[];
   supplementalActions?: QuickAction[];
   cardTitle: string;
@@ -61,12 +63,12 @@ interface ChatBoxProps {
 }
 
 // Pure helpers — no dependency on component state/props.
-const createInitialMessages = (startMsg: string | string[]): Message[] => {
+const createInitialMessages = (startMsg: string | SeedMessage[]): Message[] => {
   if (Array.isArray(startMsg)) {
-    return startMsg.map((content, index) => ({
+    return startMsg.map((seed, index) => ({
       id: (index + 1).toString(),
-      role: "assistant" as const,
-      content,
+      role: typeof seed === "string" ? ("assistant" as const) : seed.role,
+      content: typeof seed === "string" ? seed : seed.content,
       timestamp: new Date(),
     }));
   } else if (startMsg) {
@@ -166,10 +168,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
   useEffect(() => {
     if (boundConversationId) return;
     if (!startMessage || isInitialLoading) return;
-    setLocalSeedMessages((prev) => {
-      if (prev.some((m) => m.role === "user")) return prev;
-      return createInitialMessages(startMessage);
-    });
+    setLocalSeedMessages(createInitialMessages(startMessage));
   }, [startMessage, isInitialLoading, boundConversationId]);
 
   const handleQuickAction = (action: QuickAction) => {
