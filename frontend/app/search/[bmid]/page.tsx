@@ -29,7 +29,7 @@ import {
   Briefcase,
   Cog,
 } from "lucide-react";
-import { getAccessToken, useUser } from "@auth0/nextjs-auth0/client";
+import { useUser } from "@auth0/nextjs-auth0/client";
 import { LoginRequiredDialog } from "@/components/login-required-dialog";
 import { SignInOutButton } from "@/components/sign-in-out-button";
 import { getOptionalAccessToken } from "@/lib/get-optional-access-token";
@@ -98,7 +98,6 @@ export default function BiomodelDetailPage() {
     conversationId ? "analysis" : "overview",
   );
   const [diagramAnalysis, setDiagramAnalysis] = useState("");
-  const [analysisError, setAnalysisError] = useState("");
   const [combinedMessages, setCombinedMessages] = useState<string[]>([]);
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [diagramImageUrl, setDiagramImageUrl] = useState("");
@@ -205,28 +204,13 @@ export default function BiomodelDetailPage() {
     if (diagramFetchTriggeredRef.current) return;
     diagramFetchTriggeredRef.current = true;
 
+    // Diagram analyses are being precomputed and stored for all biomodels
+    // instead of generated on demand per request, so skip the /diagram
+    // call for now and show a placeholder instead.
     const fetchDiagramAnalysis = async () => {
-      try {
-        const token = await getAccessToken();
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-        const res = await fetch(`${apiUrl}/analyse/${data.bmKey}/diagram`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (res.ok) {
-          const responseData = await res.json();
-          setDiagramAnalysis(responseData.response || "");
-        } else {
-          const errorData = await res.json();
-          setAnalysisError(errorData.detail || "Failed to analyze diagram.");
-        }
-      } catch (err) {
-        setAnalysisError("Failed to fetch diagram analysis.");
-      }
+      setDiagramAnalysis(
+        "AI generated summary/analysis of this biomodel will be displayed here.",
+      );
     };
 
     fetchDiagramAnalysis();
