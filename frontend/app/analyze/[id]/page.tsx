@@ -389,6 +389,7 @@ export default function AnalysisResultsPage({
                     surface="analyze"
                     contextId={id}
                     conversationId={conversationId}
+                    conversationTitle={biomodelData?.name || `Biomodel ${id}`}
                     onConversationSaved={(newId) =>
                       router.replace(`/analyze/${id}?c=${newId}`)
                     }

@@ -527,6 +527,7 @@ export default function BiomodelDetailPage() {
                         surface="search"
                         contextId={data.bmKey}
                         conversationId={conversationId}
+                        conversationTitle={data.name}
                         onConversationSaved={(id) =>
                           router.replace(`/search/${data.bmKey}?c=${id}`)
                         }
