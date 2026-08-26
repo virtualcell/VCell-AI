@@ -32,6 +32,9 @@ interface SendMessageParams {
   // (e.g. the welcome text) alongside the new user turn.
   seedMessages: StoredMessage[];
   userContent: string;
+  // Only used when conversationId is null, as the new conversation's title.
+  // Falls back to the user's message when omitted (e.g. plain /chat).
+  title?: string;
   fetcher: (
     token: string | undefined,
     signal: AbortSignal,
@@ -141,7 +144,10 @@ export function ChatHistoryProvider({
       const conversation = buildConversation({
         surface: params.surface,
         contextId: params.contextId,
-        title: params.userContent.trim() || "New conversation",
+        title:
+          params.title?.trim() ||
+          params.userContent.trim() ||
+          "New conversation",
         messages: [...params.seedMessages, userMessage],
       });
       id = conversation.id;

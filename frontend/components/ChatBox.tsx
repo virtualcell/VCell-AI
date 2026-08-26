@@ -59,6 +59,10 @@ interface ChatBoxProps {
   surface: ConversationSurface;
   contextId?: string;
   conversationId?: string | null;
+  // Title for a newly-created conversation (e.g. the biomodel name on the
+  // search/analyze surfaces). Falls back to the user's first message when
+  // omitted, as on plain /chat.
+  conversationTitle?: string;
   onConversationSaved?: (id: string) => void;
 }
 
@@ -111,6 +115,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
   surface,
   contextId,
   conversationId,
+  conversationTitle,
   onConversationSaved,
 }) => {
   const chatHistory = useChatHistory();
@@ -259,6 +264,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
       contextId,
       seedMessages: existingId ? [] : localSeedMessages.map(toStoredMessage),
       userContent: msg,
+      title: conversationTitle,
       fetcher: (token, signal) =>
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/query`, {
           method: "POST",
@@ -296,6 +302,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
       contextId,
       seedMessages: existingId ? [] : localSeedMessages.map(toStoredMessage),
       userContent: displayText,
+      title: conversationTitle,
       fetcher: (token, signal) =>
         fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/query/faq/${faqId}?${new URLSearchParams(
