@@ -134,6 +134,15 @@ async def fetch_biomodels(
     # Extract biomodels list (assuming API returns a list directly)
     biomodels = raw_data if isinstance(raw_data, list) else raw_data.get("data", [])
 
+    # The legacy VCell API has a bug where, for a model shared with several
+    # people, groupUsers repeats the caller's own name once per share instead
+    # of listing the actual users it's shared with. Dedupe here so at least
+    # we don't surface the repeated names to the frontend.
+    for model in biomodels:
+        group_users = model.get("groupUsers")
+        if group_users:
+            model["groupUsers"] = list(dict.fromkeys(group_users))
+
     # Build response with metadata
     return {
         "search_params": params_dict,
