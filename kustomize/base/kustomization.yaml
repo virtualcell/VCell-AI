@@ -10,7 +10,15 @@ resources:
 
 # litellm_config.yaml is env-agnostic, so it is generated here (mounted read-only
 # into the litellm pod at /app/config.yaml).
+#
+# gcp-wif.json rides along in the same ConfigMap and is mounted at
+# /etc/gcp/wif.json. It is the Workload Identity Federation external-account
+# config for Vertex AI. Google's docs are explicit that this file "doesn't
+# contain a private key and doesn't need to be kept confidential" -- it only
+# names the identity pool, the Google service account to impersonate, and the
+# path of the projected token -- so it is deliberately NOT a sealed secret.
 configMapGenerator:
   - name: litellm-config-file
     files:
       - config.yaml=litellm_config.yaml
+      - gcp-wif.json
