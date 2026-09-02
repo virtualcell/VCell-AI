@@ -23,6 +23,22 @@ model_list:
       model: os.environ/LOCAL_LLM_MODEL
       api_base: os.environ/LOCAL_LLM_API_BASE
 
+  # "gemini-model" -> Gemini on Vertex AI, in the CAIA grant project. There is no
+  # api_key here on purpose: auth is Workload Identity Federation. LiteLLM calls
+  # google.auth.default(), which reads GOOGLE_APPLICATION_CREDENTIALS -> the
+  # external-account config at /etc/gcp/wif.json -> the projected ServiceAccount
+  # token at /var/run/secrets/gcp/token, and trades that at Google's STS. Nothing
+  # long-lived is stored anywhere. See docs/gcp-wif-findings.md.
+  #
+  # Leaving GOOGLE_APPLICATION_CREDENTIALS unset (as vcell-ai-local does) makes
+  # google.auth.default() fall back to the developer's own gcloud ADC, so this
+  # same alias works locally after `gcloud auth application-default login`.
+  - model_name: gemini-model
+    litellm_params:
+      model: os.environ/GEMINI_MODEL
+      vertex_project: os.environ/VERTEX_PROJECT
+      vertex_location: os.environ/VERTEX_LOCATION
+
 litellm_settings:
   success_callback: ["langfuse"]
   fallbacks:
