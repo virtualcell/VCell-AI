@@ -2,7 +2,7 @@
 
 import { usePathname, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { LogIn } from "lucide-react";
+import { LogIn, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -27,6 +27,7 @@ export function LoginRequiredDialog({
   const query = searchParams.toString();
   const returnTo = query ? `${pathname}?${query}` : pathname;
   const loginHref = `/auth/login?${new URLSearchParams({ returnTo }).toString()}`;
+  const signupHref = `/auth/login?${new URLSearchParams({ returnTo, screen_hint: "signup" }).toString()}`;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -41,6 +42,12 @@ export function LoginRequiredDialog({
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Not now
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href={signupHref} className="flex items-center gap-2">
+              <UserPlus className="h-4 w-4" />
+              Sign Up
+            </Link>
           </Button>
           <Button asChild>
             <Link href={loginHref} className="flex items-center gap-2">

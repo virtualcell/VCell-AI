@@ -41,28 +41,13 @@ export default function LandingPage() {
               </span>
             </div>
             <div className="flex items-center gap-3">
-              {user ? (
+              {user && (
                 <Button variant="outline" size="sm" asChild>
                   <a href="/auth/logout" className="flex items-center gap-2">
                     <LogOut className="h-4 w-4" />
                     Sign Out
                   </a>
                 </Button>
-              ) : (
-                <>
-                  <Button variant="outline" size="sm" asChild>
-                    <Link href={loginHref} className="flex items-center gap-2">
-                      <LogIn className="h-4 w-4" />
-                      Sign In
-                    </Link>
-                  </Button>
-                  <Button size="sm" asChild>
-                    <Link href={signupHref} className="flex items-center gap-2">
-                      <UserPlus className="h-4 w-4" />
-                      Sign Up
-                    </Link>
-                  </Button>
-                </>
               )}
             </div>
           </div>
@@ -101,15 +86,6 @@ export default function LandingPage() {
                 >
                   Start Exploring
                   <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
-              <Link href={exploreHref}>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="border-2 border-blue-600 text-blue-600 hover:bg-blue-50 px-8 py-4 text-lg font-semibold rounded-lg transition-all duration-200"
-                >
-                  Join Now!
                 </Button>
               </Link>
             </div>
@@ -184,10 +160,32 @@ export default function LandingPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="text-center">
-                <p className="text-slate-600 leading-relaxed">
+                <p className="text-slate-600 leading-relaxed mb-4">
                   Access private and restricted biomodels with secure Auth0
                   authentication.
                 </p>
+                {!user && (
+                  <div className="flex items-center justify-center gap-3">
+                    <Button variant="outline" size="sm" asChild>
+                      <Link
+                        href={loginHref}
+                        className="flex items-center gap-2"
+                      >
+                        <LogIn className="h-4 w-4" />
+                        Sign In
+                      </Link>
+                    </Button>
+                    <Button size="sm" asChild>
+                      <Link
+                        href={signupHref}
+                        className="flex items-center gap-2"
+                      >
+                        <UserPlus className="h-4 w-4" />
+                        Sign Up
+                      </Link>
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
