@@ -13,14 +13,19 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 
+const DEFAULT_DESCRIPTION =
+  "Log in or register to chat with the AI assistant or run an AI analysis. You'll be brought right back here. Registration is free and no private information is asked. You’ll get access to both AI tools and VCell modeling and simulation platform using the same credentials.";
+
 interface LoginRequiredDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  description?: string;
 }
 
 export function LoginRequiredDialog({
   open,
   onOpenChange,
+  description = DEFAULT_DESCRIPTION,
 }: LoginRequiredDialogProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -34,10 +39,7 @@ export function LoginRequiredDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Log in to continue</DialogTitle>
-          <DialogDescription>
-            Log in to chat with the AI assistant or run an AI analysis.
-            You&apos;ll be brought right back here.
-          </DialogDescription>
+          <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
