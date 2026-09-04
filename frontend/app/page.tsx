@@ -1,29 +1,30 @@
 "use client";
 
-import {
-  ArrowRight,
-  MessageSquare,
-  Wrench,
-  Shield,
-  LogIn,
-  UserPlus,
-  LogOut,
-} from "lucide-react";
+import { useState } from "react";
+import { ArrowRight, MessageSquare, Wrench, Shield, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import Image from "next/image";
 import { useUser } from "@auth0/nextjs-auth0/client";
+import { LoginRequiredDialog } from "@/components/login-required-dialog";
 
-const loginHref = "/auth/login?returnTo=/chat";
-const signupHref = "/auth/login?returnTo=/chat&screen_hint=signup";
 const exploreHref = "/search";
+
+const HOME_LOGIN_DESCRIPTION =
+  "Log in or register to chat with the AI assistant or run an AI analysis. Registration is free and no private information is asked. You’ll get access to both AI tools and VCell modeling and simulation platform using the same credentials.";
 
 export default function LandingPage() {
   const { user } = useUser();
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
+      <LoginRequiredDialog
+        open={showLoginDialog}
+        onOpenChange={setShowLoginDialog}
+        description={HOME_LOGIN_DESCRIPTION}
+      />
       {/* Header with Navigation */}
       <header className="border-b border-slate-200 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 max-w-6xl">
@@ -165,26 +166,9 @@ export default function LandingPage() {
                   authentication.
                 </p>
                 {!user && (
-                  <div className="flex items-center justify-center gap-3">
-                    <Button variant="outline" size="sm" asChild>
-                      <Link
-                        href={loginHref}
-                        className="flex items-center gap-2"
-                      >
-                        <LogIn className="h-4 w-4" />
-                        Sign In
-                      </Link>
-                    </Button>
-                    <Button size="sm" asChild>
-                      <Link
-                        href={signupHref}
-                        className="flex items-center gap-2"
-                      >
-                        <UserPlus className="h-4 w-4" />
-                        Sign Up
-                      </Link>
-                    </Button>
-                  </div>
+                  <Button size="sm" onClick={() => setShowLoginDialog(true)}>
+                    Access Private Models
+                  </Button>
                 )}
               </CardContent>
             </Card>
