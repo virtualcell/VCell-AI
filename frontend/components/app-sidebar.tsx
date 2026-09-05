@@ -9,6 +9,7 @@ import {
   MessageSquare,
   Pencil,
   Trash2,
+  User,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
@@ -383,6 +384,38 @@ export function AppSidebar() {
                       </SidebarMenuItem>
                     );
                   })}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </>
+        )}
+
+        {!isLoggedOut && (
+          <>
+            <SidebarSeparator />
+
+            {/* Account Section */}
+            <SidebarGroup>
+              {!isCollapsed && (
+                <SidebarGroupLabel className="text-slate-700 font-medium">
+                  Account
+                </SidebarGroupLabel>
+              )}
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <SidebarMenuItem key="Profile">
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname === "/profile"}
+                      className="data-[active=true]:bg-teal-50 data-[active=true]:text-teal-700 data-[active=true]:border-r-2 data-[active=true]:border-teal-600"
+                      tooltip={isCollapsed ? "Profile" : undefined}
+                    >
+                      <Link href="/profile" className="flex items-center gap-3">
+                        <User className="h-4 w-4 text-teal-600" />
+                        {!isCollapsed && <span>Profile</span>}
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
