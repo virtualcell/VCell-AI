@@ -162,7 +162,14 @@ async def unmap_vcell_user_controller(auth0_token: str, user_name: str) -> dict:
 
     # Raised outside the try so the generic handlers above don't swallow it.
     if not unmapped:
-        raise HTTPException(status_code=400, detail="Could not unlink.")
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Could not unlink — this login isn't linked to that VCell "
+                "username. It may already have been unlinked; refresh the page "
+                "to see the current state."
+            ),
+        )
 
     return {
         "status": "success",

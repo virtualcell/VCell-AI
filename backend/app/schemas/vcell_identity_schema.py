@@ -41,7 +41,7 @@ class VCellMappedUserResponse(BaseModel):
 
     mapped: bool
     userName: Optional[str] = None
-    id: Optional[float] = None
+    id: Optional[int] = None
     subject: Optional[str] = None
     insertDate: Optional[str] = None
 

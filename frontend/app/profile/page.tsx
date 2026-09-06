@@ -169,10 +169,18 @@ export default function ProfilePage() {
       const { message } = (await response.json()) as ActionResponse;
 
       if (options.refetch) {
-        setMappedUser(await fetchMappedUser());
-        setLinkUserID("");
-        setLinkPassword("");
-        setNewUserID("");
+        try {
+          setMappedUser(await fetchMappedUser());
+          setLinkUserID("");
+          setLinkPassword("");
+          setNewUserID("");
+        } catch (refetchErr) {
+          console.error("Failed to refresh VCell account link", refetchErr);
+          setNotice(
+            `${message} (Couldn't refresh this page — reload it to see the current state.)`,
+          );
+          return;
+        }
       }
       setNotice(message);
     } catch (err) {
