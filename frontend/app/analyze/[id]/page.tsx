@@ -26,6 +26,7 @@ import { getAccessToken, useUser } from "@auth0/nextjs-auth0/client";
 import { LoginRequiredDialog } from "@/components/login-required-dialog";
 import { SignInOutButton } from "@/components/sign-in-out-button";
 import { getOptionalAccessToken } from "@/lib/get-optional-access-token";
+import { messageFromErrorResponse } from "@/lib/api-error";
 import { useChatHistory } from "@/hooks/use-chat-history";
 
 interface AnalysisResults {
@@ -164,7 +165,14 @@ export default function AnalysisResultsPage({
           },
         });
 
-        if (!analyseRes.ok) throw new Error("Failed to analyze biomodel.");
+        if (!analyseRes.ok) {
+          throw new Error(
+            await messageFromErrorResponse(
+              analyseRes,
+              "Failed to analyze biomodel.",
+            ),
+          );
+        }
         const analyseData = await analyseRes.json();
 
         setResults({
@@ -173,7 +181,12 @@ export default function AnalysisResultsPage({
           aiAnalysis: analyseData.response || "No AI analysis available.",
         });
       } catch (err) {
-        setError("Failed to analyze biomodel.");
+        // Keep the reason thrown above; only fall back for non-Error throws.
+        setError(
+          err instanceof Error && err.message
+            ? err.message
+            : "Failed to analyze biomodel.",
+        );
       } finally {
         setIsAnalysisLoading(false);
       }

@@ -29,6 +29,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SignInOutButton } from "@/components/sign-in-out-button";
+import { messageFromErrorResponse } from "@/lib/api-error";
 
 interface MappedUser {
   mapped: boolean;
@@ -56,24 +57,6 @@ const formatLinkedDate = (insertDate: string | null): string | null => {
     month: "long",
     day: "numeric",
   });
-};
-
-/** Pull a useful message out of a FastAPI error body, whatever shape it took. */
-const extractError = async (
-  response: Response,
-  fallback: string,
-): Promise<string> => {
-  try {
-    const data = await response.json();
-    if (typeof data?.detail === "string") return data.detail;
-    // Pydantic validation errors arrive as a list of objects.
-    if (Array.isArray(data?.detail) && data.detail[0]?.msg) {
-      return data.detail[0].msg;
-    }
-  } catch {
-    // fall through to the generic message
-  }
-  return fallback;
 };
 
 export default function ProfilePage() {
@@ -112,7 +95,7 @@ export default function ProfilePage() {
       });
       if (!response.ok) {
         throw new Error(
-          await extractError(response, "Failed to load your VCell account"),
+          await messageFromErrorResponse(response, "Failed to load your VCell account"),
         );
       }
 
@@ -162,7 +145,7 @@ export default function ProfilePage() {
     try {
       const response = await request();
       if (!response.ok) {
-        setError(await extractError(response, fallbackError));
+        setError(await messageFromErrorResponse(response, fallbackError));
         return;
       }
 
