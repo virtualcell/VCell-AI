@@ -37,6 +37,8 @@ import {
 import { cn } from "@/lib/utils";
 import { SignInOutButton } from "@/components/sign-in-out-button";
 import { getOptionalAccessToken } from "@/lib/get-optional-access-token";
+import { useUser } from "@auth0/nextjs-auth0/client";
+import Link from "next/link";
 
 interface SearchFilters {
   bmId: string;
@@ -94,6 +96,10 @@ export default function BiomodelSearchPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [isAdvancedSearchOpen, setIsAdvancedSearchOpen] = useState(false);
+  // False when the backend could only reach public data — either we are logged
+  // out, or logged in without a linked VCell account.
+  const [includesPrivate, setIncludesPrivate] = useState(true);
+  const { user } = useUser();
   const isHydrated = useRef(false);
 
   // Restore filters/results saved before navigating away (e.g. to a result's detail page)
@@ -104,6 +110,8 @@ export default function BiomodelSearchPage() {
         const parsed = JSON.parse(saved);
         if (parsed.filters) setFilters(parsed.filters);
         if (parsed.results) setResults(parsed.results);
+        if (typeof parsed.includesPrivate === "boolean")
+          setIncludesPrivate(parsed.includesPrivate);
         if (typeof parsed.hasSearched === "boolean")
           setHasSearched(parsed.hasSearched);
         if (typeof parsed.isAdvancedSearchOpen === "boolean")
@@ -119,9 +127,15 @@ export default function BiomodelSearchPage() {
     if (!isHydrated.current) return;
     sessionStorage.setItem(
       SEARCH_STATE_KEY,
-      JSON.stringify({ filters, results, hasSearched, isAdvancedSearchOpen }),
+      JSON.stringify({
+        filters,
+        results,
+        includesPrivate,
+        hasSearched,
+        isAdvancedSearchOpen,
+      }),
     );
-  }, [filters, results, hasSearched, isAdvancedSearchOpen]);
+  }, [filters, results, includesPrivate, hasSearched, isAdvancedSearchOpen]);
 
   const handleSearch = async () => {
     setIsLoading(true);
@@ -144,6 +158,7 @@ export default function BiomodelSearchPage() {
       });
       if (!res.ok) throw new Error("Failed to fetch biomodels");
       const data = await res.json();
+      setIncludesPrivate(data.includes_private !== false);
       // Map API response to BiomodelResult[]
       const mappedResults: BiomodelResult[] = (data.data || []).map(
         (model: any) => ({
@@ -478,6 +493,25 @@ export default function BiomodelSearchPage() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        )}
+
+        {/* Signed in, but no VCell account linked, so the search could only
+            reach public data. Shown above both the results and the empty state,
+            since "no models found" is exactly when this matters most. */}
+        {!isLoading && hasSearched && user && !includesPrivate && (
+          <div className="mb-6 flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4">
+            <Lock className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
+            <p className="text-sm text-blue-900">
+              Showing public models only.{" "}
+              <Link
+                href="/profile"
+                className="font-semibold underline underline-offset-2 hover:text-blue-700"
+              >
+                Link your VCell account
+              </Link>{" "}
+              to include your private and shared models.
+            </p>
           </div>
         )}
 
