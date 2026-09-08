@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="480" viewBox="0 0 640 480" role="img" aria-label="No diagram available">
+  <rect width="640" height="480" fill="#f1f5f9"/>
+  <rect x="0.5" y="0.5" width="639" height="479" fill="none" stroke="#cbd5e1" stroke-width="1"/>
+  <g transform="translate(320 214)" fill="none" stroke="#94a3b8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="-36" y="-30" width="72" height="60" rx="6"/>
+    <circle cx="-14" cy="-10" r="7"/>
+    <path d="M-36 16l22-22 16 16 12-10 22 22"/>
+  </g>
+  <text x="320" y="300" text-anchor="middle" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif" font-size="18" fill="#64748b">No diagram available</text>
+</svg>
