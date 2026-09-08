@@ -66,26 +66,60 @@ async def check_vcell_connectivity() -> bool:
 
 
 @observe(name="GET_LEGACY_VCELL_TOKEN")
-async def get_legacy_vcell_token(auth0_token: str) -> str:
+async def get_legacy_vcell_token(auth0_token: str) -> Optional[str]:
     """
     Exchanges a verified Auth0 access token for a legacy VCell (v0) API
     bearer token, which the v0 API requires to identify the user and
     include their private/shared biomodels in results.
 
+    VCell only issues a legacy token to a login that has been linked to a VCell
+    account, so an authenticated but *unlinked* caller gets a 401 here. That is a
+    normal state rather than an error, so this returns None instead of raising and
+    the caller falls back to an anonymous, public-only request. Browsing public
+    biomodels must never depend on having linked an account.
+
+    Any other failure is treated the same way, so that an outage of this auxiliary
+    endpoint can't take down biomodel search: the main query keeps its own
+    raise_for_status, so a genuine problem on the data path still surfaces.
+
     Args:
         auth0_token (str): Verified Auth0 access token.
 
     Returns:
-        str: Legacy VCell bearer token to send to the v0 API.
+        Optional[str]: Legacy VCell bearer token to send to the v0 API, or None
+            when one could not be obtained and only public data should be queried.
     """
     url = f"{VCELL_API_V1_BASE_URL}/users/bearerToken"
 
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            url, headers={"Authorization": f"Bearer {auth0_token}"}
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                url, headers={"Authorization": f"Bearer {auth0_token}"}
+            )
+            response.raise_for_status()
+            legacy_token = response.json().get("token")
+    except httpx.HTTPStatusError as e:
+        if e.response.status_code in (401, 403):
+            logger.info(
+                "No VCell account linked to this login; querying public data only"
+            )
+        else:
+            logger.warning(
+                f"Could not get a legacy VCell token (HTTP {e.response.status_code}); "
+                "querying public data only"
+            )
+        return None
+    except httpx.RequestError as e:
+        logger.warning(
+            f"Could not reach VCell for a legacy token ({e}); querying public data only"
         )
-        response.raise_for_status()
-        return response.json()["token"]
+        return None
+
+    if not legacy_token:
+        logger.warning("VCell returned no legacy token; querying public data only")
+        return None
+
+    return legacy_token
 
 
 @observe(name="FETCH_BIOMODELS")
@@ -120,10 +154,16 @@ async def fetch_biomodels(
     # Log the URL being queried
     logger.info(f"Querying URL: {url}")
 
+    # Only attach the legacy token if we actually got one. A logged-in user who
+    # hasn't linked a VCell account falls through to an anonymous request and
+    # still gets the public catalogue.
     headers = {}
+    includes_private = False
     if auth0_token:
         legacy_token = await get_legacy_vcell_token(auth0_token)
-        headers["Authorization"] = f"Bearer {legacy_token}"
+        if legacy_token:
+            headers["Authorization"] = f"Bearer {legacy_token}"
+            includes_private = True
 
     # Perform the API request
     async with httpx.AsyncClient() as client:
@@ -146,6 +186,10 @@ async def fetch_biomodels(
     # Build response with metadata
     return {
         "search_params": params_dict,
+        # False means these are public results only — either the caller is
+        # anonymous, or they're logged in without a linked VCell account. Lets the
+        # UI distinguish "you have no private models" from "we couldn't check".
+        "includes_private": includes_private,
         "models_count": len(biomodels),
         "unique_model_keys (bmkey)": [
             model.get("bmKey") for model in biomodels if model.get("bmKey")
@@ -435,10 +479,14 @@ async def get_diagram_image(
     Returns:
         bytes: The image content (PNG) of the biomodel diagram.
     """
+    # As in fetch_biomodels: without a legacy token we fall back to an anonymous
+    # request, which still serves public diagrams. A private one will 403/404,
+    # which is the correct answer for a caller who can't see it.
     headers = {}
     if auth0_token:
         legacy_token = await get_legacy_vcell_token(auth0_token)
-        headers["Authorization"] = f"Bearer {legacy_token}"
+        if legacy_token:
+            headers["Authorization"] = f"Bearer {legacy_token}"
 
     async with httpx.AsyncClient() as client:
         response = await client.get(
