@@ -152,12 +152,20 @@ export default function AnalysisResultsPage({
       try {
         const token = await getAccessToken();
         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-        const url = new URL(`${apiUrl}/analyse/${id}`);
-        if (prompt) {
-          url.searchParams.set("user_prompt", prompt);
-        }
 
-        const analyseRes = await fetch(url.toString(), {
+        // NEXT_PUBLIC_API_URL is a relative path ("/api") in every deployed
+        // config, and `new URL()` throws on a relative URL with no base — which
+        // broke this page everywhere except local dev, where it's absolute.
+        // Build the query string directly so both forms work.
+        const query = new URLSearchParams();
+        if (prompt) {
+          query.set("user_prompt", prompt);
+        }
+        const analyseUrl = `${apiUrl}/analyse/${id}${
+          query.toString() ? `?${query}` : ""
+        }`;
+
+        const analyseRes = await fetch(analyseUrl, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
