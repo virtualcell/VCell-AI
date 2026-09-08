@@ -23,6 +23,7 @@ import {
   persistConversations,
   renameConversation,
 } from "@/lib/chat-history";
+import { messageFromErrorBody } from "@/lib/api-error";
 
 interface SendMessageParams {
   conversationId: string | null;
@@ -166,9 +167,29 @@ export function ChatHistoryProvider({
       try {
         const token = await getAccessToken();
         const res = await params.fetcher(token, controller.signal);
-        const data = await res.json();
+        const data = await res.json().catch(() => null);
+
+        // A rejected request still parses as JSON, so without this check the
+        // reason (rate limit, budget exhausted, bad request) was silently
+        // dropped and every failure looked like an empty reply.
+        if (!res.ok) {
+          const errorMessage: StoredMessage = {
+            id: generateId(),
+            role: "assistant",
+            content: messageFromErrorBody(
+              data,
+              `The server returned an error (${res.status}). Please try again.`,
+            ),
+            timestamp: new Date().toISOString(),
+          };
+          setConversations((prev) =>
+            appendMessage(prev, conversationId, errorMessage),
+          );
+          return;
+        }
+
         const aiResponse =
-          data.response || "Sorry, I didn't get a response from the server.";
+          data?.response || "Sorry, I didn't get a response from the server.";
         const assistantMessage: StoredMessage = {
           id: generateId(),
           role: "assistant",
