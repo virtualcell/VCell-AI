@@ -39,7 +39,7 @@ Sidebar link placement: **"About VCell-AI"** in the left sidebar, in its own gro
 
 > VCell-AI is an AI-assisted interface for discovering, exploring, and analysing computational biology models from the [Virtual Cell (VCell)](https://vcell.org) database. It lets you search VCell BioModels in natural language, and ask an AI assistant to summarise a model's structure, reaction diagram, or VCML definition.
 >
-> VCell-AI was developed as a Google Summer of Code project in collaboration with the VCell team at the ⟨⟨ TODO: exact institutional name — "Center for Cell Analysis and Modeling, UConn Health"? ⟩⟩.
+> VCell-AI was developed as a Google Summer of Code project in collaboration with the VCell team at the Center for [Center for Cell Analysis and Modeling (CCAM)](https://health.uconn.edu/cell-analysis-modeling/), [UConn Health](https://health.uconn.edu/) ⟩.
 >
 > This page describes how the system works, what it sends where, its limitations, and how to cite and contact us.
 
@@ -297,15 +297,14 @@ Sidebar link placement: **"About VCell-AI"** in the left sidebar, in its own gro
 <a id="contributors"></a>
 ## 9. Contributors
 
-⟨⟨ TODO: roles, affiliations, and preferred name spellings for everyone below. The names and relative contribution volume are taken from the repository's commit history; the roles are **not** stated in the repository and must be supplied. Please also confirm whether GSoC contributors should be listed with their programme year. ⟩⟩
 
-> | Name | Role | Affiliation |
-> |---|---|---|
-> | Kacem Mathlouthi | ⟨⟨ TODO — GSoC contributor, year? ⟩⟩ | ⟨⟨ TODO ⟩⟩ |
-> | Kartik Deshpande | ⟨⟨ TODO — GSoC contributor, year? ⟩⟩ | ⟨⟨ TODO ⟩⟩ |
-> | Michael Blinov | ⟨⟨ TODO — mentor / PI? ⟩⟩ | ⟨⟨ TODO ⟩⟩ |
-> | Jim Schaff | ⟨⟨ TODO — mentor / architecture? ⟩⟩ | ⟨⟨ TODO ⟩⟩ |
-> | Ezequiel Valencia | ⟨⟨ TODO ⟩⟩ | ⟨⟨ TODO ⟩⟩ |
+> | Name | Role | 
+> |---|---|
+> | Kacem Mathlouthi | [Kacem Mathlouthi](https://github.com/KacemMathlouthi) contributed to VCell-AI through [Google Summer of Code](https://summerofcode.withgoogle.com/) 2025 under the [National Resource for Network Biology (NRNB)](https://nrnb.org/gsoc.html), working on the project "Chatbot to query VCell modeling resources". | ⟨⟨ TODO ⟩⟩ |
+> | Kartik Deshpande | ⟨⟨ TODO — GSoC contributor, year? ⟩⟩ | 
+> | Michael Blinov | ⟨⟨ TODO — mentor / PI? ⟩⟩ | 
+> | Jim Schaff | ⟨⟨ TODO — mentor / architecture? ⟩⟩ | 
+> | Ezequiel Valencia | ⟨⟨ TODO ⟩⟩ | 
 >
 > ⟨⟨ TODO: anyone who contributed outside of git — design, testing, scientific review, project management — should be added; commit history will not show them. ⟩⟩
 >
