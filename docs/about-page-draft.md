@@ -300,13 +300,13 @@ Sidebar link placement: **"About VCell-AI"** in the left sidebar, in its own gro
 
 > | Name | Role | 
 > |---|---|
-> | Kacem Mathlouthi | [Kacem Mathlouthi](https://github.com/KacemMathlouthi) contributed to VCell-AI through [Google Summer of Code](https://summerofcode.withgoogle.com/) 2025 under the [National Resource for Network Biology (NRNB)](https://nrnb.org/gsoc.html), working on the project "Chatbot to query VCell modeling resources". | ⟨⟨ TODO ⟩⟩ |
-> | Kartik Deshpande | ⟨⟨ TODO — GSoC contributor, year? ⟩⟩ | 
-> | Michael Blinov | ⟨⟨ TODO — mentor / PI? ⟩⟩ | 
-> | Jim Schaff | ⟨⟨ TODO — mentor / architecture? ⟩⟩ | 
-> | Ezequiel Valencia | ⟨⟨ TODO ⟩⟩ | 
+> | Kacem Mathlouthi | [Kacem Mathlouthi](https://github.com/KacemMathlouthi) is a student who started coding for VCell-AI project through [Google Summer of Code 2025](https://summerofcode.withgoogle.com/) under the [National Resource for Network Biology (NRNB)](https://nrnb.org/gsoc.html), working on the project "Chatbot to query VCell modeling resources". |
+> | Reesha Patel | [Reesha Patel](https://github.com/reeshapatel12) is a student who worked on the VCell-AI project in Fall 2025 enhancing VCell-AI as a part of University research project.|
+> | Kartik Deshpande | [Kartik Deshpande](https://github.com/androemeda) is a student who completed coding for VCell-AI project through [Google Summer of Code 2026](https://summerofcode.withgoogle.com/) under the [National Resource for Network Biology (NRNB)](https://nrnb.org/gsoc.html), working on the project "Enhancing VCell AI Platform". | 
+> | Michael L. Blinov | [Michael Blinov](https://health.uconn.edu/blinov-lab/) is the Associate Professor at the Center for [Center for Cell Analysis and Modeling (CCAM)](https://health.uconn.edu/cell-analysis-modeling/), [UConn Health](https://health.uconn.edu/). He is an expert modeler and methods developer who initiated and managed the VCell-AI project, serving as a mentor for GSoC students.| 
+> | Jim Schaff | [James C. Schaff](https://facultydirectory.uchc.edu/profile?profileId=Schaff-James) is he main architect and developer of [VCell](http://vcell.org) modeling and simulation software. He serves as a mentor for GSoC students. | 
+> | Ezequiel Valencia | [Ezequiel Valencia](https://github.com/Ezequiel-Valencia) is a network architect at VCell project  helping with the deployment.| 
 >
-> ⟨⟨ TODO: anyone who contributed outside of git — design, testing, scientific review, project management — should be added; commit history will not show them. ⟩⟩
 >
 > The full contribution history is public at [github.com/virtualcell/VCell-AI/graphs/contributors](https://github.com/virtualcell/VCell-AI/graphs/contributors).
 
