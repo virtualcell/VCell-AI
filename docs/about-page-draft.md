@@ -290,7 +290,10 @@ Sidebar link placement: **"About VCell-AI"** in the left sidebar, in its own gro
 
 > If VCell-AI contributed to work you are publishing, please cite **both** VCell-AI and VCell itself, and cite the underlying models separately.
 >
-> ⟨⟨ TODO: Instructions on how to site ⟩⟩
+> For VCell citation:
+> 
+> Schaff, J., C. C. Fink, B. Slepchenko, J. H. Carson, and L. M. Loew. 1997. A general computational framework for modeling cellular structure and function. Biophysical journal 73:1135-1146. PMID:[9284281](https://pubmed.ncbi.nlm.nih.gov/22482950/) DOI:[10.1016/S0006-3495(97)78146-3](https://doi.org/10.1016/s0006-3495(97)78146-3)
+> Blinov, M. L., J. C. Schaff, D. Vasilescu, Moraru, II, J. E. Bloom, and L. M. Loew. 2017. Compartmental and Spatial Rule-Based Modeling with Virtual Cell. Biophysical journal 113:1365-1372. PMID:[28978431](https://pubmed.ncbi.nlm.nih.gov/28978431/) DOI:[10.1016/j.bpj.2017.08.022](https://doi.org/10.1016/j.bpj.2017.08.022)
 
 ---
 
@@ -317,19 +320,20 @@ Sidebar link placement: **"About VCell-AI"** in the left sidebar, in its own gro
 
 > ### Google Summer of Code
 >
-> VCell-AI was developed as a **Google Summer of Code** project. We thank Google and the GSoC programme, and the mentoring organisation ⟨⟨ TODO: which umbrella organisation did the project run under — NRNB? Confirm the exact org name and year(s). ⟩⟩
+> VCell-AI was developed as a **Google Summer of Code** project in 2025 and 2026. We thank Google and the GSoC programme, and the mentoring organisation the [National Resource for Network Biology (NRNB)](https://nrnb.org/).
 >
+> 
 > ### Funding
 >
-> ⟨⟨ TODO: NIH grant numbers and any other funding to acknowledge, with the exact wording the grants require. Not inferred — please supply the canonical acknowledgment text used in VCell publications. ⟩⟩
+> The Virtual Cell is supported by NIH Grant R24 GM137787 from the National Institute for General Medical Sciences.
 >
 > ### Institutional support
 >
-> ⟨⟨ TODO: exact institutional acknowledgment — centre name, department, university, and any computing/infrastructure support to credit. ⟩⟩
+>  The VCell-AI is supported by the [Center for Cell Analysis and Modeling (CCAM)](https://health.uconn.edu/cell-analysis-modeling/) and the  [High Performance Computing Facility](https://health.uconn.edu/high-performance-computing/) at the [UConn Health](https://health.uconn.edu/).
 >
 > ### Software
 >
-> > VCell-AI builds directly on the Virtual Cell modelling and simulation framework and its public API, and on the open-source projects listed in §7. We thank their maintainers.
+> > VCell-AI builds directly on the Virtual Cell modeling and simulation framework and its public API, and on the open-source projects listed in §7. We thank their maintainers.
 
 ---
 
@@ -346,8 +350,7 @@ Sidebar link placement: **"About VCell-AI"** in the left sidebar, in its own gro
 > | What | Where |
 > |---|---|
 > | Bugs, feature requests, incorrect AI responses | [GitHub Issues](https://github.com/virtualcell/VCell-AI/issues) |
-> | Problems with a specific biomodel's content | ⟨⟨ TODO: VCell support address ⟩⟩ |
-> | General VCell support | ⟨⟨ TODO: VCell support address ⟩⟩ |
+> | General VCell support and specific biomodel's content | [vcell_support@uchc.edu](vcell_support@uchc.edu) |
 > | Security vulnerabilities | ⟨⟨ TODO: security contact — should not go through public issues ⟩⟩ |
 > | Data / privacy requests (including account deletion) | ⟨⟨ TODO: contact ⟩⟩ |
 >
