@@ -262,7 +262,7 @@ export default function ProfilePage() {
                 Profile
               </h1>
               <p className="text-slate-600 mt-2">
-                Link your VCell account to use your models and simulations here
+                Link your VCell account to view your private VCell models and simulations here
               </p>
             </div>
             <SignInOutButton />
