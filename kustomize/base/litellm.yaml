@@ -1,3 +1,15 @@
+# Dedicated identity for the proxy. This exists so GCP Workload Identity
+# Federation can be scoped to *this* workload: the WIF provider's attribute
+# condition pins assertion.sub to "system:serviceaccount:<ns>:litellm", so the
+# namespace default SA (which every other pod here uses) cannot assume the
+# Google service account. See docs/gcp-wif-findings.md.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: litellm
+  labels:
+    app: litellm
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -14,6 +26,7 @@ spec:
       labels:
         app: litellm
     spec:
+      serviceAccountName: litellm
       containers:
         - name: litellm
           image: ghcr.io/berriai/litellm:main-stable
@@ -74,6 +87,16 @@ spec:
             - name: litellm-config-file
               mountPath: /app/config.yaml
               subPath: config.yaml
+            # The external-account config that vertex_credentials points at. It
+            # holds no key material -- only the pool/provider path, the target
+            # Google service account, and where to read the token -- so it rides
+            # in the same ConfigMap as config.yaml rather than a sealed secret.
+            - name: litellm-config-file
+              mountPath: /etc/gcp/wif.json
+              subPath: gcp-wif.json
+            - name: gcp-token
+              mountPath: /var/run/secrets/gcp
+              readOnly: true
           resources:
             requests:
               memory: "512Mi"
@@ -93,6 +116,25 @@ spec:
         - name: litellm-config-file
           configMap:
             name: litellm-config-file
+        # Short-lived, audience-scoped ServiceAccount token -- the credential we
+        # trade at Google's STS for a Vertex AI access token. kubelet rotates the
+        # file at ~80% of its lifetime and google-auth re-reads it on refresh, so
+        # nothing here expires. This replaces a downloadable service account key,
+        # which org policy iam.managed.disableServiceAccountKeyCreation forbids.
+        - name: gcp-token
+          projected:
+            sources:
+              - serviceAccountToken:
+                  # REPLACE_ME: the WIF provider's full resource audience, once
+                  # Burwood creates the pool (REQ0040169).
+                  #
+                  # The leading "https://" is deliberate and is NOT a typo to be
+                  # tidied up: Google's manifest uses the https:// form here, while
+                  # gcp-wif.json uses the schemeless "//iam.googleapis.com/..." form
+                  # for the same provider. Both are default allowed audiences.
+                  audience: https://iam.googleapis.com/projects/637433805721/locations/global/workloadIdentityPools/POOL_ID/providers/PROVIDER_ID
+                  expirationSeconds: 3600
+                  path: token
       imagePullSecrets:
         - name: ghcr-secret
 

@@ -70,6 +70,16 @@ sealed secret — the backend needs the master key to provision virtual keys, an
 LiteLLM needs it plus Langfuse for tracing. Provide each value once in
 `secrets.dat`; `secrets.sh` seals it into the right secrets.)
 
+Gemini is deliberately **absent** from that list. It authenticates to Vertex AI
+with GCP Workload Identity Federation, so there is no key to seal: the pod
+presents a 1-hour projected ServiceAccount token, and the external-account config
+that describes the exchange (`base/gcp-wif.json`, mounted at `/etc/gcp/wif.json`)
+carries no key material and rides in the plain `litellm-config-file` ConfigMap.
+Adding a Gemini model therefore needs no `kubeseal` round-trip and no change to
+`secrets.dat`. See [`docs/gcp-wif-findings.md`](../docs/gcp-wif-findings.md) — in
+particular the note that the uploaded JWKS must be refreshed if the cluster's
+service-account signing key is ever rotated.
+
 `secrets.dat` (plaintext) and the generated `secret-*.yaml` are **gitignored**.
 Run `secrets.sh` to (re)generate the sealed manifests before applying an overlay.
 
