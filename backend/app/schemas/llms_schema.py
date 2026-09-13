@@ -2,7 +2,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-LLMModel = Literal["openai-model", "local-model"]
+LLMModel = Literal["openai-model", "gemini-model", "local-model"]
 
 
 class ChatRequest(BaseModel):
