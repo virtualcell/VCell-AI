@@ -165,17 +165,21 @@ export function MarkdownRenderer({
           // Horizontal rules
           hr: () => <hr className="my-4 border-t border-slate-300" />,
 
-          // Links
-          a: ({ children, href }) => (
-            <a
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 underline hover:text-blue-800 transition-colors"
-            >
-              {children}
-            </a>
-          ),
+          // Links. Same-page anchors (#section) must stay in this tab —
+          // opening them in a new one would just reload the page.
+          a: ({ children, href }) => {
+            const isAnchor = href?.startsWith("#");
+            return (
+              <a
+                href={href}
+                target={isAnchor ? undefined : "_blank"}
+                rel={isAnchor ? undefined : "noopener noreferrer"}
+                className="text-blue-600 underline hover:text-blue-800 transition-colors"
+              >
+                {children}
+              </a>
+            );
+          },
 
           // Strikethrough (from remark-gfm)
           del: ({ children }) => (

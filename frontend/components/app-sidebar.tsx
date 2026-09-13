@@ -7,6 +7,7 @@ import {
   FlaskConical,
   FolderOpen,
   Gauge,
+  Info,
   MessageSquare,
   Pencil,
   Trash2,
@@ -334,6 +335,29 @@ export function AppSidebar() {
                       <FlaskConical className="h-4 w-4 text-yellow-400" />
                     </span>
                     {!isCollapsed && <span>Biomodel Explorer</span>}
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarSeparator />
+
+        {/* About Section */}
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem key="About">
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === "/about"}
+                  className="data-[active=true]:bg-slate-100 data-[active=true]:text-slate-900 data-[active=true]:border-r-2 data-[active=true]:border-slate-400"
+                  tooltip={isCollapsed ? "About VCell-AI" : undefined}
+                >
+                  <Link href="/about" className="flex items-center gap-3">
+                    <Info className="h-4 w-4 text-slate-500" />
+                    {!isCollapsed && <span>About VCell-AI</span>}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
