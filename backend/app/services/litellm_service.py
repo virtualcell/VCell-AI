@@ -98,3 +98,129 @@ async def get_user_budget_info(auth0_sub: str) -> dict:
         "max_budget": max_budget,
         "remaining_budget": remaining_budget,
     }
+
+
+# LiteLLM's built-in proxy admin. Its budget must stay unlimited, so it is
+# always excluded from bulk budget updates.
+LITELLM_EXCLUDED_USER_IDS = {"default_user_id"}
+LITELLM_EXCLUDED_ROLES = {"proxy_admin", "proxy_admin_viewer"}
+
+# /user/list caps page_size at 100.
+_USER_LIST_PAGE_SIZE = 100
+
+
+def _is_excluded_from_bulk_update(user: dict) -> bool:
+    """
+    Return True for LiteLLM users that must never be touched by a bulk budget
+    update (the proxy admin / default user).
+    """
+    return (
+        user.get("user_id") in LITELLM_EXCLUDED_USER_IDS
+        or user.get("user_role") in LITELLM_EXCLUDED_ROLES
+    )
+
+
+async def list_managed_users() -> list[dict]:
+    """
+    List every LiteLLM user eligible for bulk budget updates, i.e. all users
+    except the proxy admin / default user.
+
+    Returns:
+        list[dict]: user_id, user_email, spend, max_budget and budget_duration
+            for each managed user.
+    """
+    users: list[dict] = []
+    page = 1
+
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        while True:
+            response = await client.get(
+                f"{settings.LITELLM_URL}/user/list",
+                headers={"Authorization": f"Bearer {settings.LITELLM_MASTER_KEY}"},
+                params={"page": page, "page_size": _USER_LIST_PAGE_SIZE},
+            )
+            response.raise_for_status()
+            data = response.json()
+
+            users.extend(data.get("users") or [])
+
+            if page >= (data.get("total_pages") or 1):
+                break
+            page += 1
+
+    return [
+        {
+            "user_id": user.get("user_id"),
+            "user_email": user.get("user_email"),
+            "spend": user.get("spend") or 0.0,
+            "max_budget": user.get("max_budget"),
+            "budget_duration": user.get("budget_duration"),
+        }
+        for user in users
+        if not _is_excluded_from_bulk_update(user)
+    ]
+
+
+async def update_all_user_budgets(max_budget: float, budget_duration: str) -> dict:
+    """
+    Set the same max budget and reset frequency on every managed LiteLLM user.
+
+    LiteLLM's own "update all users" option would also overwrite the proxy
+    admin's unlimited budget, so the user list is fetched and filtered first and
+    the updates are sent as an explicit per-user batch.
+
+    Args:
+        max_budget (float): Max budget in USD to apply to each managed user.
+        budget_duration (str): LiteLLM duration string the budget resets on
+            (e.g. "1h", "24h", "7d", "30d").
+
+    Returns:
+        dict: total_users, successful_updates, failed_updates and the user_ids
+            of any users that could not be updated.
+    """
+    managed_users = await list_managed_users()
+
+    if not managed_users:
+        return {
+            "total_users": 0,
+            "successful_updates": 0,
+            "failed_updates": 0,
+            "failed_user_ids": [],
+        }
+
+    async with httpx.AsyncClient(timeout=60.0) as client:
+        response = await client.post(
+            f"{settings.LITELLM_URL}/user/bulk_update",
+            headers={"Authorization": f"Bearer {settings.LITELLM_MASTER_KEY}"},
+            json={
+                "users": [
+                    {
+                        "user_id": user["user_id"],
+                        "max_budget": max_budget,
+                        "budget_duration": budget_duration,
+                    }
+                    for user in managed_users
+                ]
+            },
+        )
+        response.raise_for_status()
+        data = response.json()
+
+    failed_user_ids = [
+        result.get("user_id")
+        for result in (data.get("results") or [])
+        if not result.get("success")
+    ]
+
+    logger.info(
+        f"Bulk budget update: {data.get('successful_updates')} succeeded, "
+        f"{data.get('failed_updates')} failed "
+        f"(max_budget={max_budget}, budget_duration={budget_duration})"
+    )
+
+    return {
+        "total_users": data.get("total_requested") or len(managed_users),
+        "successful_updates": data.get("successful_updates") or 0,
+        "failed_updates": data.get("failed_updates") or 0,
+        "failed_user_ids": failed_user_ids,
+    }
