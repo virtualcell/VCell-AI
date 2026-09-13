@@ -28,7 +28,11 @@ import {
   Atom,
   Briefcase,
   Cog,
+  BookOpen,
+  ExternalLink,
+  Sparkles,
 } from "lucide-react";
+import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { LoginRequiredDialog } from "@/components/login-required-dialog";
 import { SignInOutButton } from "@/components/sign-in-out-button";
@@ -69,6 +73,30 @@ interface Application {
   mathKey: string;
 }
 
+// A publication from the VCell publication database that references this
+// biomodel. Most fields are optional: a handful of records are missing a DOI,
+// a PubMed ID or a citation string.
+interface Publication {
+  pubKey: string;
+  title: string;
+  authors?: string | string[];
+  year?: number;
+  citation?: string;
+  pubmedid?: string;
+  doi?: string;
+  url?: string;
+  date?: string;
+}
+
+// A precomputed, biologist-facing Markdown explanation of the model. Absent
+// (404) for biomodels the generation job hasn't covered yet.
+interface BiomodelSummary {
+  bmKey: string;
+  summary: string;
+  modelUsed?: string;
+  generatedAt?: string;
+}
+
 interface BiomodelDetail {
   bmKey: string;
   name: string;
@@ -82,6 +110,38 @@ interface BiomodelDetail {
   ownerKey: string;
   simulations: Simulation[];
   applications: Application[];
+}
+
+// The VCell API splits an author list on commas, so surnames and initials
+// arrive as separate array elements. The backend already rejoins them; this
+// just covers the case where the raw array comes through.
+function formatAuthors(authors?: string | string[]): string | null {
+  if (!authors) return null;
+  const text = Array.isArray(authors)
+    ? authors
+        .map((a) => a.trim())
+        .filter(Boolean)
+        .join(", ")
+    : authors;
+  return text.trim() || null;
+}
+
+// Only the calendar date matters for a publication. Parsing the full ISO
+// timestamp would shift the day for viewers west of the server's offset, so
+// take the date straight off the string instead.
+function formatPublicationDate(value?: string): string | null {
+  if (!value) return null;
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(value);
+  if (!match) return null;
+  const [, year, month, day] = match;
+  return new Date(
+    Date.UTC(Number(year), Number(month) - 1, Number(day)),
+  ).toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    timeZone: "UTC",
+  });
 }
 
 export default function BiomodelDetailPage() {
@@ -102,6 +162,9 @@ export default function BiomodelDetailPage() {
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [diagramImageUrl, setDiagramImageUrl] = useState("");
   const [diagramError, setDiagramError] = useState("");
+  const [publications, setPublications] = useState<Publication[]>([]);
+  const [summary, setSummary] = useState<BiomodelSummary | null>(null);
+  const [summaryLoading, setSummaryLoading] = useState(true);
   const { user, isLoading: isUserLoading } = useUser();
   const diagramFetchTriggeredRef = useRef(false);
 
@@ -175,6 +238,53 @@ export default function BiomodelDetailPage() {
     })();
   }, [bmid]);
 
+  // Publications are supplementary metadata — most biomodels have none, so a
+  // failure here just leaves the section hidden rather than surfacing an error.
+  useEffect(() => {
+    if (!data?.bmKey) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/biomodel/${data.bmKey}/publications`,
+        );
+        if (!res.ok) throw new Error("Failed to fetch publications");
+        const json = await res.json();
+        if (!cancelled) setPublications(Array.isArray(json) ? json : []);
+      } catch {
+        if (!cancelled) setPublications([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [data?.bmKey]);
+
+  // The precomputed model summary. A 404 just means this biomodel hasn't been
+  // summarized yet, which is expected — not an error worth surfacing.
+  useEffect(() => {
+    if (!data?.bmKey) return;
+    let cancelled = false;
+    setSummaryLoading(true);
+    (async () => {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/biomodel/${data.bmKey}/summary`,
+        );
+        if (!res.ok) throw new Error("No summary available");
+        const json = await res.json();
+        if (!cancelled) setSummary(json);
+      } catch {
+        if (!cancelled) setSummary(null);
+      } finally {
+        if (!cancelled) setSummaryLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [data?.bmKey]);
+
   useEffect(() => {
     if (!data?.bmKey) return;
     setDiagramError("");
@@ -216,13 +326,16 @@ export default function BiomodelDetailPage() {
     fetchDiagramAnalysis();
   }, [data?.bmKey, activeTab, isUserLoading, user, conversationId]);
 
-  // Create combined messages when diagram analysis is ready
+  // Seed the chat with the precomputed summary so follow-up questions carry it
+  // as context, falling back to the placeholder for models without one.
   useEffect(() => {
-    if (diagramAnalysis) {
-      const diagramMessage = `# Diagram Analysis \n ${diagramAnalysis}`;
-      setCombinedMessages([diagramMessage]);
+    if (summaryLoading) return;
+    if (summary?.summary) {
+      setCombinedMessages([`# Model Summary\n\n${summary.summary}`]);
+    } else if (diagramAnalysis) {
+      setCombinedMessages([`# Diagram Analysis \n ${diagramAnalysis}`]);
     }
-  }, [diagramAnalysis]);
+  }, [diagramAnalysis, summary, summaryLoading]);
 
   if (error) return <div className="p-8 text-center text-red-600">{error}</div>;
   if (!data) return null;
@@ -376,6 +489,106 @@ export default function BiomodelDetailPage() {
                   </CollapsibleContent>
                 </Collapsible>
 
+                {/* Publications Section — hidden entirely for the great
+                    majority of biomodels, which no publication references. */}
+                {publications.length > 0 && (
+                  <Collapsible className="mb-6" defaultOpen>
+                    <CollapsibleTrigger asChild>
+                      <div className="flex items-center gap-2 mb-2 cursor-pointer hover:bg-slate-50 p-2 rounded transition-colors">
+                        <BookOpen className="h-4 w-4 text-blue-400" />
+                        <span className="font-semibold text-slate-800 text-sm">
+                          Publications
+                        </span>
+                        <span className="text-xs text-slate-500">
+                          ({publications.length})
+                        </span>
+                        <ChevronsUpDown className="h-4 w-4 text-slate-400 ml-auto" />
+                      </div>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <ul className="space-y-2 mt-1">
+                        {publications.map((pub) => {
+                          const doiUrl = pub.doi
+                            ? `https://doi.org/${pub.doi}`
+                            : null;
+                          const pubmedUrl = pub.pubmedid
+                            ? `https://pubmed.ncbi.nlm.nih.gov/${pub.pubmedid}`
+                            : pub.url || null;
+                          const primaryUrl = doiUrl || pubmedUrl;
+                          const authors = formatAuthors(pub.authors);
+                          const publishedOn = formatPublicationDate(pub.date);
+                          return (
+                            <li
+                              key={pub.pubKey}
+                              className="bg-slate-50 border border-slate-200 rounded p-3 shadow-sm"
+                            >
+                              {primaryUrl ? (
+                                <a
+                                  href={primaryUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="font-medium text-blue-900 hover:text-blue-700 hover:underline inline-flex items-start gap-1 text-sm"
+                                >
+                                  {pub.title}
+                                  <ExternalLink className="h-3 w-3 mt-0.5 shrink-0 text-blue-400" />
+                                </a>
+                              ) : (
+                                <span className="font-medium text-blue-900 text-sm">
+                                  {pub.title}
+                                </span>
+                              )}
+                              {authors && (
+                                <div className="text-xs text-slate-600 italic mt-1">
+                                  {authors}
+                                </div>
+                              )}
+                              {(pub.citation || pub.year) && (
+                                <div className="text-xs text-slate-500 mt-1">
+                                  {pub.citation || pub.year}
+                                </div>
+                              )}
+                              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-xs text-slate-500">
+                                {publishedOn && (
+                                  <span className="inline-flex items-center gap-1">
+                                    <Calendar className="h-3 w-3 text-slate-400" />
+                                    {publishedOn}
+                                  </span>
+                                )}
+                                {pub.doi && (
+                                  <a
+                                    href={doiUrl!}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-700 hover:underline"
+                                  >
+                                    DOI: {pub.doi}
+                                  </a>
+                                )}
+                                {pub.pubmedid && (
+                                  <a
+                                    href={`https://pubmed.ncbi.nlm.nih.gov/${pub.pubmedid}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-700 hover:underline"
+                                  >
+                                    PubMed: {pub.pubmedid}
+                                  </a>
+                                )}
+                                <span>
+                                  Pub Key:{" "}
+                                  <span className="font-mono text-blue-700">
+                                    {pub.pubKey}
+                                  </span>
+                                </span>
+                              </div>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </CollapsibleContent>
+                  </Collapsible>
+                )}
+
                 {/* Applications Section */}
                 <Collapsible className="mb-6" defaultOpen>
                   <CollapsibleTrigger asChild>
@@ -503,6 +716,35 @@ export default function BiomodelDetailPage() {
               </TabsContent>
 
               <TabsContent value="analysis" className="space-y-6">
+                {/* Precomputed model summary. Rendered only when one exists —
+                    models the generation job hasn't reached show nothing here
+                    and fall back to the chat placeholder below. */}
+                {summary?.summary && (
+                  <Collapsible className="mb-6" defaultOpen>
+                    <CollapsibleTrigger asChild>
+                      <div className="flex items-center gap-2 mb-2 cursor-pointer hover:bg-slate-50 p-2 rounded transition-colors">
+                        <Sparkles className="h-4 w-4 text-blue-400" />
+                        <span className="font-semibold text-slate-800 text-sm">
+                          Model Summary
+                        </span>
+                        {summary.generatedAt && (
+                          <span className="text-xs text-slate-500">
+                            generated{" "}
+                            {formatPublicationDate(summary.generatedAt) ??
+                              "recently"}
+                          </span>
+                        )}
+                        <ChevronsUpDown className="h-4 w-4 text-slate-400 ml-auto" />
+                      </div>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <div className="bg-blue-50 border border-blue-100 rounded p-4 shadow-sm overflow-x-auto">
+                        <MarkdownRenderer content={summary.summary} />
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+                )}
+
                 {/* AI Analysis Section */}
                 <div className="mb-6">
                   <div className="flex items-center gap-2 mb-2">
