@@ -2,6 +2,7 @@ from app.core.logger import get_logger
 import httpx
 import asyncio
 import re
+import time
 from app.schemas.vcelldb_schema import BiomodelRequestParams, SimulationRequestParams
 from urllib.parse import urlencode, quote
 from langfuse import observe
@@ -563,14 +564,14 @@ async def fetch_publications() -> List[dict]:
                 sanitized_publications = []
                 for pub in publications:
                     if isinstance(pub, dict):
-                        # Create a copy and remove unwanted fields
+                        # Create a copy and remove unwanted fields. pubKey, date
+                        # and url are kept: the UI links to the publication by
+                        # pubKey and shows the publication date, and endnoteid /
+                        # wittid are internal bookkeeping ids (always 0 or -1).
                         sanitized_pub = pub.copy()
                         sanitized_pub.pop('wittid', None)
-                        sanitized_pub.pop('date', None)
-                        sanitized_pub.pop('url', None)
-                        sanitized_pub.pop('pubKey', None)
                         sanitized_pub.pop('endnoteid', None)
-                        
+
                         # Clean up author arrays - remove empty strings and combine
                         authors = pub.get('authors', [])
                         if authors:
@@ -599,4 +600,148 @@ async def fetch_publications() -> List[dict]:
     except Exception as e:
         logger.error(f"Unexpected error fetching publications: {str(e)}")
         raise e
+
+
+# The VCell API has no per-biomodel publication endpoint: the only link between
+# a biomodel and a paper is each publication's `biomodelReferences` list, so
+# finding a biomodel's publications means scanning the whole feed. That feed is
+# small and slow-moving (~250 records, ~175 KB), so it is fetched once and kept
+# in memory behind a TTL alongside a bmKey -> publications index.
+PUBLICATIONS_CACHE_TTL_SECONDS = 6 * 60 * 60
+
+_publications_cache: Optional[List[dict]] = None
+_publications_by_bmkey: dict[str, List[dict]] = {}
+_publications_cached_at: float = 0.0
+_publications_lock = asyncio.Lock()
+
+
+def _index_publications_by_bmkey(publications: List[dict]) -> dict[str, List[dict]]:
+    """
+    Build a bmKey -> publications lookup from the publication feed.
+
+    A publication can reference several biomodels and a biomodel can appear in
+    more than one publication, so this is a genuine many-to-many fan-out. The
+    reference lists themselves are dropped from the indexed copy: on a biomodel
+    page, the other models a paper happens to cite are noise.
+
+    Args:
+        publications (List[dict]): Publications as returned by fetch_publications.
+
+    Returns:
+        dict[str, List[dict]]: Publications keyed by referenced biomodel key.
+    """
+    index: dict[str, List[dict]] = {}
+
+    for publication in publications:
+        if not isinstance(publication, dict):
+            continue
+
+        entry = {
+            key: value
+            for key, value in publication.items()
+            if key not in ("biomodelReferences", "mathmodelReferences")
+        }
+
+        for reference in publication.get("biomodelReferences") or []:
+            bm_key = reference.get("bmKey")
+            if bm_key:
+                index.setdefault(str(bm_key), []).append(entry)
+
+    return index
+
+
+async def _get_publications_index() -> dict[str, List[dict]]:
+    """
+    Return the bmKey -> publications index, refreshing the cached feed if the
+    TTL has expired.
+
+    If the refresh fails but a previous index is still held, the stale index is
+    served rather than failing the caller: publication metadata is supplementary
+    and an outdated list beats an error on the biomodel page.
+
+    Returns:
+        dict[str, List[dict]]: Publications keyed by referenced biomodel key.
+    """
+    global _publications_cache, _publications_by_bmkey, _publications_cached_at
+
+    # The lock is held across the fetch so a burst of concurrent callers on a
+    # cold cache triggers one upstream request instead of one each.
+    async with _publications_lock:
+        is_fresh = (
+            _publications_cache is not None
+            and (time.monotonic() - _publications_cached_at)
+            < PUBLICATIONS_CACHE_TTL_SECONDS
+        )
+
+        if not is_fresh:
+            try:
+                publications = await fetch_publications()
+                _publications_cache = publications
+                _publications_by_bmkey = _index_publications_by_bmkey(publications)
+                _publications_cached_at = time.monotonic()
+                logger.info(
+                    f"Publications cache refreshed: {len(publications)} publications, "
+                    f"{len(_publications_by_bmkey)} biomodels with publications"
+                )
+            except Exception as e:
+                if _publications_cache is None:
+                    raise e
+                logger.warning(
+                    f"Publications refresh failed, serving stale cache: {str(e)}"
+                )
+
+        return _publications_by_bmkey
+
+
+@observe(name="FETCH_BIOMODEL_PUBLICATIONS")
+async def fetch_biomodel_publications(biomodel_id: str) -> List[dict]:
+    """
+    Fetch the publications that reference a given biomodel.
+
+    Matching is on the exact bmKey, which pins one specific saved version of a
+    model, so other versions of a published model return nothing.
+
+    Args:
+        biomodel_id (str): ID (bmKey) of the biomodel.
+
+    Returns:
+        List[dict]: Publications referencing the biomodel; empty if none do.
+    """
+    index = await _get_publications_index()
+    publications = index.get(str(biomodel_id), [])
+
+    logger.info(
+        f"Found {len(publications)} publication(s) for biomodel {biomodel_id}"
+    )
+    return publications
+
+
+async def attach_publications_to_biomodels(biomodels: List[dict]) -> List[dict]:
+    """
+    Annotate biomodels in place with the publications that reference them.
+
+    Used on the LLM tool path so answers cite real publication metadata instead
+    of the free-text "model published as ..." prose in the `annot` field. Models
+    with no publications are left untouched rather than carrying an empty list,
+    to keep them out of the model's context.
+
+    Args:
+        biomodels (List[dict]): Biomodels as returned by fetch_biomodels.
+
+    Returns:
+        List[dict]: The same list, with a `publications` key where applicable.
+    """
+    try:
+        index = await _get_publications_index()
+    except Exception as e:
+        # Publications are supplementary; never fail a biomodel lookup over them.
+        logger.warning(f"Could not attach publications to biomodels: {str(e)}")
+        return biomodels
+
+    for model in biomodels:
+        publications = index.get(str(model.get("bmKey")))
+        if publications:
+            model["publications"] = publications
+
+    return biomodels
 
