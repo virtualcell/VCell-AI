@@ -43,7 +43,7 @@ class Settings(BaseSettings):
     # LiteLLM Proxy Config
     LITELLM_URL: str = "http://litellm:4000"
     LITELLM_MASTER_KEY: Optional[str] = None
-    DEFAULT_USER_BUDGET: Decimal = Decimal("10.00")
+    DEFAULT_USER_BUDGET: Decimal = Decimal("2.00")
     DEFAULT_BUDGET_DURATION: str = "30d"
 
 

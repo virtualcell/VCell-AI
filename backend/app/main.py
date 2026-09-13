@@ -16,6 +16,7 @@ from app.routes.qdrant_router import router as qdrant_router
 from app.routes.knowledge_base_router import router as knowledge_base_router
 from app.routes.users_router import router as users_router
 from app.routes.vcell_identity_router import router as vcell_identity_router
+from app.routes.litellm_router import router as litellm_router
 
 ascii_art = """
 ╔════════════════════════════════════════════════════════════════════════════════════╗
@@ -60,6 +61,7 @@ app.include_router(vcelldb_router, tags=["VCellDB API Wrapper"])
 app.include_router(qdrant_router, tags=["Qdrant Vector DB"], prefix="/qdrant")
 app.include_router(users_router, tags=["Users"])
 app.include_router(vcell_identity_router, tags=["VCell Account Linking"])
+app.include_router(litellm_router, tags=["LiteLLM Admin"], prefix="/litellm")
 
 if __name__ == "__main__":
     uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)

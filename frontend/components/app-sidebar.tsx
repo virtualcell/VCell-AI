@@ -6,6 +6,7 @@ import {
   Sparkles,
   FlaskConical,
   FolderOpen,
+  Gauge,
   MessageSquare,
   Pencil,
   Trash2,
@@ -448,6 +449,22 @@ export function AppSidebar() {
                       >
                         <FolderOpen className="h-4 w-4 text-purple-500" />
                         {!isCollapsed && <span>Knowledge Base</span>}
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem key="LiteLLM">
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname === "/admin/litellm"}
+                      className="data-[active=true]:bg-purple-50 data-[active=true]:text-purple-700 data-[active=true]:border-r-2 data-[active=true]:border-purple-500"
+                      tooltip={isCollapsed ? "LiteLLM" : undefined}
+                    >
+                      <Link
+                        href="/admin/litellm"
+                        className="flex items-center gap-3"
+                      >
+                        <Gauge className="h-4 w-4 text-purple-500" />
+                        {!isCollapsed && <span>LiteLLM</span>}
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
