@@ -12,7 +12,13 @@ from app.services.vcelldb_service import (
     get_diagram_image,
     fetch_biomodel_applications_files,
     fetch_publications,
+    fetch_biomodel_publications,
 )
+from app.services.publications_service import get_publications_for_biomodel
+from app.services.model_summary_service import get_stored_summary
+from app.core.logger import get_logger
+
+logger = get_logger("vcelldb_controller")
 
 
 async def get_biomodels_controller(
@@ -154,6 +160,66 @@ async def get_biomodel_applications_files_controller(biomodel_id: str) -> dict:
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+async def get_biomodel_publications_controller(biomodel_id: str) -> List[dict]:
+    """
+    Controller function to fetch the publications referencing a biomodel.
+
+    Reads the synced Supabase tables first and falls back to the live VCell feed
+    when nothing is stored, so the section keeps working before the first sync
+    and if Supabase is unreachable.
+
+    Raises:
+        HTTPException: If the VCell API request fails.
+    """
+    try:
+        try:
+            stored = get_publications_for_biomodel(biomodel_id)
+            if stored:
+                return stored
+        except Exception as e:
+            logger.warning(
+                f"Supabase publications lookup failed for {biomodel_id}, "
+                f"falling back to the live feed: {str(e)}"
+            )
+
+        return await fetch_biomodel_publications(biomodel_id)
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(
+            status_code=e.response.status_code,
+            detail="Error fetching biomodel publications.",
+        )
+    except httpx.RequestError as e:
+        raise HTTPException(
+            status_code=500, detail="Error communicating with VCell API."
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+async def get_biomodel_summary_controller(biomodel_id: str) -> dict:
+    """
+    Controller function to fetch the stored AI-generated summary for a biomodel.
+    Raises:
+        HTTPException: 404 when no summary has been generated for this biomodel.
+    """
+    try:
+        row = get_stored_summary(biomodel_id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    if not row or row.get("status") != "ok" or not row.get("summary_md"):
+        raise HTTPException(
+            status_code=404, detail="No summary has been generated for this biomodel."
+        )
+
+    return {
+        "bmKey": str(row["bm_key"]),
+        "summary": row["summary_md"],
+        "modelUsed": row.get("llm_model"),
+        "generatedAt": row.get("generated_at"),
+    }
 
 
 async def get_publications_controller() -> List[dict]:

@@ -12,6 +12,8 @@ from app.controllers.vcelldb_controller import (
     get_diagram_image_controller,
     get_biomodel_applications_files_controller,
     get_publications_controller,
+    get_biomodel_publications_controller,
+    get_biomodel_summary_controller,
 )
 
 router = APIRouter()
@@ -112,6 +114,30 @@ async def get_biomodel_applications_files(biomodel_id: str):
     """
     try:
         return await get_biomodel_applications_files_controller(biomodel_id)
+    except HTTPException as e:
+        raise e
+
+
+@router.get("/biomodel/{biomodel_id}/publications", response_model=List[dict])
+async def get_biomodel_publications(biomodel_id: str):
+    """
+    Endpoint to retrieve the publications that reference a given biomodel.
+    Returns an empty list for the many biomodels that aren't cited anywhere.
+    """
+    try:
+        return await get_biomodel_publications_controller(biomodel_id)
+    except HTTPException as e:
+        raise e
+
+
+@router.get("/biomodel/{biomodel_id}/summary", response_model=dict)
+async def get_biomodel_summary(biomodel_id: str):
+    """
+    Endpoint to retrieve the precomputed AI-generated summary for a biomodel.
+    Returns 404 for biomodels that have not been summarized yet.
+    """
+    try:
+        return await get_biomodel_summary_controller(biomodel_id)
     except HTTPException as e:
         raise e
 
