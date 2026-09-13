@@ -8,6 +8,8 @@ from app.services.vcelldb_service import (
     fetch_simulation_details,
     get_vcml_file,
     fetch_biomodel_applications_files,
+    fetch_biomodel_publications,
+    _index_publications_by_bmkey,
 )
 from app.schemas.vcelldb_schema import BiomodelRequestParams, SimulationRequestParams
 
@@ -71,3 +73,45 @@ class TestVCellDBService:
         assert "sbml_url" in app0
         assert "263874893" in app0["key"]
         assert "Application0" in app0["name"]
+
+    async def test_fetch_biomodel_publications_success(self):
+        """Test fetching the publications that reference a biomodel."""
+        result = await fetch_biomodel_publications("203656156")
+
+        assert len(result) == 1
+        publication = result[0]
+        assert publication["pubKey"] == "203679830"
+        assert publication["doi"] == "10.1371/journal.pone.0248293"
+        assert publication["pubmedid"] == "33735291"
+        # pubKey, date and url must survive sanitization — the UI needs them.
+        assert "date" in publication
+        # Authors arrive split across array elements and must be rejoined.
+        assert publication["authors"].startswith("Eroumé, K., Vasilevich, A.")
+        # A biomodel's own page has no use for the other models a paper cites.
+        assert "biomodelReferences" not in publication
+
+    async def test_fetch_biomodel_publications_none(self):
+        """Test a biomodel that no publication references."""
+        assert await fetch_biomodel_publications("211211962") == []
+
+    def test_index_publications_by_bmkey_fans_out(self):
+        """A publication referencing several biomodels is indexed under each."""
+        index = _index_publications_by_bmkey(
+            [
+                {
+                    "pubKey": "1",
+                    "title": "Two models",
+                    "biomodelReferences": [{"bmKey": "10"}, {"bmKey": "20"}],
+                },
+                {
+                    "pubKey": "2",
+                    "title": "Also cites 10",
+                    "biomodelReferences": [{"bmKey": "10"}],
+                },
+                {"pubKey": "3", "title": "No models", "biomodelReferences": []},
+            ]
+        )
+
+        assert sorted(index) == ["10", "20"]
+        assert [p["pubKey"] for p in index["10"]] == ["1", "2"]
+        assert [p["pubKey"] for p in index["20"]] == ["1"]

@@ -33,7 +33,7 @@ ALWAYS use the provided name and biomodelID exactly. Format the name as [name](/
    - **Biomodel Key:** ${biomodelId}
    - **Owner:** ${owner}
    - **Description:** ${description or summary of the biomodel, do not include `clonedFrom` info}
-   - **Publisher:** ${publication info extracted from the `annot` field, if present}
+   - **Publisher:** ${publication info from the `publications` field, or from `annot` as a fallback, if present}
    - **Applications:**
 
 List every application name for the model in italics, each on its own bullet point. Under each
@@ -41,11 +41,12 @@ bulleted application name, list its corresponding simulations, with each simulat
 Do not omit any applications.
 ```
 
-### Publisher Info from `annot`
-* The `annot` field on each biomodel returned by `fetch_biomodels` can contain a mix of lines: provenance lines starting with "cloned from ..." (ownership history), free-text notes, and a publication line such as "model published as <Authors>, <Journal>, <Date/Year>." or similar phrasing referencing authors, a journal, or a publication year.
-* If `annot` contains a publication line, extract it and present it cleanly under its own **Publisher:** bullet point (strip the leading "model published as" wording and any trailing boilerplate, keeping authors/journal/date). Do not merge it into the Description bullet.
+### Publisher Info
+* A biomodel returned by `fetch_biomodels` may carry a `publications` field: the actual publications from the VCell publication database that reference this model, each with `title`, `authors`, `year`, `citation`, `doi` and `pubmedid`. This is authoritative — ALWAYS prefer it over anything written in `annot`.
+* When `publications` is present, render the **Publisher:** bullet from it as `${title} — ${authors}, ${citation}` and append the DOI as a markdown link `[doi:${doi}](https://doi.org/${doi})` when a `doi` exists. If the model has several publications, list each on its own sub-bullet.
+* Only when `publications` is absent, fall back to `annot`, which can contain a mix of lines: provenance lines starting with "cloned from ..." (ownership history), free-text notes, and a publication line such as "model published as <Authors>, <Journal>, <Date/Year>.". Extract that publication line, strip the leading "model published as" wording, and present the authors/journal/date under the **Publisher:** bullet.
 * Never include the raw "cloned from ..." provenance lines anywhere in the response, whether in the Description or Publisher bullet.
-* If `annot` has no publication line, omit the **Publisher:** bullet entirely for that model — do not write "N/A" or leave it blank.
+* If there is neither a `publications` entry nor a publication line in `annot`, omit the **Publisher:** bullet entirely for that model — do not write "N/A" or leave it blank.
 
 ### Rules for LONG LISTS (>10 models)
 * ALWAYS continue numbering sequentially (1, 2, 3, ...)

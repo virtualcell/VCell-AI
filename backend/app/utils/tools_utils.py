@@ -4,6 +4,7 @@ from app.services.vcelldb_service import (
     fetch_simulation_details,
     get_vcml_file,
     fetch_publications,
+    attach_publications_to_biomodels,
 )
 from app.services.knowledge_base_service import get_similar_chunks
 from app.schemas.vcelldb_schema import BiomodelRequestParams, SimulationRequestParams
@@ -211,7 +212,11 @@ async def execute_tool(name, args, auth0_token: str | None = None):
             #     args["savedHigh"] = None
             args["maxRows"] = 1000
             params = BiomodelRequestParams(**args)
-            return await fetch_biomodels(params, auth0_token)
+            result = await fetch_biomodels(params, auth0_token)
+            # Give the model real publication metadata to cite, rather than
+            # leaving it to parse the free-text `annot` field for a citation.
+            await attach_publications_to_biomodels(result.get("data", []))
+            return result
 
         elif name == "fetch_simulation_details":
             params = SimulationRequestParams(**args)
