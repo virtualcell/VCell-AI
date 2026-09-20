@@ -725,7 +725,10 @@ export default function BiomodelDetailPage() {
                       <div className="flex items-center gap-2 mb-2 cursor-pointer hover:bg-slate-50 p-2 rounded transition-colors">
                         <Sparkles className="h-4 w-4 text-blue-400" />
                         <span className="font-semibold text-slate-800 text-sm">
-                          Model Summary
+                          AI generated model summary
+                        </span>
+                        <span className="text-xs text-slate-400">
+                          AI can make mistakes
                         </span>
                         {summary.generatedAt && (
                           <span className="text-xs text-slate-500">
