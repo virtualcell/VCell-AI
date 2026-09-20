@@ -358,7 +358,7 @@ export default function BiomodelDetailPage() {
           <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-50 border-b border-slate-200 px-5 py-4 flex flex-col md:flex-row md:items-center md:justify-between">
             <div className="flex flex-col gap-1.5 w-full">
               <div className="flex items-center justify-between w-full">
-                <CardTitle className="text-2xl font-extrabold text-blue-900 flex items-center gap-2.5">
+                <CardTitle className="text-2xl font-extrabold text-slate-900 flex items-center gap-2.5">
                   <FlaskConical className="h-7 w-7 text-blue-500" />
                   {data.name}
                 </CardTitle>
@@ -378,7 +378,7 @@ export default function BiomodelDetailPage() {
               <div className="flex flex-wrap gap-3 mt-2 text-sm text-slate-600">
                 <span className="flex items-center gap-1">
                   <Hash className="h-4 w-4 text-blue-400" />{" "}
-                  <span className="font-mono text-blue-700">{data.bmKey}</span>
+                  <span className="font-mono text-slate-900">{data.bmKey}</span>
                 </span>
                 <span className="flex items-center gap-1">
                   <User className="h-4 w-4 text-blue-400" /> {data.ownerName}
@@ -516,7 +516,7 @@ export default function BiomodelDetailPage() {
                                   <ExternalLink className="h-3 w-3 mt-0.5 shrink-0 text-blue-400" />
                                 </a>
                               ) : (
-                                <span className="font-medium text-blue-900 text-sm">
+                                <span className="font-medium text-slate-900 text-sm">
                                   {pub.title}
                                 </span>
                               )}
@@ -559,7 +559,7 @@ export default function BiomodelDetailPage() {
                                 )}
                                 <span>
                                   Pub Key:{" "}
-                                  <span className="font-mono text-blue-700">
+                                  <span className="font-mono text-slate-900">
                                     {pub.pubKey}
                                   </span>
                                 </span>
@@ -596,17 +596,17 @@ export default function BiomodelDetailPage() {
                             key={app.key}
                             className="bg-slate-50 border border-slate-200 rounded p-2 flex flex-col gap-1 shadow-sm"
                           >
-                            <span className="font-medium text-blue-900 flex items-center gap-2 text-sm">
+                            <span className="font-medium text-slate-900 flex items-center gap-2 text-sm">
                               <Hash className="h-3 w-3 text-blue-300" />
                               {app.name}
                             </span>
                             <span className="text-xs text-slate-500 flex gap-3">
                               App Key:{" "}
-                              <span className="font-mono text-blue-700">
+                              <span className="font-mono text-slate-900">
                                 {app.key}
                               </span>
                               MathKey:{" "}
-                              <span className="font-mono text-blue-700">
+                              <span className="font-mono text-slate-900">
                                 {app.mathKey}
                               </span>
                             </span>
@@ -649,26 +649,26 @@ export default function BiomodelDetailPage() {
                           key={sim.key}
                           className="bg-slate-50 border border-slate-200 rounded p-2 shadow-sm"
                         >
-                          <div className="font-medium text-blue-900 flex items-center gap-2 mb-1 text-sm">
+                          <div className="font-medium text-slate-900 flex items-center gap-2 mb-1 text-sm">
                             <Hash className="h-3 w-3 text-blue-300" />
                             {sim.name}
                           </div>
                           <div className="text-xs text-slate-500 mb-1 flex flex-wrap gap-2">
                             <span>
                               Solver:{" "}
-                              <span className="font-mono text-blue-700">
+                              <span className="font-mono text-slate-900">
                                 {sim.solverName}
                               </span>
                             </span>
                             <span>
                               Scan Count:{" "}
-                              <span className="font-mono text-blue-700">
+                              <span className="font-mono text-slate-900">
                                 {sim.scanCount}
                               </span>
                             </span>
                             <span>
                               Sim Context:{" "}
-                              <span className="font-mono text-blue-700">
+                              <span className="font-mono text-slate-900">
                                 {sim.bioModelLink.simContextName}
                               </span>
                             </span>
@@ -680,7 +680,7 @@ export default function BiomodelDetailPage() {
                                 {sim.overrides.map((ov, i) => (
                                   <li key={i}>
                                     {ov.name} ({ov.type}):{" "}
-                                    <span className="font-mono text-blue-700">
+                                    <span className="font-mono text-slate-900">
                                       {ov.values
                                         ? ov.values.join(", ")
                                         : "No values"}
