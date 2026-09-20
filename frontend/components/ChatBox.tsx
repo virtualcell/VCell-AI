@@ -25,6 +25,10 @@ export interface Message {
   content: string;
   timestamp: Date;
   modelUsed?: string;
+  // Kept in the conversation (and sent to the model as context) but not drawn
+  // in the transcript — used for content the surface already displays itself,
+  // such as the precomputed model summary on the biomodel page.
+  hidden?: boolean;
 }
 
 interface QuickAction {
@@ -46,13 +50,17 @@ interface ChatParameters {
   llmMode: string;
 }
 
-type SeedMessage = string | { role: "user" | "assistant"; content: string };
+export type SeedMessage =
+  | string
+  | { role: "user" | "assistant"; content: string; hidden?: boolean };
 
 interface ChatBoxProps {
   startMessage: string | SeedMessage[];
   quickActions: QuickAction[];
   supplementalActions?: QuickAction[];
-  cardTitle: string;
+  // Omit to drop the card header entirely — used where the surrounding page
+  // already labels the chat and a second title would just repeat it.
+  cardTitle?: string;
   promptPrefix?: string;
   isLoading?: boolean;
   parameters?: ChatParameters;
@@ -74,6 +82,7 @@ const createInitialMessages = (startMsg: string | SeedMessage[]): Message[] => {
       role: typeof seed === "string" ? ("assistant" as const) : seed.role,
       content: typeof seed === "string" ? seed : seed.content,
       timestamp: new Date(),
+      hidden: typeof seed === "string" ? undefined : seed.hidden,
     }));
   } else if (startMsg) {
     return [
@@ -94,6 +103,7 @@ const toMessage = (stored: StoredMessage): Message => ({
   content: stored.content,
   timestamp: new Date(stored.timestamp),
   modelUsed: stored.modelUsed,
+  hidden: stored.hidden,
 });
 
 const toStoredMessage = (message: Message): StoredMessage => ({
@@ -102,6 +112,7 @@ const toStoredMessage = (message: Message): StoredMessage => ({
   content: message.content,
   timestamp: message.timestamp.toISOString(),
   modelUsed: message.modelUsed,
+  hidden: message.hidden,
 });
 
 export const ChatBox: React.FC<ChatBoxProps> = ({
@@ -149,6 +160,9 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
   const messages: Message[] = storedConversation
     ? storedConversation.messages.map(toMessage)
     : localSeedMessages;
+  // `messages` stays complete — it is what gets sent to the model and
+  // persisted. Only the transcript drops the hidden ones.
+  const visibleMessages = messages.filter((message) => !message.hidden);
   // Reflects the shared store's pending state for this conversation, so the
   // spinner is correct even right after navigating back to a chat whose
   // reply kept generating in the background while this instance wasn't
@@ -342,16 +356,18 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
         onOpenChange={setShowLoginDialog}
       />
       <Card className="h-full flex flex-col shadow-sm border-slate-200">
-        <CardHeader className="bg-slate-50 border-b border-slate-200 flex-shrink-0">
-          <CardTitle className="flex items-center gap-2 text-slate-900">
-            <MessageSquare className="h-5 w-5" />
-            {cardTitle}
-          </CardTitle>
-        </CardHeader>
+        {cardTitle && (
+          <CardHeader className="bg-slate-50 border-b border-slate-200 flex-shrink-0">
+            <CardTitle className="flex items-center gap-2 text-slate-900">
+              <MessageSquare className="h-5 w-5" />
+              {cardTitle}
+            </CardTitle>
+          </CardHeader>
+        )}
         <CardContent className="flex-1 p-0 overflow-hidden">
           <ScrollArea className="h-full p-4">
             <div className="space-y-4">
-              {messages.map((message) => (
+              {visibleMessages.map((message) => (
                 <div
                   key={message.id}
                   className={`flex gap-3 ${message.role === "user" ? "justify-end" : "justify-start"}`}

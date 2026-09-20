@@ -6,6 +6,9 @@ export interface StoredMessage {
   content: string;
   timestamp: string;
   modelUsed?: string;
+  // Part of the conversation and sent to the model, but not drawn in the
+  // transcript; see Message in components/ChatBox.tsx.
+  hidden?: boolean;
 }
 
 export interface Conversation {
