@@ -17,7 +17,7 @@ import { LoginRequiredDialog } from "@/components/login-required-dialog";
 import { useChatHistory } from "@/hooks/use-chat-history";
 import type { ConversationSurface, StoredMessage } from "@/lib/chat-history";
 
-type ModelId = "openai-model" | "local-model";
+type ModelId = "openai-model" | "gemini-model" | "local-model";
 
 export interface Message {
   id: string;
@@ -443,6 +443,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="openai-model">OpenAI</SelectItem>
+                <SelectItem value="gemini-model">Gemini</SelectItem>
                 <SelectItem value="local-model">Local LLM</SelectItem>
               </SelectContent>
             </Select>
