@@ -28,7 +28,7 @@ from app.core.singleton import get_supabase_client
 
 logger = get_logger("publications_service")
 
-VCELL_API_V1_BASE_URL = "https://vcell.cam.uchc.edu/api/v1"
+VCELL_API_V1_BASE_URL = "https://vcell-dev.cam.uchc.edu/api/v1"
 PUBMED_EFETCH_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
 
 # NCBI accepts long id lists but asks for no more than 3 requests/second without
