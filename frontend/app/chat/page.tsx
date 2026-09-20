@@ -126,7 +126,7 @@ export default function ChatPage() {
                 </AlertDescription>
               </Alert>
 
-              <Button
+              {/* <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setShowOnboarding(true)}
@@ -134,7 +134,7 @@ export default function ChatPage() {
               >
                 <HelpCircle className="h-4 w-4" />
                 How to Use
-              </Button>
+              </Button> */}
               <SignInOutButton />
             </div>
           </div>

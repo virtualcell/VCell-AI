@@ -9,7 +9,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChatBox } from "@/components/ChatBox";
+import { ChatBox, type SeedMessage } from "@/components/ChatBox";
 import { BnglVisualizerSection } from "@/components/BnglVisualizerSection";
 import {
   User,
@@ -126,6 +126,13 @@ function formatAuthors(authors?: string | string[]): string | null {
   return text.trim() || null;
 }
 
+// Generated summaries open with "# Model Explanation: <name>", which only
+// repeats the model name already shown at the top of the page. Stripped at
+// render rather than in the prompt, so existing summaries don't need regenerating.
+function stripSummaryTitle(markdown: string): string {
+  return markdown.replace(/^\s*#\s+Model Explanation:[^\n]*\n+/, "").trimStart();
+}
+
 // Only the calendar date matters for a publication. Parsing the full ISO
 // timestamp would shift the day for viewers west of the server's offset, so
 // take the date straight off the string instead.
@@ -157,8 +164,9 @@ export default function BiomodelDetailPage() {
   const [activeTab, setActiveTab] = useState(
     conversationId ? "analysis" : "overview",
   );
-  const [diagramAnalysis, setDiagramAnalysis] = useState("");
-  const [combinedMessages, setCombinedMessages] = useState<string[]>([]);
+  const [combinedMessages, setCombinedMessages] = useState<SeedMessage[]>(
+    [],
+  );
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [diagramImageUrl, setDiagramImageUrl] = useState("");
   const [diagramError, setDiagramError] = useState("");
@@ -166,7 +174,6 @@ export default function BiomodelDetailPage() {
   const [summary, setSummary] = useState<BiomodelSummary | null>(null);
   const [summaryLoading, setSummaryLoading] = useState(true);
   const { user, isLoading: isUserLoading } = useUser();
-  const diagramFetchTriggeredRef = useRef(false);
 
   // Chat history hydrates from localStorage asynchronously. If we're
   // resuming a specific conversation, wait for that to finish before
@@ -304,38 +311,25 @@ export default function BiomodelDetailPage() {
     })();
   }, [data?.bmKey]);
 
-  useEffect(() => {
-    if (!data?.bmKey) return;
-    if (activeTab !== "analysis") return;
-    if (isUserLoading || !user) return;
-    // Resuming a saved conversation — its diagram analysis (if any) is
-    // already part of the stored history, no need to regenerate it.
-    if (conversationId) return;
-    if (diagramFetchTriggeredRef.current) return;
-    diagramFetchTriggeredRef.current = true;
-
-    // Diagram analyses are being precomputed and stored for all biomodels
-    // instead of generated on demand per request, so skip the /diagram
-    // call for now and show a placeholder instead.
-    const fetchDiagramAnalysis = async () => {
-      setDiagramAnalysis(
-        "AI generated summary/analysis of this biomodel will be displayed here.",
-      );
-    };
-
-    fetchDiagramAnalysis();
-  }, [data?.bmKey, activeTab, isUserLoading, user, conversationId]);
-
   // Seed the chat with the precomputed summary so follow-up questions carry it
-  // as context, falling back to the placeholder for models without one.
+  // as context. It's marked hidden because the card above already shows it —
+  // it stays in the conversation and goes to the model, but isn't drawn twice.
+  // Models with no summary (including private ones, which the generation job
+  // doesn't cover) seed nothing and open an empty chat.
   useEffect(() => {
     if (summaryLoading) return;
-    if (summary?.summary) {
-      setCombinedMessages([`# Model Summary\n\n${summary.summary}`]);
-    } else if (diagramAnalysis) {
-      setCombinedMessages([`# Diagram Analysis \n ${diagramAnalysis}`]);
-    }
-  }, [diagramAnalysis, summary, summaryLoading]);
+    setCombinedMessages(
+      summary?.summary
+        ? [
+            {
+              role: "assistant",
+              content: `# Model Summary\n\n${stripSummaryTitle(summary.summary)}`,
+              hidden: true,
+            },
+          ]
+        : [],
+    );
+  }, [summary, summaryLoading]);
 
   if (error) return <div className="p-8 text-center text-red-600">{error}</div>;
   if (!data) return null;
@@ -364,7 +358,7 @@ export default function BiomodelDetailPage() {
           <CardHeader className="bg-gradient-to-r from-blue-100 to-blue-50 border-b border-slate-200 px-5 py-4 flex flex-col md:flex-row md:items-center md:justify-between">
             <div className="flex flex-col gap-1.5 w-full">
               <div className="flex items-center justify-between w-full">
-                <CardTitle className="text-2xl font-extrabold text-blue-900 flex items-center gap-2.5">
+                <CardTitle className="text-2xl font-extrabold text-slate-900 flex items-center gap-2.5">
                   <FlaskConical className="h-7 w-7 text-blue-500" />
                   {data.name}
                 </CardTitle>
@@ -379,23 +373,12 @@ export default function BiomodelDetailPage() {
                     <FileText className="h-4 w-4" /> Download VCML
                   </button>
                   <SignInOutButton />
-                  {/* <button
-                    onClick={() => {
-                      window.open(
-                        `/analyze/${data?.bmKey}?prompt=Describe%20model`,
-                        "_blank",
-                      );
-                    }}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-yellow-500 text-yellow-700 bg-white font-semibold shadow-sm transition-colors hover:bg-yellow-50 text-sm"
-                  >
-                    <FlaskConical className="h-4 w-4" /> AI Analysis
-                  </button> */}
                 </div>
               </div>
               <div className="flex flex-wrap gap-3 mt-2 text-sm text-slate-600">
                 <span className="flex items-center gap-1">
                   <Hash className="h-4 w-4 text-blue-400" />{" "}
-                  <span className="font-mono text-blue-700">{data.bmKey}</span>
+                  <span className="font-mono text-slate-900">{data.bmKey}</span>
                 </span>
                 <span className="flex items-center gap-1">
                   <User className="h-4 w-4 text-blue-400" /> {data.ownerName}
@@ -533,7 +516,7 @@ export default function BiomodelDetailPage() {
                                   <ExternalLink className="h-3 w-3 mt-0.5 shrink-0 text-blue-400" />
                                 </a>
                               ) : (
-                                <span className="font-medium text-blue-900 text-sm">
+                                <span className="font-medium text-slate-900 text-sm">
                                   {pub.title}
                                 </span>
                               )}
@@ -576,7 +559,7 @@ export default function BiomodelDetailPage() {
                                 )}
                                 <span>
                                   Pub Key:{" "}
-                                  <span className="font-mono text-blue-700">
+                                  <span className="font-mono text-slate-900">
                                     {pub.pubKey}
                                   </span>
                                 </span>
@@ -613,17 +596,17 @@ export default function BiomodelDetailPage() {
                             key={app.key}
                             className="bg-slate-50 border border-slate-200 rounded p-2 flex flex-col gap-1 shadow-sm"
                           >
-                            <span className="font-medium text-blue-900 flex items-center gap-2 text-sm">
+                            <span className="font-medium text-slate-900 flex items-center gap-2 text-sm">
                               <Hash className="h-3 w-3 text-blue-300" />
                               {app.name}
                             </span>
                             <span className="text-xs text-slate-500 flex gap-3">
                               App Key:{" "}
-                              <span className="font-mono text-blue-700">
+                              <span className="font-mono text-slate-900">
                                 {app.key}
                               </span>
                               MathKey:{" "}
-                              <span className="font-mono text-blue-700">
+                              <span className="font-mono text-slate-900">
                                 {app.mathKey}
                               </span>
                             </span>
@@ -666,26 +649,26 @@ export default function BiomodelDetailPage() {
                           key={sim.key}
                           className="bg-slate-50 border border-slate-200 rounded p-2 shadow-sm"
                         >
-                          <div className="font-medium text-blue-900 flex items-center gap-2 mb-1 text-sm">
+                          <div className="font-medium text-slate-900 flex items-center gap-2 mb-1 text-sm">
                             <Hash className="h-3 w-3 text-blue-300" />
                             {sim.name}
                           </div>
                           <div className="text-xs text-slate-500 mb-1 flex flex-wrap gap-2">
                             <span>
                               Solver:{" "}
-                              <span className="font-mono text-blue-700">
+                              <span className="font-mono text-slate-900">
                                 {sim.solverName}
                               </span>
                             </span>
                             <span>
                               Scan Count:{" "}
-                              <span className="font-mono text-blue-700">
+                              <span className="font-mono text-slate-900">
                                 {sim.scanCount}
                               </span>
                             </span>
                             <span>
                               Sim Context:{" "}
-                              <span className="font-mono text-blue-700">
+                              <span className="font-mono text-slate-900">
                                 {sim.bioModelLink.simContextName}
                               </span>
                             </span>
@@ -697,7 +680,7 @@ export default function BiomodelDetailPage() {
                                 {sim.overrides.map((ov, i) => (
                                   <li key={i}>
                                     {ov.name} ({ov.type}):{" "}
-                                    <span className="font-mono text-blue-700">
+                                    <span className="font-mono text-slate-900">
                                       {ov.values
                                         ? ov.values.join(", ")
                                         : "No values"}
@@ -725,7 +708,10 @@ export default function BiomodelDetailPage() {
                       <div className="flex items-center gap-2 mb-2 cursor-pointer hover:bg-slate-50 p-2 rounded transition-colors">
                         <Sparkles className="h-4 w-4 text-blue-400" />
                         <span className="font-semibold text-slate-800 text-sm">
-                          Model Summary
+                          AI generated model summary
+                        </span>
+                        <span className="text-xs text-slate-400">
+                          AI can make mistakes
                         </span>
                         {summary.generatedAt && (
                           <span className="text-xs text-slate-500">
@@ -739,7 +725,9 @@ export default function BiomodelDetailPage() {
                     </CollapsibleTrigger>
                     <CollapsibleContent>
                       <div className="bg-blue-50 border border-blue-100 rounded p-4 shadow-sm overflow-x-auto">
-                        <MarkdownRenderer content={summary.summary} />
+                        <MarkdownRenderer
+                          content={stripSummaryTitle(summary.summary)}
+                        />
                       </div>
                     </CollapsibleContent>
                   </Collapsible>
@@ -763,7 +751,6 @@ export default function BiomodelDetailPage() {
                         key={conversationId ?? "new"}
                         startMessage={combinedMessages}
                         quickActions={quickActions}
-                        cardTitle="VCell AI Assistant"
                         promptPrefix={`Analyze the biomodel with the bmId ${data.bmKey}`}
                         isLoading={false}
                         surface="search"

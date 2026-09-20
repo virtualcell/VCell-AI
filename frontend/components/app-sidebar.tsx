@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 import {
   Search,
   Sparkles,
-  FlaskConical,
   FolderOpen,
   Gauge,
   Info,
+  ExternalLink,
   MessageSquare,
   Pencil,
   Trash2,
@@ -64,8 +64,11 @@ const buildConversationHref = (conversation: Conversation): string => {
   switch (conversation.surface) {
     case "search":
       return `/search/${conversation.contextId}?c=${conversation.id}`;
+    // The /analyze surface is gone; conversations saved from it are keyed by
+    // biomodel id just like search ones, so they reopen there instead of
+    // pointing at a dead route.
     case "analyze":
-      return `/analyze/${conversation.contextId}?c=${conversation.id}`;
+      return `/search/${conversation.contextId}?c=${conversation.id}`;
     case "chat":
     default:
       return `/chat?c=${conversation.id}`;
@@ -256,6 +259,24 @@ export function AppSidebar() {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              <SidebarMenuItem key="AboutVCell">
+                <SidebarMenuButton
+                  asChild
+                  tooltip={isCollapsed ? "About VCell" : undefined}
+                >
+                  {/* The main VCell site, not part of this app — opened in a
+                      new tab so the user doesn't lose their place here. */}
+                  <a
+                    href="https://vcell.org"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3"
+                  >
+                    <ExternalLink className="h-4 w-4 text-slate-500" />
+                    {!isCollapsed && <span>About VCell</span>}
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -343,21 +364,6 @@ export function AppSidebar() {
                       <Sparkles className="h-4 w-4 text-yellow-400" />
                     </span>
                     {!isCollapsed && <span>VCell Assistant</span>}
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem key="BiomodelAnalysis">
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === "/analyze"}
-                  className="data-[active=true]:bg-yellow-50 data-[active=true]:text-yellow-700 data-[active=true]:border-r-2 data-[active=true]:border-yellow-500"
-                  tooltip={isCollapsed ? "Biomodel Explorer" : undefined}
-                >
-                  <Link href="/analyze" className="flex items-center gap-3">
-                    <span className="relative flex items-center">
-                      <FlaskConical className="h-4 w-4 text-yellow-400" />
-                    </span>
-                    {!isCollapsed && <span>Biomodel Explorer</span>}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
