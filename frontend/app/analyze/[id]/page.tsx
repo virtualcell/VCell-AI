@@ -240,7 +240,7 @@ export default function AnalysisResultsPage({
   };
 
   const handleDownloadVCML = () => {
-    const vcellUrl = `https://vcell.cam.uchc.edu/api/v0/biomodel/${id}/biomodel.vcml`;
+    const vcellUrl = `https://vcell-dev.cam.uchc.edu/api/v0/biomodel/${id}/biomodel.vcml`;
     window.open(vcellUrl, "_blank");
   };
 

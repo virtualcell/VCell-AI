@@ -8,8 +8,8 @@ from urllib.parse import urlencode, quote
 from langfuse import observe
 from typing import List, Optional
 
-VCELL_API_BASE_URL = "https://vcell.cam.uchc.edu/api/v0"
-VCELL_API_V1_BASE_URL = "https://vcell.cam.uchc.edu/api/v1"
+VCELL_API_BASE_URL = "https://vcell-dev.cam.uchc.edu/api/v0"
+VCELL_API_V1_BASE_URL = "https://vcell-dev.cam.uchc.edu/api/v1"
 
 logger = get_logger("vcelldb_service")
 
@@ -51,7 +51,7 @@ async def check_vcell_connectivity() -> bool:
     try:
         import socket
 
-        hostname = "vcell.cam.uchc.edu"
+        hostname = "vcell-dev.cam.uchc.edu"
         logger.info(f"Checking connectivity to {hostname}")
 
         # Try to resolve the hostname

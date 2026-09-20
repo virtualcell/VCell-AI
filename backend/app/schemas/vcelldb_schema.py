@@ -9,7 +9,7 @@ class CategoryEnum(str, Enum):
     public = "public"
     shared = "shared"
     tutorials = "tutorial"
-    educational = "educational"
+    education = "education"
 
 
 class OrderByEnum(str, Enum):

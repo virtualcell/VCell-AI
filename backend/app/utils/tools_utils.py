@@ -39,8 +39,8 @@ fetch_biomodels_tool = ToolDefinition(
                 },
                 "category": {
                     "type": "string",
-                    "enum": ["all", "public", "shared", "tutorial", "educational"],
-                    "description": "The category under which the biomodels are classified. Options include: 'all', 'public', 'shared', 'tutorial', and 'educational'.",
+                    "enum": ["all", "public", "shared", "tutorial", "education"],
+                    "description": "The category under which the biomodels are classified. Options include: 'all', 'public', 'shared', 'tutorial', and 'education'. Note that 'tutorial' and 'education' are curated collections owned by the 'tutorial' and 'Education' accounts respectively, so they ignore the 'owner' filter; combine 'owner' with 'all' or 'public' instead.",
                 },
                 "owner": {
                     "type": "string",

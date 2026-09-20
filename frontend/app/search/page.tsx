@@ -71,7 +71,7 @@ const categoryOptions = [
   { value: "public", label: "Public" },
   { value: "shared", label: "Shared" },
   { value: "tutorial", label: "Tutorial" },
-  { value: "educational", label: "Educational" },
+  { value: "education", label: "Education" },
 ];
 
 const defaultFilters: SearchFilters = {

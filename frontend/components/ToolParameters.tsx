@@ -261,15 +261,15 @@ export function ToolParameters({
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem
-                        value="educational"
-                        id="educational"
+                        value="education"
+                        id="education"
                         className="h-4 w-4"
                       />
                       <Label
-                        htmlFor="educational"
+                        htmlFor="education"
                         className="text-sm text-slate-700 cursor-pointer"
                       >
-                        Educational
+                        Education
                       </Label>
                     </div>
                   </RadioGroup>
