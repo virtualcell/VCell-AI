@@ -71,7 +71,7 @@ export const DiagramSection: React.FC<DiagramSectionProps> = ({
             ) : (
               <img
                 src={
-                  `https://vcell.cam.uchc.edu/api/v0/biomodel/${biomodelId}/diagram` ||
+                  `https://vcell-dev.cam.uchc.edu/api/v0/biomodel/${biomodelId}/diagram` ||
                   "/placeholder.svg"
                 }
                 alt="Biomodel Diagram"

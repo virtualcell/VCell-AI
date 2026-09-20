@@ -49,7 +49,7 @@ export const VCMLSection: React.FC<VCMLSectionProps> = ({ biomodelId }) => {
   }, [biomodelId]);
 
   const handleDownload = () => {
-    const vcellUrl = `https://vcell.cam.uchc.edu/api/v0/biomodel/${biomodelId}/biomodel.vcml`;
+    const vcellUrl = `https://vcell-dev.cam.uchc.edu/api/v0/biomodel/${biomodelId}/biomodel.vcml`;
     window.open(vcellUrl, "_blank");
   };
 

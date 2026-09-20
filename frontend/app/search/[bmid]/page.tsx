@@ -371,7 +371,7 @@ export default function BiomodelDetailPage() {
                 <div className="flex gap-2.5">
                   <button
                     onClick={() => {
-                      const vcellUrl = `https://vcell.cam.uchc.edu/api/v0/biomodel/${data?.bmKey}/biomodel.vcml`;
+                      const vcellUrl = `https://vcell-dev.cam.uchc.edu/api/v0/biomodel/${data?.bmKey}/biomodel.vcml`;
                       window.open(vcellUrl, "_blank");
                     }}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-blue-600 text-blue-700 bg-white font-semibold shadow-sm transition-colors hover:bg-blue-50 text-sm"
@@ -606,8 +606,8 @@ export default function BiomodelDetailPage() {
                         const encodedAppName = encodeURIComponent(
                           app.name || "",
                         );
-                        const bnglUrl = `https://vcell.cam.uchc.edu/api/v0/biomodel/${data.bmKey}/biomodel.bngl?appname=${encodedAppName}`;
-                        const sbmlUrl = `https://vcell.cam.uchc.edu/api/v0/biomodel/${data.bmKey}/biomodel.sbml?appname=${encodedAppName}`;
+                        const bnglUrl = `https://vcell-dev.cam.uchc.edu/api/v0/biomodel/${data.bmKey}/biomodel.bngl?appname=${encodedAppName}`;
+                        const sbmlUrl = `https://vcell-dev.cam.uchc.edu/api/v0/biomodel/${data.bmKey}/biomodel.sbml?appname=${encodedAppName}`;
                         return (
                           <li
                             key={app.key}
