@@ -7,6 +7,7 @@ import {
   FolderOpen,
   Gauge,
   Info,
+  ExternalLink,
   MessageSquare,
   Pencil,
   Trash2,
@@ -256,6 +257,24 @@ export function AppSidebar() {
                     <Info className="h-4 w-4 text-slate-500" />
                     {!isCollapsed && <span>About VCell-AI</span>}
                   </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem key="AboutVCell">
+                <SidebarMenuButton
+                  asChild
+                  tooltip={isCollapsed ? "About VCell" : undefined}
+                >
+                  {/* The main VCell site, not part of this app — opened in a
+                      new tab so the user doesn't lose their place here. */}
+                  <a
+                    href="https://vcell.org"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3"
+                  >
+                    <ExternalLink className="h-4 w-4 text-slate-500" />
+                    {!isCollapsed && <span>About VCell</span>}
+                  </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
