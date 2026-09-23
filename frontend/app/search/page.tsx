@@ -50,6 +50,7 @@ interface SearchFilters {
   startRow: number;
   maxRows: number;
   orderBy: string;
+  hasPublications: boolean;
 }
 
 interface BiomodelResult {
@@ -84,6 +85,7 @@ const defaultFilters: SearchFilters = {
   startRow: 1,
   maxRows: 1000,
   orderBy: "date_desc",
+  hasPublications: false,
 };
 
 const SEARCH_STATE_KEY = "vcell-search-state";
@@ -93,6 +95,10 @@ export default function BiomodelSearchPage() {
   const [filters, setFilters] = useState<SearchFilters>(defaultFilters);
 
   const [results, setResults] = useState<BiomodelResult[]>([]);
+  // Biomodels that at least one publication references. Publications live in
+  // our own store, not the VCell API, so this set is fetched once and applied
+  // to results here rather than being part of the upstream query.
+  const [publishedKeys, setPublishedKeys] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [isAdvancedSearchOpen, setIsAdvancedSearchOpen] = useState(false);
@@ -123,6 +129,28 @@ export default function BiomodelSearchPage() {
     isHydrated.current = true;
   }, []);
 
+  // Fetched once per visit: a few hundred keys, used both to filter and to badge
+  // results. A failure just leaves the set empty, disabling the filter rather
+  // than breaking search.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/biomodels/with-publications`,
+        );
+        if (!res.ok) throw new Error("Failed to load published biomodels");
+        const keys: string[] = await res.json();
+        if (!cancelled) setPublishedKeys(new Set(keys.map(String)));
+      } catch {
+        if (!cancelled) setPublishedKeys(new Set());
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   useEffect(() => {
     if (!isHydrated.current) return;
     sessionStorage.setItem(
@@ -136,6 +164,12 @@ export default function BiomodelSearchPage() {
       }),
     );
   }, [filters, results, includesPrivate, hasSearched, isAdvancedSearchOpen]);
+
+  // Applied to the fetched results rather than the query: the VCell API has no
+  // notion of publications.
+  const visibleResults = filters.hasPublications
+    ? results.filter((model) => publishedKeys.has(String(model.bmId)))
+    : results;
 
   const handleSearch = async () => {
     setIsLoading(true);
@@ -341,6 +375,25 @@ export default function BiomodelSearchPage() {
               </RadioGroup>
             </div>
 
+            <div className="mt-3">
+              <label className="inline-flex items-center gap-2 cursor-pointer select-none text-sm text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={filters.hasPublications}
+                  onChange={(e) =>
+                    setFilters({ ...filters, hasPublications: e.target.checked })
+                  }
+                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-400 cursor-pointer"
+                />
+                <span className="font-medium">Only models with publications</span>
+                {publishedKeys.size > 0 && (
+                  <span className="text-slate-400 text-xs">
+                    ({publishedKeys.size} in the database)
+                  </span>
+                )}
+              </label>
+            </div>
+
             <Collapsible
               open={isAdvancedSearchOpen}
               onOpenChange={setIsAdvancedSearchOpen}
@@ -516,19 +569,20 @@ export default function BiomodelSearchPage() {
         )}
 
         {/* Results Section */}
-        {!isLoading && results.length > 0 && (
+        {!isLoading && visibleResults.length > 0 && (
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-2xl font-semibold text-slate-900">
                 Search Results
               </h2>
               <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                {results.length} model{results.length === 1 ? "" : "s"} found
+                {visibleResults.length} model
+                {visibleResults.length === 1 ? "" : "s"} found
               </Badge>
             </div>
 
             <div className="grid gap-4">
-              {results.map((model) => (
+              {visibleResults.map((model) => (
                 <Card
                   key={model.bmId}
                   onClick={() => {
@@ -558,6 +612,14 @@ export default function BiomodelSearchPage() {
                         <div className="flex items-start justify-between gap-3">
                           <h3 className="text-lg font-semibold text-slate-900 group-hover:text-blue-700 transition-colors">
                             {model.name}
+                            {publishedKeys.has(String(model.bmId)) && (
+                              <Badge
+                                variant="secondary"
+                                className="ml-2 align-middle bg-amber-100 text-amber-800 font-medium"
+                              >
+                                Published
+                              </Badge>
+                            )}
                           </h3>
                           <ArrowRight className="h-4 w-4 text-slate-300 group-hover:text-blue-500 group-hover:translate-x-0.5 transition-all flex-shrink-0 mt-1.5" />
                         </div>
@@ -611,7 +673,7 @@ export default function BiomodelSearchPage() {
         )}
 
         {/* Empty state: searched but nothing matched */}
-        {!isLoading && hasSearched && results.length === 0 && (
+        {!isLoading && hasSearched && visibleResults.length === 0 && (
           <Card className="border-slate-200 border-dashed shadow-none">
             <CardContent className="py-16 flex flex-col items-center text-center">
               <div className="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center mb-4">
@@ -621,8 +683,11 @@ export default function BiomodelSearchPage() {
                 No biomodels found
               </h3>
               <p className="text-slate-500 text-sm max-w-sm">
-                Try adjusting your filters, or search with a different name,
-                owner, or biomodel ID.
+                {results.length > 0 && filters.hasPublications
+                  ? `None of the ${results.length} matching model${
+                      results.length === 1 ? "" : "s"
+                    } is referenced by a publication. Untick "Only models with publications" to see them.`
+                  : "Try adjusting your filters, or search with a different name, owner, or biomodel ID."}
               </p>
             </CardContent>
           </Card>

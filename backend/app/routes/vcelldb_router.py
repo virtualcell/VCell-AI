@@ -14,6 +14,7 @@ from app.controllers.vcelldb_controller import (
     get_publications_controller,
     get_biomodel_publications_controller,
     get_biomodel_summary_controller,
+    get_published_biomodel_keys_controller,
 )
 
 router = APIRouter()
@@ -138,6 +139,18 @@ async def get_biomodel_summary(biomodel_id: str):
     """
     try:
         return await get_biomodel_summary_controller(biomodel_id)
+    except HTTPException as e:
+        raise e
+
+
+@router.get("/biomodels/with-publications", response_model=List[str])
+async def get_published_biomodel_keys():
+    """
+    Endpoint listing the biomodel keys that any publication references, so the
+    search page can filter to published models without a request per result.
+    """
+    try:
+        return await get_published_biomodel_keys_controller()
     except HTTPException as e:
         raise e
 
