@@ -13,8 +13,12 @@ from app.services.vcelldb_service import (
     fetch_biomodel_applications_files,
     fetch_publications,
     fetch_biomodel_publications,
+    _get_publications_index,
 )
-from app.services.publications_service import get_publications_for_biomodel
+from app.services.publications_service import (
+    get_publications_for_biomodel,
+    get_biomodel_keys_with_publications,
+)
 from app.services.model_summary_service import get_stored_summary
 from app.core.logger import get_logger
 
@@ -194,6 +198,30 @@ async def get_biomodel_publications_controller(biomodel_id: str) -> List[dict]:
         raise HTTPException(
             status_code=500, detail="Error communicating with VCell API."
         )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+async def get_published_biomodel_keys_controller() -> List[str]:
+    """
+    Controller function to list the biomodels that any publication references.
+
+    Falls back to the live VCell feed when Supabase has nothing stored, so the
+    search filter still works before the first publications sync.
+    """
+    try:
+        keys = get_biomodel_keys_with_publications()
+        if keys:
+            return keys
+    except Exception as e:
+        logger.warning(
+            f"Supabase lookup of published biomodels failed, "
+            f"falling back to the live feed: {str(e)}"
+        )
+
+    try:
+        index = await _get_publications_index()
+        return sorted(index.keys())
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

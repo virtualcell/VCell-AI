@@ -330,6 +330,39 @@ def get_publication_rows_for_biomodel(bm_key: str) -> List[dict]:
     return rows
 
 
+def get_biomodel_keys_with_publications() -> List[str]:
+    """
+    List every biomodel key that at least one publication references.
+
+    Used by the search page to narrow results to published models. Returns keys
+    rather than full publication rows: the set is small (a few hundred), the
+    caller only needs membership, and it is fetched once per search rather than
+    per result.
+
+    Returns:
+        List[str]: Biomodel keys, as strings to match the VCell API's `bmKey`.
+    """
+    supabase = get_supabase_client()
+    keys: set = set()
+    page_size = 1000
+    offset = 0
+
+    while True:
+        response = (
+            supabase.table("biomodel_publications")
+            .select("bm_key")
+            .range(offset, offset + page_size - 1)
+            .execute()
+        )
+        batch = response.data or []
+        keys.update(str(row["bm_key"]) for row in batch)
+        if len(batch) < page_size:
+            break
+        offset += page_size
+
+    return sorted(keys)
+
+
 def to_api_shape(row: dict) -> dict:
     """
     Map a stored publication row back to the shape the biomodel page expects.
