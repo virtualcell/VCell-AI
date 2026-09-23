@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowRight, MessageSquare, Wrench, Shield, LogOut } from "lucide-react";
+import { ArrowRight, MessageSquare, Wrench, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
@@ -19,43 +19,13 @@ export default function LandingPage() {
   const [showLoginDialog, setShowLoginDialog] = useState(false);
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div className="min-h-full flex flex-col bg-white">
       <LoginRequiredDialog
         open={showLoginDialog}
         onOpenChange={setShowLoginDialog}
         description={HOME_LOGIN_DESCRIPTION}
       />
-      {/* Header with Navigation */}
-      <header className="border-b border-slate-200 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 max-w-6xl">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Image
-                src="/VCellLogo.png"
-                alt="VCell Logo"
-                width={100}
-                height={100}
-                className="rounded-lg"
-              />
-              <span className="text-xl font-semibold text-slate-900">
-                AI Explorer
-              </span>
-            </div>
-            <div className="flex items-center gap-3">
-              {user && (
-                <Button variant="outline" size="sm" asChild>
-                  <a href="/auth/logout" className="flex items-center gap-2">
-                    <LogOut className="h-4 w-4" />
-                    Sign Out
-                  </a>
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <main className="flex-1 flex flex-col items-center justify-center">
+      <div className="flex-1 flex flex-col items-center justify-center">
         <div className="container mx-auto px-4 max-w-6xl flex flex-col items-center justify-center">
           {/* Hero Section */}
           <div className="text-center mb-16">
@@ -174,7 +144,7 @@ export default function LandingPage() {
             </Card>
           </div>
         </div>
-      </main>
+      </div>
 
       {/* Footer */}
       <footer className="text-center border-t border-slate-200 text-sm">

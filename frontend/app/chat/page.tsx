@@ -17,7 +17,6 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { OnboardingModal } from "@/components/onboarding-modal";
 import { ChatBox } from "@/components/ChatBox";
-import { SignInOutButton } from "@/components/sign-in-out-button";
 import { useChatHistory } from "@/hooks/use-chat-history";
 
 export default function ChatPage() {
@@ -112,7 +111,7 @@ export default function ChatPage() {
   const cardTitle = "VCell AI Assistant";
 
   return (
-    <div className="h-screen bg-slate-50 flex flex-col">
+    <div className="h-full bg-slate-50 flex flex-col">
       <div className="container mx-auto p-6 max-w-7xl flex-1 flex flex-col min-h-0">
         {/* Header */}
         <div className="mb-4 flex-shrink-0">
@@ -135,7 +134,6 @@ export default function ChatPage() {
                 <HelpCircle className="h-4 w-4" />
                 How to Use
               </Button> */}
-              <SignInOutButton />
             </div>
           </div>
         </div>

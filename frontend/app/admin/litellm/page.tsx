@@ -14,7 +14,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { SignInOutButton } from "@/components/sign-in-out-button";
 import { Gauge, Users, ShieldCheck, Save } from "lucide-react";
 
 interface ManagedUser {
@@ -138,7 +137,7 @@ export default function LiteLLMAdminPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-full bg-slate-50">
       <div className="container mx-auto p-8 max-w-7xl">
         {/* Header */}
         <div className="mb-8">
@@ -152,7 +151,6 @@ export default function LiteLLMAdminPage() {
                 Set the max budget and reset frequency for every user at once
               </p>
             </div>
-            <SignInOutButton />
           </div>
         </div>
 
