@@ -1,151 +1,142 @@
-# VCell Frontend
-A modern, responsive web application built with Next.js for the VCell AI Explorer platform. This frontend provides an intuitive interface for discovering, analyzing, and exploring biomodels with AI-powered capabilities.
+# VCell-AI Frontend
 
-## Architecture
-The frontend follows Next.js App Router architecture with the following structure:
+Next.js 15 application for the VCell AI Platform. It provides the search, analysis, chat and administration interfaces, holds the user's authenticated session, and keeps their conversation history.
+
+For the platform as a whole — services, deployment, configuration — see the [root README](../README.md).
+
+---
+
+## Structure
+
 ```
 frontend/
-├── app/                      # Next.js App Router pages
-│   ├── layout.tsx           # Root layout component
-│   ├── page.tsx             # Landing page
-│   ├── chat/                # AI chatbot interface
-│   ├── search/              # Biomodel search and results
-│   ├── analyze/             # Model analysis tools
-│   ├── diagrams/            # Visual diagram viewer
-│   ├── sbml/                # SBML file viewer
-│   ├── vcml/                # VCML file viewer
-│   ├── admin/               # Admin dashboard
-│   ├── signin/              # Authentication pages
-│   └── signup/              # User registration
-├── components/              # Reusable UI components
-│   ├── ui/                  # Base UI components (Radix UI)
-│   ├── ChatBox.tsx          # Chat interface component
-│   ├── app-sidebar.tsx      # Application sidebar
-│   ├── markdown-renderer.tsx # Markdown content renderer
-│   └── ...                  # Other custom components
-├── hooks/                   # Custom React hooks
-├── lib/                     # Utility functions and configurations
-├── styles/                  # Global styles and CSS
-└── public/                  # Static assets
+├── app/                  # App Router pages
+│   ├── page.tsx            # Landing page
+│   ├── about/              # How the system works, limitations, sources, citation
+│   ├── search/             # BioModel search
+│   │   └── [bmid]/           # Model detail: metadata, diagram, files, summary,
+│   │                         # publications, and the AI analysis tab
+│   ├── chat/               # General-purpose AI assistant
+│   ├── profile/            # Account, and VCell account linking
+│   ├── vcml/               # VCML viewer
+│   ├── sbml/               # SBML viewer
+│   ├── diagrams/           # Reaction diagram viewer
+│   └── admin/
+│       ├── knowledge-base/   # Knowledge base management
+│       └── litellm/          # User budget administration
+├── components/           # Shared components
+│   └── ui/                 # ShadCN / Radix primitives
+├── hooks/                # Custom hooks, including conversation history
+├── lib/                  # Auth client, conversation storage, API helpers
+├── styles/               # Global styles
+├── middleware.ts         # Route gating
+└── public/               # Static assets
 ```
 
-## Features
-### Core Functionality
-- **AI Chatbot Interface**: Interactive chat with LLM-powered responses
-- **Advanced Search**: Comprehensive biomodel search with filters
-- **File Viewers**: Support for VCML, SBML, and BNGL file formats
-- **Visual Diagrams**: Interactive biomodel diagram display
-- **Responsive Design**: Mobile-first, responsive interface
-- **Authentication**: Secure user authentication with Auth0
+---
 
-### Key Components
-#### Chat Interface (`/chat`)
-- Natural language conversation with AI
-- Message history 
-- Markdown rendering with math support
+## Routes
 
-#### Search Interface (`/search`)
-- Advanced filtering and sorting
-- Search results
-- Biomodel metadata display
-- Quick access to files and diagrams
+| Route | Access | Purpose |
+|---|---|---|
+| `/` | Public | Landing page and entry points |
+| `/about` | Public | AI models in use, data handling, limitations, sources, citation |
+| `/search` | Public | BioModel search with filters and sorting |
+| `/search/[bmid]` | Public (AI tab gated) | Model detail: metadata, diagram, files, summary, publications, AI analysis |
+| `/chat` | Public (queries gated) | Conversational assistant over the BioModel database |
+| `/vcml`, `/sbml`, `/diagrams` | Public | File-format viewers |
+| `/profile` | Authenticated | Account details and VCell account linking |
+| `/admin/knowledge-base` | Administrator | Upload, inspect and remove knowledge-base documents |
+| `/admin/litellm` | Administrator | Review and adjust user budgets |
 
-#### File Viewers
-- **VCML Viewer**: XML-based model format display
-- **SBML Viewer**: Systems Biology Markup Language support
-- **Diagram Viewer**: Interactive visual representations
+---
 
-#### Admin Dashboard (`/admin`)
-- Knowledge base management
-- User management
-- System monitoring
+## Authentication
+
+Sessions are handled by Auth0. `middleware.ts` gates every route that is not explicitly public and redirects unauthenticated users to the login flow, preserving where they were headed.
+
+The access/gating model is deliberately split:
+
+- **Browsing is open.** Search, model pages and the file viewers work without an account — the public catalogue should be discoverable.
+- **AI features require an account.** They cost money to serve and must be attributable, so the chat input and the analysis actions prompt for sign-in at the point of use, with a dialog that explains why, rather than redirecting away from the page.
+- **Admin sections are hidden** from users without the role, and the backend enforces the same check independently.
+
+Requests to protected backend endpoints carry the user's access token. After login, the session is synced to the backend, which creates or updates the user record and provisions their gateway key.
+
+---
+
+## Conversation History
+
+Conversations are stored in the browser, namespaced per user, so two people using the same machine never see each other's history. A **Conversation History** section in the sidebar lists past conversations and switches between them.
+
+All AI surfaces write to the same store, so an exchange started on a model page can be resumed from the chat page and vice versa. In-flight requests survive switching conversations, and conversations started from a model are titled with that model's name.
+
+Keeping history client-side is deliberate: chat content is never written to a server-side store.
+
+---
 
 ## Tech Stack
-### Core Framework
-- **Next.js 15**: React framework with App Router
-- **TypeScript**: Type-safe JavaScript
-- **React 19**: Latest React features and hooks
 
-### UI & Styling
-- **Tailwind CSS**: Utility-first CSS framework
-- **ShadCN**: simple components
-- **Framer Motion**: Animation library
-- **Lucide React**: Icon library
+| Area | Choice |
+|---|---|
+| Framework | Next.js 15 (App Router), React 19 |
+| Language | TypeScript |
+| Styling | Tailwind CSS |
+| Components | ShadCN UI on Radix primitives |
+| Authentication | `@auth0/nextjs-auth0` |
+| Content | React Markdown with GFM, KaTeX for mathematics, XML viewer for model files |
+| Forms | React Hook Form with Zod validation |
+| Motion & icons | Framer Motion, Lucide |
 
-### Content & Data
-- **React Markdown**: Markdown rendering
-- **KaTeX**: Mathematical expression rendering
-- **React XML Viewer**: XML file display
+---
 
-### Development Tools
-- **Prettier**: Code formatting
-- **ESLint**: Code linting
-- **PostCSS**: CSS processing
+## Quick Start
 
-## 🚀 Quick Start
 ### Prerequisites
+
 - Node.js 18+
-- pnpm or npm
+- A running backend (see [backend/README.md](../backend/README.md), or `docker compose up` at the repository root)
+- An Auth0 application
 
-### Installation
-
-1. **Navigate to frontend directory**
-   ```bash
-   cd frontend
-   ```
-
-2. **Install dependencies**
-   ```bash
-   pnpm install
-   # or
-   npm install
-   ```
-
-3. **Set up environment variables**
-   ```bash
-   cp .env.example .env.local
-   # Edit .env.local with your configuration
-   ```
-
-4. **Start development server**
-   ```bash
-   pnpm dev
-   # or
-   npm run dev
-   ```
-
-5. **Open your browser**
-   Navigate to http://localhost:3000
-
-### Using Docker
-
-1. **Build the container**
-   ```bash
-   docker build -t vcell-frontend .
-   ```
-
-2. **Run with Docker Compose**
-   ```bash
-   docker-compose up frontend
-   ```
-
-## Building for Production
-
-### Build Application
 ```bash
-pnpm build
-# or
-npm run build
+cd frontend
+npm install                 # or pnpm install
+cp .env.example .env        # then fill in
+npm run dev
 ```
 
-### Start Production Server
+The application runs at http://localhost:3000.
+
+### Configuration
+
+| Variable | Purpose |
+|---|---|
+| `NEXT_PUBLIC_API_URL` | Backend base URL. Absolute for local development; relative (`/api`) where an ingress proxies the backend |
+| `AUTH0_SECRET` | Secret used to encrypt the session cookie |
+| `APP_BASE_URL` | Public base URL of this application |
+| `AUTH0_DOMAIN` | Auth0 tenant domain |
+| `AUTH0_CLIENT_ID` | Auth0 application client ID |
+| `AUTH0_CLIENT_SECRET` | Auth0 application client secret |
+| `AUTH0_AUDIENCE` | API audience, so the issued token is accepted by the backend |
+
+`NEXT_PUBLIC_API_URL` is read at build time. The Docker image defaults it to the relative `/api` so one image works in any environment behind an ingress; local `docker compose` overrides it with an absolute URL at build time, since there is no proxy in front of it there.
+
+---
+
+## Scripts
+
 ```bash
-pnpm start
-# or
-npm start
+npm run dev      # Development server
+npm run build    # Production build
+npm run start    # Serve the production build
+npm run lint     # ESLint
 ```
 
-### Docker Production Build
+Note that linting and type errors are not enforced during the Next.js build, so run `npm run lint` explicitly.
+
+### Docker
+
 ```bash
-docker build -t vcell-frontend:prod --target production .
+docker build -t vcell-frontend .        # from frontend/
+docker compose up frontend              # from the repository root
 ```

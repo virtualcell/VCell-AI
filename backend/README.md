@@ -1,131 +1,192 @@
-# VCell Backend
-A FastAPI-based backend service for the VCell AI platform. This service provides RESTful APIs for biomodel retrieval, AI-powered analysis, knowledge base management, and vector database operations.
+# VCell-AI Backend
+
+FastAPI service behind the VCell AI Platform. It wraps the VCell BioModel database, runs the AI assistant and its tool calling, manages the knowledge base, handles authentication and user records, and serves precomputed model summaries and publication data.
+
+For the platform as a whole — services, deployment, configuration — see the [root README](../README.md).
+
+---
 
 ## Architecture
-The backend follows a clean architecture pattern with the following structure:
+
+The application is layered, and requests move in one direction through it:
+
+```
+routes/  →  controllers/  →  services/
+```
+
+| Layer | Responsibility |
+|---|---|
+| `routes/` | Endpoint definitions, request/response models, and the auth dependencies that guard them |
+| `controllers/` | Orchestration and HTTP error mapping |
+| `services/` | Business logic and calls to external systems (VCell API, LiteLLM, Qdrant, Supabase, PubMed) |
+
+Everything is `async`. Shared clients are created once as singletons rather than per request. Service functions are traced with Langfuse, so LLM calls, tool executions and their inputs/outputs are observable end to end.
+
 ```
 backend/
 ├── app/
-│   ├── main.py                 # FastAPI application entry point
-│   ├── core/                   # Core configurations and utilities
-│   │   ├── config.py          # Application settings
-│   │   └── logger.py          # Logging configuration
-│   ├── routes/                # API route definitions
-│   │   ├── vcelldb_router.py  # VCellDB API wrapper routes
-│   │   ├── llms_router.py     # LLM and AI analysis routes
-│   │   ├── knowledge_base_router.py  # Knowledge base management
-│   │   └── qdrant_router.py   # Vector database operations
-│   ├── controllers/           # Business logic layer
-│   ├── services/              # External service integrations
-│   ├── schemas/               # Pydantic data models
-│   └── utils/                 # Utility functions
-├── tests/                     # Test suite
-├── pyproject.toml            # Poetry configuration
-└── Dockerfile                # Container configuration
+│   ├── main.py            # Application entry point and router registration
+│   ├── core/              # Settings, logging, auth dependencies, shared clients
+│   ├── routes/            # API endpoint definitions
+│   ├── controllers/       # Orchestration and error handling
+│   ├── services/          # Business logic and external integrations
+│   ├── schemas/           # Pydantic request/response models
+│   └── utils/             # System prompt, tool definitions, FAQ registry
+├── scripts/               # Batch jobs (e.g. summary generation)
+├── sql/                   # Supabase schema, as a record of what was applied
+├── tests/                 # Pytest suite
+├── populate_db.ipynb      # Knowledge-base seeding notebook
+└── pyproject.toml
 ```
 
-## Features
+---
 
-### Core Functionality
-- **VCellDB Integration**: Wrapper for VCell biomodel database API
-- **AI-Powered Analysis**: LLM integration with tool calling capabilities
-- **Knowledge Base**: Vector-based document storage and retrieval
-- **File Processing**: Support for PDF, text, and markdown files
-- **RESTful APIs**: Comprehensive API endpoints with automatic documentation
+## Authentication and Authorization
 
-### API Endpoints
+Auth is enforced by FastAPI dependencies, applied per route or per router:
 
-#### VCellDB Routes (`/vcelldb`)
-- `GET /biomodel` - Retrieve biomodels with filtering and sorting
-- `GET /biomodel/{id}/simulations` - Get simulations for a biomodel
-- `GET /biomodel/{id}/biomodel.vcml` - Retrieve VCML file content
-- `GET /biomodel/{id}/biomodel.sbml` - Retrieve SBML file content
-- `GET /biomodel/{id}/diagram` - Get diagram URL
-- `GET /biomodel/{id}/diagram/image` - Get diagram image
-- `GET /biomodel/{id}/applications/files` - Get application files
+| Dependency | Behaviour |
+|---|---|
+| `verify_auth0_token` | Requires a valid Auth0 access token; rejects missing, invalid or expired tokens |
+| `get_optional_auth0_token` | Accepts requests with or without a token, but still rejects an invalid one — used where logged-out callers get public results and authenticated callers get more |
+| `require_admin` | Requires a verified token **and** the `admin` role on the user's Supabase record |
 
-#### LLM Routes (`/llm`)
-- `POST /query` - General LLM query with tool calling
-- `POST /analyse/{biomodel_id}` - Analyze specific biomodel
-- `POST /analyse/{biomodel_id}/vcml` - Analyze VCML content
-- `POST /analyse/{biomodel_id}/diagram` - Analyze diagram
+Signing keys are fetched from Auth0 and cached, so a cold start does not depend on network access at import time.
 
-#### Knowledge Base Routes (`/kb`)
-- `POST /create-collection` - Create knowledge base collection
-- `GET /files` - List all files in knowledge base
-- `POST /upload-pdf` - Upload PDF file
-- `POST /upload-text` - Upload text file
-- `DELETE /files/{file_name}` - Delete file
-- `GET /similar` - Find similar documents
-- `GET /files/{file_name}/chunks` - Get file chunks
+The caller's token is also what unlocks private data: where a route supports it, the verified token is forwarded to the VCell API so a researcher's own private BioModels are included in the response. Callers without a linked VCell account fall back to the public catalogue.
 
-#### Qdrant Routes (`/qdrant`)
-- Direct vector database operations for advanced use cases
+---
 
-## Tech Stack
-- **Framework**: FastAPI 0.115+
-- **Language**: Python 3.12+
-- **Dependency Management**: Poetry
-- **Database**: Qdrant Vector Database
-- **AI/ML**: OpenAI API, LangChain
-- **File Processing**: PyPDF, Markitdown
-- **Testing**: Pytest with async support
-- **Documentation**: Auto-generated OpenAPI/Swagger docs
+## API Surface
 
+Interactive documentation is generated at `/docs` when the server is running. Only the knowledge-base, Qdrant and LiteLLM routers are mounted under a prefix; the rest are served at the root.
 
-## 🚀 Quick Start
+### BioModel data — no prefix
+
+Public, with private models included when a token is supplied.
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /biomodel` | Search and filter the BioModel catalogue |
+| `GET /biomodel/{id}/simulations` | Simulations defined on a model |
+| `GET /biomodel/{id}/biomodel.vcml` | VCML model definition |
+| `GET /biomodel/{id}/biomodel.sbml` | SBML export |
+| `GET /biomodel/{id}/biomodel.bngl` | BNGL export (rule-based models) |
+| `GET /biomodel/{id}/diagram` | Reaction diagram URL |
+| `GET /biomodel/{id}/diagram/image` | Reaction diagram image |
+| `GET /biomodel/{id}/applications/files` | Application files |
+| `GET /biomodel/{id}/publications` | Publications associated with a model |
+| `GET /biomodel/{id}/summary` | Precomputed model summary |
+| `GET /publications` | Publication catalogue |
+
+### AI assistant — no prefix, authenticated
+
+| Endpoint | Purpose |
+|---|---|
+| `POST /query` | Conversational query with tool calling |
+| `POST /query/faq/{faq_id}` | Quick-action question that executes a known tool directly, skipping tool selection |
+| `POST /analyse/{id}` | Analysis of a BioModel |
+| `POST /analyse/{id}/vcml` | Analysis of a model's VCML |
+| `POST /analyse/{id}/diagram` | Analysis of a model's reaction diagram |
+
+### Users and identity — no prefix, authenticated
+
+| Endpoint | Purpose |
+|---|---|
+| `POST /users/me` | Verify the token and upsert the user record |
+| `GET /users/me/role` | The caller's role |
+| `GET /users/me/budget` | The caller's spend and remaining budget |
+| `GET /users/vcell/mapped` | The VCell identity linked to the caller, if any |
+| `POST /users/vcell/map` | Link an existing VCell account |
+| `POST /users/vcell/new` | Create a VCell identity for the caller |
+| `POST /users/vcell/recover` | Recover an existing VCell account |
+| `DELETE /users/vcell/mapped` | Unlink the VCell account |
+
+VCell credentials submitted for linking are forwarded to the VCell API and never stored.
+
+### Knowledge base — `/kb`, admin only
+
+Create and inspect collections, upload PDF and text documents, list and delete files, retrieve a file's chunks, and run similarity search. Uploaded documents are chunked, embedded and stored with their source, so retrieved passages can be traced back to the document they came from.
+
+### Vector store — `/qdrant`, and gateway administration — `/litellm`
+
+Direct vector operations for advanced use, and admin endpoints for reviewing managed gateway users and updating budgets in bulk.
+
+---
+
+## AI Assistant
+
+The assistant answers by calling tools rather than from memory. Tool definitions and the dispatcher live in `app/utils/`, alongside the system prompt that governs the assistant's persona and when each tool should be used.
+
+Available tools cover: searching the BioModel catalogue, fetching simulation details, retrieving a model's VCML, fetching publications, and searching the knowledge base.
+
+All completions are sent through the **LiteLLM gateway** using the caller's own virtual key, which is what enforces per-user budgets. When a request would exceed a user's budget, or the hosted provider fails, it is retried against the locally hosted model instead of failing, and the response reports which model actually answered.
+
+---
+
+## Precomputed Data
+
+Two datasets are generated ahead of time and stored in Supabase rather than produced per request:
+
+- **Publications** — the VCell publication feed, cleaned at ingest and enriched with abstracts from PubMed.
+- **Model summaries** — biologist-facing explanations generated from each model's structure and its associated literature.
+
+Summaries are stored with a hash of their inputs and of the instruction file that produced them, so a re-run regenerates only what has changed and is cheap to resume after a failure. The instruction file is version-controlled at the repository root, so how models are described can be revised without a code change.
+
+```bash
+cd backend
+poetry run python scripts/generate_summaries.py --limit 10      # trial run
+poetry run python scripts/generate_summaries.py --only <bm_key> --force
+poetry run python scripts/generate_summaries.py                 # whole catalogue
+```
+
+The Supabase tables these rely on are recorded in `sql/`. There is no migration tooling; the files are the record of what was applied.
+
+---
+
+## Quick Start
 
 ### Prerequisites
-- Python 3.12+
-- Poetry
-- Docker (for Qdrant)
 
-### Installation
+- Python 3.12+ and Poetry
+- A running Qdrant instance, and a LiteLLM gateway (both are provided by `docker compose` at the repository root)
+- Auth0 and Supabase credentials
 
-1. **Clone and navigate to backend**
-   ```bash
-   cd backend
-   ```
+```bash
+cd backend
+poetry install --no-root
+cp .env.example .env        # then fill in
+poetry run uvicorn app.main:app --reload --port 8000
+```
 
-2. **Install dependencies**
-   ```bash
-   poetry install
-   ```
+Run from `backend/` — settings are resolved relative to the working directory.
 
-3. **Set up environment variables**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your configuration
-   ```
+| Endpoint | URL |
+|---|---|
+| API | http://localhost:8000 |
+| Interactive docs | http://localhost:8000/docs |
+| OpenAPI schema | http://localhost:8000/openapi.json |
 
-4. **Start the development server**
-   ```bash
-   poetry run uvicorn app.main:app --reload
-   ```
+### Configuration
 
-### Using Docker
+`.env.example` lists every key. Broadly: the LLM provider and its credentials, Qdrant, Langfuse, Auth0, Supabase, and the LiteLLM gateway URL, master key and default user budget.
 
-1. **Build the container**
-   ```bash
-   docker build -t vcell-backend .
-   ```
+---
 
-2. **Run with Docker Compose**
-   ```bash
-   docker-compose up backend
-   ```
+## Testing
 
-## 📚 API Documentation
-Once the server is running, you can access:
-- **Interactive API Docs**: http://localhost:8000/docs
-- **OpenAPI Schema**: http://localhost:8000/openapi.json
+```bash
+cd backend
+poetry run pytest tests/                        # everything
+poetry run pytest tests/test_llms_service.py    # one file
+```
 
+Tests run from `backend/`; imports resolve via the pytest configuration in `pyproject.toml`, so no path manipulation is needed in test files. Continuous integration runs the same suite on every push and pull request to `main`.
 
-## Logging
-The application uses structured logging with different levels:
-- **DEBUG**: Detailed debugging information
-- **INFO**: General application information
-- **WARNING**: Warning messages
-- **ERROR**: Error messages
-- **CRITICAL**: Critical errors
-Logs are configured in `app/core/logger.py` and can be customized via environment variables.
+---
+
+## Observability
+
+Langfuse traces LLM calls, tool executions, token usage and latency. Both the backend and the LiteLLM gateway report to it, so a single request can be followed from the endpoint through tool execution to the completion that answered it. Configure it through the Langfuse keys in `.env`; see [SETUP.md](../SETUP.md).
+
+Application logging is configured in `app/core/logger.py`.
