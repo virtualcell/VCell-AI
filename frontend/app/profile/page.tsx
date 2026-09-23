@@ -28,7 +28,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { SignInOutButton } from "@/components/sign-in-out-button";
 import { messageFromErrorResponse } from "@/lib/api-error";
 
 interface MappedUser {
@@ -251,7 +250,7 @@ export default function ProfilePage() {
   const linkedDate = formatLinkedDate(mappedUser?.insertDate ?? null);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-full bg-slate-50">
       <div className="container mx-auto p-8 max-w-5xl">
         {/* Header */}
         <div className="mb-8">
@@ -265,7 +264,6 @@ export default function ProfilePage() {
                 Link your VCell account to view your private VCell models and simulations here
               </p>
             </div>
-            <SignInOutButton />
           </div>
         </div>
 

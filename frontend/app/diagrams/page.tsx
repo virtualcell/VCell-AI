@@ -21,7 +21,6 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { SignInOutButton } from "@/components/sign-in-out-button";
 
 interface DiagramInfo {
   url: string;
@@ -78,7 +77,7 @@ export default function DiagramsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-full bg-slate-50">
       <div className="container mx-auto p-6 max-w-7xl">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between gap-4">
@@ -91,7 +90,6 @@ export default function DiagramsPage() {
               representations.
             </p>
           </div>
-          <SignInOutButton />
         </div>
 
         {/* Input Form */}

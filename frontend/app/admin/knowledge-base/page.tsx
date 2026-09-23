@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
-import { SignInOutButton } from "@/components/sign-in-out-button";
 import { Input } from "@/components/ui/input";
 import {
   FileText,
@@ -205,7 +204,7 @@ export default function KnowledgeBasePage() {
   if (error) return <div className="p-8 text-center text-red-600">{error}</div>;
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-full bg-slate-50">
       <div className="container mx-auto p-8 max-w-7xl">
         {/* Header */}
         <div className="mb-8">
@@ -226,7 +225,6 @@ export default function KnowledgeBasePage() {
               >
                 <Plus className="h-4 w-4" /> Upload File
               </Button>
-              <SignInOutButton />
             </div>
           </div>
         </div>

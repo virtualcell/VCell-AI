@@ -35,7 +35,6 @@ import {
 import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { LoginRequiredDialog } from "@/components/login-required-dialog";
-import { SignInOutButton } from "@/components/sign-in-out-button";
 import { getOptionalAccessToken } from "@/lib/get-optional-access-token";
 import { useChatHistory } from "@/hooks/use-chat-history";
 
@@ -348,7 +347,7 @@ export default function BiomodelDetailPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-full bg-slate-50">
       <LoginRequiredDialog
         open={showLoginDialog}
         onOpenChange={setShowLoginDialog}
@@ -372,7 +371,6 @@ export default function BiomodelDetailPage() {
                   >
                     <FileText className="h-4 w-4" /> Download VCML
                   </button>
-                  <SignInOutButton />
                 </div>
               </div>
               <div className="flex flex-wrap gap-3 mt-2 text-sm text-slate-600">

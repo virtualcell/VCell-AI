@@ -35,7 +35,6 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
-import { SignInOutButton } from "@/components/sign-in-out-button";
 import { getOptionalAccessToken } from "@/lib/get-optional-access-token";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import Link from "next/link";
@@ -238,7 +237,7 @@ export default function BiomodelSearchPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-full bg-slate-50">
       <div className="container mx-auto p-6 max-w-7xl">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between gap-4">
@@ -256,7 +255,6 @@ export default function BiomodelSearchPage() {
               </p>
             </div>
           </div>
-          <SignInOutButton />
         </div>
 
         {/* Search Form */}
