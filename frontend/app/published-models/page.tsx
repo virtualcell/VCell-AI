@@ -5,7 +5,8 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BookOpen, ExternalLink } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { BookOpen, ExternalLink, Search } from "lucide-react";
 
 interface PublishedBiomodel {
   bmKey: string;
@@ -29,6 +30,7 @@ interface PublishedModel {
 
 export default function PublishedModelsPage() {
   const [publications, setPublications] = useState<PublishedModel[]>([]);
+  const [filter, setFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -52,6 +54,29 @@ export default function PublishedModelsPage() {
       cancelled = true;
     };
   }, []);
+
+  // One box matching anything shown in the row, like the VCell publications
+  // page: a name typed into it should find the paper whether it appears in the
+  // authors, the citation, a referenced model or its owner.
+  const query = filter.trim().toLowerCase();
+  const filtered = query
+    ? publications.filter((pub) =>
+        [
+          pub.title,
+          pub.authors,
+          pub.year,
+          pub.citation,
+          pub.pubmedid,
+          pub.doi,
+          ...pub.biomodels.map((model) => model.name),
+          ...pub.owners,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase()
+          .includes(query),
+      )
+    : publications;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -84,13 +109,21 @@ export default function PublishedModelsPage() {
 
         {!loading && !error && (
           <>
-            <div className="flex items-center justify-between mb-3">
-              <Badge
-                variant="secondary"
-                className="bg-blue-100 text-blue-800"
-              >
-                {publications.length} publication
-                {publications.length === 1 ? "" : "s"}
+            <div className="flex flex-wrap items-center gap-3 mb-3">
+              <div className="relative w-full max-w-sm">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+                <Input
+                  value={filter}
+                  onChange={(e) => setFilter(e.target.value)}
+                  placeholder="Filter by title, author, citation, model or owner"
+                  aria-label="Filter publications"
+                  className="pl-9 border-slate-300 focus:border-blue-500"
+                />
+              </div>
+              <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                {filtered.length}
+                {query ? ` of ${publications.length}` : ""} publication
+                {filtered.length === 1 ? "" : "s"}
               </Badge>
             </div>
 
@@ -124,7 +157,7 @@ export default function PublishedModelsPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {publications.map((pub) => (
+                    {filtered.map((pub) => (
                       <tr
                         key={pub.pubKey}
                         className="border-b border-slate-100 last:border-0 hover:bg-slate-50 align-top"
@@ -199,6 +232,11 @@ export default function PublishedModelsPage() {
                   </tbody>
                 </table>
               </div>
+              {filtered.length === 0 && (
+                <div className="py-12 text-center text-slate-500 text-sm">
+                  No publications match “{filter}”.
+                </div>
+              )}
             </Card>
           </>
         )}
