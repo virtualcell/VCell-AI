@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { BookOpen, ExternalLink, Search } from "lucide-react";
@@ -120,11 +119,6 @@ export default function PublishedModelsPage() {
                   className="pl-9 border-slate-300 focus:border-blue-500"
                 />
               </div>
-              <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                {filtered.length}
-                {query ? ` of ${publications.length}` : ""} publication
-                {filtered.length === 1 ? "" : "s"}
-              </Badge>
             </div>
 
             <Card className="border-slate-200 shadow-sm overflow-hidden">
