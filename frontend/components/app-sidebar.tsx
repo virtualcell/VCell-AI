@@ -38,28 +38,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { useChatHistory } from "@/hooks/use-chat-history";
 import type { Conversation } from "@/lib/chat-history";
+import { formatUsdAsTokens } from "@/lib/token-pricing";
 
 interface BudgetInfo {
   spend: number;
   max_budget: number | null;
   remaining_budget: number | null;
 }
-
-const formatBudget = (value: number | null): string => {
-  if (value === null) {
-    return "Unlimited";
-  }
-
-  if (Math.abs(value) > 0 && Math.abs(value) < 1) {
-    return `$${Number(value.toFixed(4)).toString()}`;
-  }
-
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 2,
-  }).format(value);
-};
 
 const buildConversationHref = (conversation: Conversation): string => {
   switch (conversation.surface) {
@@ -202,19 +187,21 @@ export function AppSidebar() {
     ? "Log in to see your token usage"
     : !budget
       ? "Loading..."
-      : `${formatBudget(budget.remaining_budget)} remaining`;
+      : budget.remaining_budget === null
+        ? "Unlimited tokens"
+        : `${formatUsdAsTokens(budget.remaining_budget)} tokens remaining`;
   const budgetSummary = isLoggedOut
     ? "Log in to see your token usage"
     : !budget
       ? "Loading..."
       : budget.max_budget === null
-        ? `${formatBudget(budget.spend)} spent, unlimited budget`
-        : `${formatBudget(budget.spend)} spent of ${formatBudget(budget.max_budget)} budget`;
+        ? `${formatUsdAsTokens(budget.spend)} tokens used, unlimited budget`
+        : `${formatUsdAsTokens(budget.spend)} of ${formatUsdAsTokens(budget.max_budget)} tokens used`;
   const budgetCollapsedText = isLoggedOut
     ? "Log in"
     : !budget
       ? "--"
-      : formatBudget(budget.spend);
+      : formatUsdAsTokens(budget.spend);
   const loginReturnHref = `/auth/login?returnTo=${encodeURIComponent(pathname)}`;
 
   return (
