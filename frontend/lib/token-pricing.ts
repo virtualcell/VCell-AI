@@ -1,8 +1,3 @@
-// LiteLLM tracks spend in USD, but a dollar figure means little to someone
-// deciding whether they can afford another question. These helpers convert
-// that spend into an approximate token count for display only — nothing here
-// is sent back to LiteLLM, which still owns the real (dollar) budget.
-//
 // gpt-4o-mini is the reference model for the conversion (OpenAI list price):
 //   input  $0.15 per 1M tokens
 //   output $0.60 per 1M tokens
