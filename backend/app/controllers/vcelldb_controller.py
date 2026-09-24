@@ -18,6 +18,7 @@ from app.services.vcelldb_service import (
 from app.services.publications_service import (
     get_publications_for_biomodel,
     get_biomodel_keys_with_publications,
+    get_publications_listing,
 )
 from app.services.model_summary_service import get_stored_summary
 from app.core.logger import get_logger
@@ -248,6 +249,20 @@ async def get_biomodel_summary_controller(biomodel_id: str) -> dict:
         "modelUsed": row.get("llm_model"),
         "generatedAt": row.get("generated_at"),
     }
+
+
+async def get_publications_listing_controller() -> List[dict]:
+    """
+    Controller function for the published-models listing.
+
+    Reads the synced Supabase tables, which carry the biomodel owners the page
+    shows. Raises rather than falling back: an empty table means the sync hasn't
+    run, and silently returning nothing would look like "no publications exist".
+    """
+    try:
+        return get_publications_listing()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 async def get_publications_controller() -> List[dict]:

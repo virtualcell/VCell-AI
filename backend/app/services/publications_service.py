@@ -388,6 +388,90 @@ def to_api_shape(row: dict) -> dict:
     }
 
 
+def _publication_row_to_listing(row: dict, links: List[dict]) -> dict:
+    """
+    Shape one publication for the published-models listing.
+
+    Args:
+        row (dict): A `publications` table row.
+        links (List[dict]): Its `biomodel_publications` rows.
+
+    Returns:
+        dict: The listing representation, including the owners of the biomodels
+        the publication references.
+    """
+    biomodels = [
+        {
+            "bmKey": str(link["bm_key"]),
+            "name": link.get("model_name"),
+            "ownerName": link.get("owner_name"),
+        }
+        for link in links
+    ]
+
+    # A publication can cite several models from different users, so owner is a
+    # list rather than a single value. Deduplicated, order preserved.
+    owners = list(
+        dict.fromkeys(
+            model["ownerName"] for model in biomodels if model.get("ownerName")
+        )
+    )
+
+    return {
+        "pubKey": str(row.get("pub_key")),
+        "title": row.get("title"),
+        "authors": row.get("authors"),
+        "year": row.get("year"),
+        "citation": row.get("citation"),
+        "pubmedid": row.get("pubmedid"),
+        "doi": row.get("doi"),
+        "biomodels": biomodels,
+        "owners": owners,
+    }
+
+
+def get_publications_listing() -> List[dict]:
+    """
+    List every publication with the biomodels it references and their owners.
+
+    Backs the "VCell Published Models" page. Deliberately omits the fields that
+    page doesn't show (pubKey aside, which is only a row key): the publication
+    date, the raw payload, and math-model references.
+
+    Returns:
+        List[dict]: Publications, newest first; empty when none are stored.
+    """
+    supabase = get_supabase_client()
+
+    publications = (
+        supabase.table("publications")
+        .select("pub_key, title, authors, year, citation, pubmedid, doi, pub_date")
+        .order("pub_date", desc=True)
+        .execute()
+    ).data or []
+
+    links_by_pub: dict = {}
+    offset = 0
+    page_size = 1000
+    while True:
+        batch = (
+            supabase.table("biomodel_publications")
+            .select("pub_key, bm_key, model_name, owner_name")
+            .range(offset, offset + page_size - 1)
+            .execute()
+        ).data or []
+        for link in batch:
+            links_by_pub.setdefault(link["pub_key"], []).append(link)
+        if len(batch) < page_size:
+            break
+        offset += page_size
+
+    return [
+        _publication_row_to_listing(row, links_by_pub.get(row["pub_key"], []))
+        for row in publications
+    ]
+
+
 def get_publications_for_biomodel(bm_key: str) -> List[dict]:
     """
     Fetch a biomodel's publications from Supabase in API shape.
