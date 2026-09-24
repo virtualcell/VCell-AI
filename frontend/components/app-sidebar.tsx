@@ -7,6 +7,7 @@ import {
   FolderOpen,
   Gauge,
   Info,
+  BookOpen,
   ExternalLink,
   MessageSquare,
   Pencil,
@@ -334,6 +335,22 @@ export function AppSidebar() {
                   <Link href="/search" className="flex items-center gap-3">
                     <Search className="h-4 w-4" />
                     {!isCollapsed && <span>Biomodel Search</span>}
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem key="PublishedModels">
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === "/published-models"}
+                  className="data-[active=true]:bg-blue-50 data-[active=true]:text-blue-700 data-[active=true]:border-r-2 data-[active=true]:border-blue-600"
+                  tooltip={isCollapsed ? "VCell Published Models" : undefined}
+                >
+                  <Link
+                    href="/published-models"
+                    className="flex items-center gap-3"
+                  >
+                    <BookOpen className="h-4 w-4" />
+                    {!isCollapsed && <span>VCell Published Models</span>}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
