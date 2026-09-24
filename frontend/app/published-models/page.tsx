@@ -66,7 +66,6 @@ export default function PublishedModelsPage() {
           pub.year,
           pub.citation,
           pub.pubmedid,
-          pub.doi,
           ...pub.biomodels.map((model) => model.name),
           ...pub.owners,
         ]
@@ -139,9 +138,6 @@ export default function PublishedModelsPage() {
                         Citation
                       </th>
                       <th className="px-4 py-3 font-semibold">PubMed</th>
-                      <th className="px-4 py-3 font-semibold min-w-[180px]">
-                        DOI
-                      </th>
                       <th className="px-4 py-3 font-semibold min-w-[220px]">
                         Biomodels
                       </th>
@@ -178,20 +174,6 @@ export default function PublishedModelsPage() {
                             >
                               {pub.pubmedid}
                               <ExternalLink className="h-3 w-3" />
-                            </a>
-                          ) : (
-                            <span className="text-slate-400">—</span>
-                          )}
-                        </td>
-                        <td className="px-4 py-3">
-                          {pub.doi ? (
-                            <a
-                              href={`https://doi.org/${pub.doi}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-700 hover:underline break-all"
-                            >
-                              {pub.doi}
                             </a>
                           ) : (
                             <span className="text-slate-400">—</span>
