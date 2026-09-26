@@ -312,19 +312,6 @@ export function AppSidebar() {
           )}
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem key="BiomodelSearch">
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === "/search"}
-                  className="data-[active=true]:bg-blue-50 data-[active=true]:text-blue-700 data-[active=true]:border-r-2 data-[active=true]:border-blue-600"
-                  tooltip={isCollapsed ? "Biomodel Search" : undefined}
-                >
-                  <Link href="/search" className="flex items-center gap-3">
-                    <Search className="h-4 w-4" />
-                    {!isCollapsed && <span>Biomodel Search</span>}
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
               <SidebarMenuItem key="PublishedModels">
                 <SidebarMenuButton
                   asChild
@@ -338,6 +325,19 @@ export function AppSidebar() {
                   >
                     <BookOpen className="h-4 w-4" />
                     {!isCollapsed && <span>VCell Published Models</span>}
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem key="BiomodelSearch">
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === "/search"}
+                  className="data-[active=true]:bg-blue-50 data-[active=true]:text-blue-700 data-[active=true]:border-r-2 data-[active=true]:border-blue-600"
+                  tooltip={isCollapsed ? "Biomodel Search" : undefined}
+                >
+                  <Link href="/search" className="flex items-center gap-3">
+                    <Search className="h-4 w-4" />
+                    {!isCollapsed && <span>Biomodel Search</span>}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
