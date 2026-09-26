@@ -77,7 +77,9 @@ Public, with private models included when a token is supplied.
 | `GET /biomodel/{id}/applications/files` | Application files |
 | `GET /biomodel/{id}/publications` | Publications associated with a model |
 | `GET /biomodel/{id}/summary` | Precomputed model summary |
+| `GET /biomodels/with-publications` | Keys of every model a publication references, so the search page can filter without a request per result |
 | `GET /publications` | Publication catalogue |
+| `GET /publications/listing` | Every publication with the models it references and their owners |
 
 ### AI assistant — no prefix, authenticated
 
