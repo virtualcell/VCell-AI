@@ -18,6 +18,7 @@ The v1 payload differs from v0 in ways that all have to be handled here:
 
 import asyncio
 import re
+import time
 from typing import List, Optional
 
 import httpx
@@ -430,13 +431,88 @@ def _publication_row_to_listing(row: dict, links: List[dict]) -> dict:
     }
 
 
+# The listing is rebuilt from the live feed rather than the synced tables, so
+# newly added publications appear without waiting for a sync. Everything the
+# page shows - owners included - is in the upstream payload; only the PubMed
+# abstracts (used for summary generation) need the stored copy. A short TTL
+# keeps a burst of page loads down to one upstream call.
+PUBLICATIONS_LISTING_TTL_SECONDS = 15 * 60
+
+_listing_cache: Optional[List[dict]] = None
+_listing_cached_at: float = 0.0
+_listing_lock = asyncio.Lock()
+
+
+def _raw_publication_to_listing(raw: dict) -> Optional[tuple]:
+    """
+    Shape one raw v1 record for the listing.
+
+    Reuses the same cleaning the sync applies, so the live and stored paths
+    return identical shapes rather than two nearly-alike ones.
+
+    Args:
+        raw (dict): A record from the v1 publications feed.
+
+    Returns:
+        Optional[tuple]: (publication date, listing entry), or None if the
+        record has no usable key. The date is returned separately because the
+        listing itself doesn't carry it, but the page orders by it.
+    """
+    row = clean_publication(raw)
+    if row is None:
+        return None
+    return row.get("pub_date") or "", _publication_row_to_listing(
+        row, extract_biomodel_links(raw)
+    )
+
+
+@observe(name="GET_PUBLICATIONS_LISTING_LIVE")
+async def get_publications_listing_live() -> List[dict]:
+    """
+    Build the publications listing from the live VCell feed, cached briefly.
+
+    Returns:
+        List[dict]: Publications, newest first.
+    """
+    global _listing_cache, _listing_cached_at
+
+    async with _listing_lock:
+        is_fresh = (
+            _listing_cache is not None
+            and (time.monotonic() - _listing_cached_at)
+            < PUBLICATIONS_LISTING_TTL_SECONDS
+        )
+
+        if not is_fresh:
+            raw_publications = await fetch_publications_v1()
+            entries = [
+                entry
+                for entry in (
+                    _raw_publication_to_listing(raw) for raw in raw_publications
+                )
+                if entry is not None
+            ]
+            entries.sort(key=lambda entry: entry[0], reverse=True)
+
+            _listing_cache = [listing for _, listing in entries]
+            _listing_cached_at = time.monotonic()
+            logger.info(
+                f"Publications listing refreshed from the live feed: "
+                f"{len(_listing_cache)} publications"
+            )
+
+        return _listing_cache
+
+
 def get_publications_listing() -> List[dict]:
     """
-    List every publication with the biomodels it references and their owners.
+    List every publication with the biomodels it references and their owners,
+    from the synced Supabase tables.
 
-    Backs the "VCell Published Models" page. Deliberately omits the fields that
-    page doesn't show (pubKey aside, which is only a row key): the publication
-    date, the raw payload, and math-model references.
+    The fallback for get_publications_listing_live: a snapshot that keeps the
+    page working when the VCell API is unreachable. Deliberately omits the
+    fields the page doesn't show (pubKey aside, which is only a row key): the
+    publication date, the raw payload, and math-model references.
 
     Returns:
         List[dict]: Publications, newest first; empty when none are stored.

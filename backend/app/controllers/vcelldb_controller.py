@@ -19,6 +19,7 @@ from app.services.publications_service import (
     get_publications_for_biomodel,
     get_biomodel_keys_with_publications,
     get_publications_listing,
+    get_publications_listing_live,
 )
 from app.services.model_summary_service import get_stored_summary
 from app.core.logger import get_logger
@@ -255,10 +256,20 @@ async def get_publications_listing_controller() -> List[dict]:
     """
     Controller function for the published-models listing.
 
-    Reads the synced Supabase tables, which carry the biomodel owners the page
-    shows. Raises rather than falling back: an empty table means the sync hasn't
-    run, and silently returning nothing would look like "no publications exist".
+    Reads the live VCell feed so newly added publications show up without
+    waiting for a sync, and falls back to the synced Supabase snapshot when
+    that feed is unreachable.
     """
+    try:
+        live = await get_publications_listing_live()
+        if live:
+            return live
+        logger.warning("Live publications feed returned nothing; using the stored copy")
+    except Exception as e:
+        logger.warning(
+            f"Live publications feed unavailable, using the stored copy: {str(e)}"
+        )
+
     try:
         return get_publications_listing()
     except Exception as e:
