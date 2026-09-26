@@ -384,11 +384,6 @@ export default function BiomodelSearchPage() {
                   className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-400 cursor-pointer"
                 />
                 <span className="font-medium">Only models with publications</span>
-                {publishedKeys.size > 0 && (
-                  <span className="text-slate-400 text-xs">
-                    ({publishedKeys.size} in the database)
-                  </span>
-                )}
               </label>
             </div>
 
