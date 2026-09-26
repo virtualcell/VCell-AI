@@ -7,7 +7,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import {
   BookOpen,
-  ExternalLink,
   Search,
   ArrowUp,
   ArrowDown,
@@ -45,19 +44,19 @@ const COLUMNS: {
   numeric?: boolean;
   sortValue: (pub: PublishedModel) => string | number | null;
 }[] = [
-  { key: "title", label: "Title", width: "min-w-[320px]", sortValue: (p) => p.title },
-  { key: "authors", label: "Authors", width: "min-w-[200px]", sortValue: (p) => p.authors ?? null },
-  { key: "year", label: "Year", numeric: true, sortValue: (p) => p.year ?? null },
-  { key: "citation", label: "Citation", width: "min-w-[200px]", sortValue: (p) => p.citation ?? null },
-  { key: "pubmedid", label: "PubMed", numeric: true, sortValue: (p) => (p.pubmedid ? Number(p.pubmedid) : null) },
+  { key: "title", label: "Title", width: "w-[24%]", sortValue: (p) => p.title },
+  { key: "authors", label: "Authors", width: "w-[16%]", sortValue: (p) => p.authors ?? null },
+  { key: "year", label: "Year", width: "w-[5%]", numeric: true, sortValue: (p) => p.year ?? null },
+  { key: "citation", label: "Citation", width: "w-[17%]", sortValue: (p) => p.citation ?? null },
+  { key: "pubmedid", label: "PubMed", width: "w-[8%]", numeric: true, sortValue: (p) => (p.pubmedid ? Number(p.pubmedid) : null) },
   {
     key: "biomodels",
     label: "Biomodels",
-    width: "min-w-[220px]",
+    width: "w-[21%]",
     // Sorted by the names as displayed, so the ordering matches what's on screen.
     sortValue: (p) => p.biomodels.map((m) => m.name || m.bmKey).join(", ") || null,
   },
-  { key: "owners", label: "Owner", width: "min-w-[120px]", sortValue: (p) => p.owners.join(", ") || null },
+  { key: "owners", label: "Owner", width: "w-[9%]", sortValue: (p) => p.owners.join(", ") || null },
 ];
 
 export default function PublishedModelsPage() {
@@ -199,7 +198,7 @@ export default function PublishedModelsPage() {
               {/* Wide table: scrolls inside its own container so the page
                   itself never scrolls sideways. */}
               <div className="overflow-x-auto">
-                <table className="w-full text-sm border-collapse">
+                <table className="w-full table-fixed text-xs border-collapse">
                   <thead className="bg-slate-100 border-b border-slate-200">
                     <tr className="text-left text-slate-700">
                       {COLUMNS.map((column) => {
@@ -214,7 +213,7 @@ export default function PublishedModelsPage() {
                                   : "descending"
                                 : "none"
                             }
-                            className={`px-4 py-3 font-semibold ${column.width ?? ""}`}
+                            className={`px-3 py-2 font-semibold align-bottom ${column.width ?? ""}`}
                           >
                             <button
                               type="button"
@@ -243,41 +242,40 @@ export default function PublishedModelsPage() {
                         key={pub.pubKey}
                         className="border-b border-slate-100 last:border-0 hover:bg-slate-50 align-top"
                       >
-                        <td className="px-4 py-3 text-slate-900 font-medium">
+                        <td className="px-3 py-2 text-slate-900 font-medium break-words">
                           {pub.title}
                         </td>
-                        <td className="px-4 py-3 text-slate-600 italic">
+                        <td className="px-3 py-2 text-slate-600 italic break-words">
                           {pub.authors || "—"}
                         </td>
-                        <td className="px-4 py-3 text-slate-700 whitespace-nowrap">
+                        <td className="px-3 py-2 text-slate-700 whitespace-nowrap">
                           {pub.year ?? "—"}
                         </td>
-                        <td className="px-4 py-3 text-slate-600">
+                        <td className="px-3 py-2 text-slate-600 break-words">
                           {pub.citation || "—"}
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap">
+                        <td className="px-3 py-2 whitespace-nowrap">
                           {pub.pubmedid ? (
                             <a
                               href={`https://pubmed.ncbi.nlm.nih.gov/${pub.pubmedid}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-blue-700 hover:underline inline-flex items-center gap-1"
+                              className="text-blue-700 hover:underline"
                             >
                               {pub.pubmedid}
-                              <ExternalLink className="h-3 w-3" />
                             </a>
                           ) : (
                             <span className="text-slate-400">—</span>
                           )}
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-3 py-2">
                           {pub.biomodels.length > 0 ? (
                             <div className="flex flex-col gap-1">
                               {pub.biomodels.map((model) => (
                                 <Link
                                   key={model.bmKey}
                                   href={`/search/${model.bmKey}`}
-                                  className="text-blue-700 hover:underline"
+                                  className="text-blue-700 hover:underline break-words"
                                 >
                                   {model.name || model.bmKey}
                                 </Link>
@@ -287,7 +285,7 @@ export default function PublishedModelsPage() {
                             <span className="text-slate-400">—</span>
                           )}
                         </td>
-                        <td className="px-4 py-3 text-slate-700">
+                        <td className="px-3 py-2 text-slate-700 break-words">
                           {pub.owners.length > 0 ? (
                             pub.owners.join(", ")
                           ) : (
