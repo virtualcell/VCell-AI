@@ -16,11 +16,11 @@ VCell-AI lets researchers search VCell BioModels in natural language, ask an ass
 - **AI model analysis** — explanations of a model's species, reactions, parameters, applications and simulations, grounded in its VCML and reaction diagram.
 - **Private model access** — authenticated users who have linked a VCell account see their own private models in search, analysis and chat.
 - **Precomputed model summaries** — biologist-facing summaries generated from each model's VCML and its associated literature, served instantly and consistently.
-- **Publication data** — papers associated with a BioModel, with abstracts, shown alongside the model.
+- **Publication data** — papers associated with a BioModel, with abstracts, shown alongside the model. A dedicated **Published Models** page lists the published record of the database, and search results can be filtered to models a publication references.
 - **Knowledge base (RAG)** — administrator-curated documents, chunked and embedded into a vector store, searched by the assistant as a tool.
 - **File viewers** — VCML, SBML and BNGL, plus an interactive network visualization for rule-based models.
 - **Choice of LLM** — a hosted commercial model or a locally hosted model, selectable per message, with automatic fallback to the local model when a budget is exhausted or the hosted provider fails. Every reply is labelled with the model that actually answered it.
-- **Per-user cost control** — each account is provisioned with its own gateway key and spending budget, with live spend shown in the UI and an admin page for adjusting budgets.
+- **Per-user cost control** — each account is provisioned with its own gateway key and budget, shown in the UI as a token allowance, with an admin page for adjusting budgets.
 - **Conversation history** — conversations are kept per user in the browser and resumable across pages and sessions.
 
 ---
@@ -169,7 +169,7 @@ The LiteLLM gateway requires a Postgres connection (`DATABASE_URL`) for virtual 
 
 Authentication is handled by **Auth0**. The frontend holds the session and gates non-public routes; the backend independently verifies the access token on every protected request. Verified users are recorded in Supabase, and that record carries their role, gateway key and budget.
 
-- **Public** — the landing page, the About page, BioModel search and browsing, and the file viewers.
+- **Public** — the landing page, the About page, BioModel search and browsing, the Published Models page, and the file viewers.
 - **Authenticated** — all AI features (chat, analysis, knowledge-base search), the profile page, and access to private BioModels.
 - **Administrator** — knowledge-base management and budget administration.
 

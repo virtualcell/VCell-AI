@@ -16,6 +16,7 @@ frontend/
 │   ├── search/             # BioModel search
 │   │   └── [bmid]/           # Model detail: metadata, diagram, files, summary,
 │   │                         # publications, and the AI analysis tab
+│   ├── published-models/   # Publications and the models they reference
 │   ├── chat/               # General-purpose AI assistant
 │   ├── profile/            # Account, and VCell account linking
 │   ├── vcml/               # VCML viewer
@@ -25,6 +26,7 @@ frontend/
 │       ├── knowledge-base/   # Knowledge base management
 │       └── litellm/          # User budget administration
 ├── components/           # Shared components
+│   ├── app-header.tsx      # Sticky header rendered by the root layout
 │   └── ui/                 # ShadCN / Radix primitives
 ├── hooks/                # Custom hooks, including conversation history
 ├── lib/                  # Auth client, conversation storage, API helpers
@@ -41,8 +43,9 @@ frontend/
 |---|---|---|
 | `/` | Public | Landing page and entry points |
 | `/about` | Public | AI models in use, data handling, limitations, sources, citation |
-| `/search` | Public | BioModel search with filters and sorting |
+| `/search` | Public | BioModel search with filters, sorting, and a published-models filter |
 | `/search/[bmid]` | Public (AI tab gated) | Model detail: metadata, diagram, files, summary, publications, AI analysis |
+| `/published-models` | Public | Publications and the BioModels they reference, with a single filter box |
 | `/chat` | Public (queries gated) | Conversational assistant over the BioModel database |
 | `/vcml`, `/sbml`, `/diagrams` | Public | File-format viewers |
 | `/profile` | Authenticated | Account details and VCell account linking |
@@ -62,6 +65,14 @@ The access/gating model is deliberately split:
 - **Admin sections are hidden** from users without the role, and the backend enforces the same check independently.
 
 Requests to protected backend endpoints carry the user's access token. After login, the session is synced to the backend, which creates or updates the user record and provisions their gateway key.
+
+---
+
+## Layout and Chrome
+
+The root layout renders a single sticky `AppHeader` carrying the brand and the authentication controls, so they are in the same place on every page, and the sidebar for navigation. Pages render only their own content.
+
+The sidebar also shows the signed-in user's remaining LLM allowance. It is stored as a spending budget but displayed as a **token count** (`lib/token-pricing.ts`), converted at a blended rate for the reference model — a quota is easier to reason about than a fraction of a dollar.
 
 ---
 
