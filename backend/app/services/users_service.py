@@ -1,7 +1,10 @@
 from datetime import datetime, timezone
 
+from app.core.logger import get_logger
 from app.core.singleton import get_supabase_client
 from app.services.litellm_service import get_or_create_virtual_key
+
+logger = get_logger("users_service")
 
 
 def sync_auth0_user(payload: dict) -> dict | None:
@@ -54,14 +57,26 @@ def get_user_role(auth0_sub: str) -> str | None:
 
 async def sync_current_user(payload: dict) -> dict:
     """
-    Ensure the user has a LiteLLM virtual key, then sync them into Supabase.
+    Sync the user into Supabase and make sure they have a LiteLLM virtual key.
+
+    The Supabase row is written first, deliberately: key provisioning talks to
+    LiteLLM, and when that used to run first a single failure there took the
+    whole login with it, leaving no user record at all. A missing key is
+    recoverable - the next call through this path or the chat endpoint
+    provisions one - whereas a missing user row loses the person's role.
     """
     auth0_sub = payload["sub"]
 
     supabase = get_supabase_client()
-    await get_or_create_virtual_key(auth0_sub, payload.get("email") or "", supabase)
-
     user = sync_auth0_user(payload)
+
+    try:
+        await get_or_create_virtual_key(auth0_sub, payload.get("email") or "", supabase)
+    except Exception as e:
+        logger.warning(
+            f"Could not provision a LiteLLM key for {auth0_sub}; the user is "
+            f"synced and a later request will retry: {str(e)}"
+        )
 
     return {
         "status": "success",

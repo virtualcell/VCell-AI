@@ -7,16 +7,51 @@ from app.core.logger import get_logger
 logger = get_logger("litellm_service")
 
 
+async def generate_key_for_existing_user(auth0_sub: str) -> str:
+    """
+    Issue a fresh virtual key for a user LiteLLM already knows about.
+
+    LiteLLM only ever returns a key's plaintext at creation, storing a hash
+    afterwards, so a key that is lost on our side cannot be read back - a new
+    one has to be minted. The key is created against the existing user rather
+    than a new one, which keeps their budget and accumulated spend intact.
+    Budgets live on the user, not the key, so the extra key does not widen
+    anyone's allowance.
+
+    Args:
+        auth0_sub (str): The Auth0 subject claim, LiteLLM's user_id.
+
+    Returns:
+        str: A new virtual key ("sk-...") bound to the existing user.
+    """
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        response = await client.post(
+            f"{settings.LITELLM_URL}/key/generate",
+            headers={"Authorization": f"Bearer {settings.LITELLM_MASTER_KEY}"},
+            json={"user_id": auth0_sub},
+        )
+        response.raise_for_status()
+        data = response.json()
+
+    logger.info(f"Issued a new virtual key for existing LiteLLM user {auth0_sub}")
+    return data["key"]
+
+
 async def provision_user(auth0_sub: str, email: str) -> str:
     """
     Create a user in LiteLLM and return the virtual key it generates.
+
+    If LiteLLM already has the user - which happens whenever our record of
+    their key is missing but LiteLLM's is not - it answers 409 rather than
+    returning a key. That is recoverable: mint a key against the existing user
+    instead of failing the login.
 
     Args:
         auth0_sub (str): The Auth0 subject claim, used as LiteLLM's user_id.
         email (str): The user's email, stored on the LiteLLM user record.
 
     Returns:
-        str: The virtual key ("sk-...") LiteLLM generated for this user.
+        str: The virtual key ("sk-...") for this user.
     """
     async with httpx.AsyncClient(timeout=30.0) as client:
         response = await client.post(
@@ -29,6 +64,14 @@ async def provision_user(auth0_sub: str, email: str) -> str:
                 "budget_duration": settings.DEFAULT_BUDGET_DURATION,
             },
         )
+
+        if response.status_code == 409:
+            logger.info(
+                f"LiteLLM already has user {auth0_sub}; issuing a key against "
+                f"the existing record instead of creating a duplicate"
+            )
+            return await generate_key_for_existing_user(auth0_sub)
+
         response.raise_for_status()
         data = response.json()
 
