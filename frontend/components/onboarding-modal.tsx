@@ -309,8 +309,8 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-xl max-h-[70vh] p-2 sm:p-3 overflow-y-auto text-xs sm:text-sm">
-        <DialogHeader className="border-b border-slate-200 pb-1 sm:pb-2">
+      <DialogContent className="max-w-xl max-h-[70vh] p-2 sm:p-3 flex flex-col text-xs sm:text-sm">
+        <DialogHeader className="border-b border-slate-200 pb-1 sm:pb-2 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1 sm:gap-2">
               {steps[currentStep].icon}
@@ -341,9 +341,9 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
           </div>
         </DialogHeader>
 
-        <div className="py-2 sm:py-3">{steps[currentStep].content}</div>
+        <div className="py-2 sm:py-3 flex-1 min-h-0 overflow-y-auto">{steps[currentStep].content}</div>
 
-        <div className="flex items-center justify-between border-t border-slate-200 pt-2 sm:pt-3">
+        <div className="flex items-center justify-between border-t border-slate-200 pt-2 sm:pt-3 flex-shrink-0">
           <Button
             variant="outline"
             onClick={prevStep}
@@ -359,7 +359,7 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
                 onClick={handleClose}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs"
               >
-                Get Started
+              Get Started
               </Button>
             ) : (
               <Button
