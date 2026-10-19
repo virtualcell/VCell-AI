@@ -87,10 +87,11 @@ spec:
             - name: litellm-config-file
               mountPath: /app/config.yaml
               subPath: config.yaml
-            # The external-account config that vertex_credentials points at. It
-            # holds no key material -- only the pool/provider path, the target
-            # Google service account, and where to read the token -- so it rides
-            # in the same ConfigMap as config.yaml rather than a sealed secret.
+            # The external-account config that GOOGLE_APPLICATION_CREDENTIALS
+            # points at. It holds no key material -- only the pool/provider path,
+            # the target Google service account, and where to read the token -- so
+            # it rides in the same ConfigMap as config.yaml rather than a sealed
+            # secret.
             - name: litellm-config-file
               mountPath: /etc/gcp/wif.json
               subPath: gcp-wif.json
@@ -125,14 +126,14 @@ spec:
           projected:
             sources:
               - serviceAccountToken:
-                  # REPLACE_ME: the WIF provider's full resource audience, once
-                  # Burwood creates the pool (REQ0040169).
+                  # The WIF provider's full resource audience. Pool and provider
+                  # were created 2026-10-19 in project caia-fac-uconn-2-225-2026.
                   #
                   # The leading "https://" is deliberate and is NOT a typo to be
                   # tidied up: Google's manifest uses the https:// form here, while
                   # gcp-wif.json uses the schemeless "//iam.googleapis.com/..." form
                   # for the same provider. Both are default allowed audiences.
-                  audience: https://iam.googleapis.com/projects/637433805721/locations/global/workloadIdentityPools/POOL_ID/providers/PROVIDER_ID
+                  audience: https://iam.googleapis.com/projects/637433805721/locations/global/workloadIdentityPools/vcell-ai-pool/providers/rke2-vcell-ai
                   expirationSeconds: 3600
                   path: token
       imagePullSecrets:
