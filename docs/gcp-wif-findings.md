@@ -6,8 +6,13 @@ not in an env file, not in the pod. It authenticates with GCP **Workload Identit
 Federation** (WIF), trading a short-lived Kubernetes ServiceAccount token for a Vertex AI
 access token on every refresh.
 
-This document records why, and what was measured before committing to the design. It is
-written to be readable by someone who has not seen the ticket (Burwood REQ0040169).
+This document records why, what was measured before committing to the design, and what was
+actually built. It is written to be readable by someone who has not seen the ticket (Burwood
+REQ0040169).
+
+**Status (2026-10-19):** the GCP side is built and proven end to end. Burwood never created the
+pool; Jim did, after being granted the admin roles listed under *GCP-side configuration*. The
+action log at the end of this document is the record of exactly what was run.
 
 ## Why not a service account key
 
@@ -61,10 +66,12 @@ running `litellm` pod before the design was settled, rather than assumed from do
 | Custom-audience token minting | **works.** A token minted with a GCP audience carries `iss` as above and `sub = system:serviceaccount:vcell-ai-rke-dev:<sa>` — exactly the claims the attribute mapping needs |
 | `--api-audiences` | set to `https://kubernetes.default.svc.cluster.local,rke2`, and it does **not** restrict projected-token audiences (it governs tokens presented *to* the API server) |
 | Pod egress to Google | `sts.googleapis.com`, `iamcredentials.googleapis.com`, `us-central1-aiplatform.googleapis.com` all reachable from the litellm pod — TLS completes and Google answers. No egress firewall or proxy in the way |
-| LiteLLM | 1.92.0, with `google-auth` 2.52.0 and `google-cloud-aiplatform` 1.133.0 |
+| LiteLLM | 1.92.0, with `google-auth` 2.52.0 and `google-cloud-aiplatform` 1.133.0, as of 2026-09-02. The image tag is `main-stable`, so these drift |
 | LiteLLM WIF support | first-class. `vertex_llm_base.py` branches on `type == "external_account"` and calls `google.auth.identity_pool.Credentials.from_info()`; a `credential_source.file` config (our case) hits that branch |
 | GCP project number | `637433805721` |
-| **End-to-end rehearsal** | the real rendered `gcp-wif.json` plus a real cluster token was fed to `google.auth` inside the litellm pod: it parsed as an identity-pool credential, wired up impersonation, read the projected token, and **reached Google's STS**, which rejected only the `POOL_ID` placeholder. Every link except the pool itself is therefore proven |
+| **End-to-end rehearsal** (2026-09-02) | the real rendered `gcp-wif.json` plus a real cluster token was fed to `google.auth` inside the litellm pod: it parsed as an identity-pool credential, wired up impersonation, read the projected token, and **reached Google's STS**, which rejected only the `POOL_ID` placeholder. Every link except the pool itself was therefore proven |
+| **Full chain** (2026-10-19) | with the pool, provider and service account created: a token minted by `kubectl create token litellm` in `vcell-ai-rke-dev` was exchanged at STS, impersonated `vcell-ai-litellm@…`, and called `gemini-2.5-flash` in `us-central1`, which answered. Run from a laptop with curl, not from the pod, since the branch is not yet deployed |
+| Vertex with a user credential | `gemini-2.5-flash` also answers for `schaff.jim@gmail.com` directly, which is the docker-compose ADC path |
 
 ## The one non-obvious part: the issuer is not on the internet
 
@@ -87,20 +94,22 @@ keys rather than to go and get them.
 
 ## Operational consequence: JWKS rotation
 
-The uploaded JWKS is a **static snapshot**, with a maximum of 8 keys. If the cluster's
-service-account signing key ever changes — RKE2 key rotation, a control-plane rebuild, a
-cluster re-creation — federation breaks silently and every Gemini call starts returning 403
-until someone re-uploads:
+The uploaded JWKS is a **static snapshot**. If the cluster's service-account signing key ever
+changes — RKE2 key rotation, a control-plane rebuild, a cluster re-creation — federation breaks
+silently and every Gemini call starts returning 403 until someone re-uploads:
 
 ```bash
 kubectl get --raw /openid/v1/jwks > cluster-jwks.json
-gcloud iam workload-identity-pools providers update-oidc PROVIDER_ID \
-    --location=global --workload-identity-pool=POOL_ID \
+gcloud iam workload-identity-pools providers update-oidc rke2-vcell-ai \
+    --location=global --workload-identity-pool=vcell-ai-pool \
     --jwk-json-path=cluster-jwks.json
 ```
 
-Note `update-oidc` **replaces** the uploaded keys; the previous set cannot be restored. If
-Gemini starts failing with auth errors and nothing in this repo changed, check this first.
+Treat `update-oidc` as replace-all and keep the old `cluster-jwks.json` until the new one is
+confirmed working. (Google's Kubernetes WIF page does not state a key limit or the exact
+replace semantics; an earlier version of this note claimed both, unverified.) If Gemini starts
+failing with auth errors and nothing in this repo changed, check this first. Re-uploading needs
+`roles/iam.workloadIdentityPoolAdmin` on the project.
 
 ## Design choices worth knowing
 
@@ -121,9 +130,12 @@ condition can name one workload.
 `vertex_credentials` accepts a path — but the env var route means `google.auth.default()`
 handles it, which gives a useful property: with the variable unset, it falls back to a
 developer's own `gcloud auth application-default login`. The same `gemini-model` alias
-therefore works locally with no config changes. Pointing `vertex_credentials` at a path that
-does not exist locally would instead fail, because LiteLLM treats a non-existent path as
-inline JSON and tries to parse it.
+therefore works in docker compose once the ADC file is mounted (an optional, commented-out
+volume in `docker-compose.yml`, paired with `GOOGLE_APPLICATION_CREDENTIALS` in `litellm.env`).
+It does **not** work in the `vcell-ai-local` kustomize overlay: nothing mounts ADC into that
+pod, and a local cluster's tokens are not trusted by the pool. Pointing `vertex_credentials`
+at a path that does not exist locally would fail outright, because LiteLLM treats a
+non-existent path as inline JSON and tries to parse it.
 
 **The credential config is not a secret.** `gcp-wif.json` lives in the plain
 `litellm-config-file` ConfigMap next to `config.yaml`, not in the sealed `litellm-secrets`.
@@ -138,7 +150,13 @@ Both are default allowed audiences for the same provider. Do not "fix" one to ma
 
 ## GCP-side configuration
 
-Run by Burwood in project `caia-fac-uconn-2-225-2026` (number `637433805721`).
+Run by Jim on 2026-10-19 in project `caia-fac-uconn-2-225-2026` (number `637433805721`), as
+`schaff.jim@gmail.com`, after being granted `roles/iam.workloadIdentityPoolAdmin`,
+`roles/iam.serviceAccountAdmin`, `roles/iam.serviceAccountKeyAdmin`,
+`roles/serviceusage.serviceUsageAdmin` and `roles/resourcemanager.projectIamAdmin` on the project.
+The four APIs in the last command were already enabled, so that step was a no-op. A pre-existing
+`vcellai-service-account@…` (origin unknown, holds `roles/aiplatform.user`, has only a
+Google-managed key) was left alone and is not part of this setup.
 
 ```bash
 POOL=vcell-ai-pool
@@ -186,7 +204,7 @@ the problem is.
 **1. Token shape.** Confirms the cluster mints what the pool expects.
 
 ```bash
-AUD="https://iam.googleapis.com/projects/637433805721/locations/global/workloadIdentityPools/POOL_ID/providers/PROVIDER_ID"
+AUD="https://iam.googleapis.com/projects/637433805721/locations/global/workloadIdentityPools/vcell-ai-pool/providers/rke2-vcell-ai"
 kubectl -n vcell-ai-rke-dev create token litellm --audience="$AUD" \
   | cut -d. -f2 | base64 -d 2>/dev/null | jq '{iss, aud, sub}'
 ```
@@ -217,7 +235,7 @@ Reading the error matters:
 | `Invalid value for "audience"` | the audience string is malformed or names a pool/provider that does not exist |
 | `Unable to parse the provided JWT` / issuer errors | the uploaded JWKS no longer matches the cluster's signing key — re-upload it (see above) |
 | `The given credential is rejected by the attribute condition` | the condition does not match `system:serviceaccount:vcell-ai-rke-dev:litellm` |
-| a 403 on `generateAccessToken` | the `roles/iam.workloadIdentityUser` binding on the Google service account is missing or names the project ID instead of the project number |
+| a 403 on `generateAccessToken` (`iam.serviceAccounts.getAccessToken` denied) | the `roles/iam.workloadIdentityUser` binding on the Google service account is missing, names the project ID instead of the project number, **or was created in the last few minutes** — on 2026-10-19 the binding took about four minutes to take effect, and the exact same request then succeeded |
 
 **3. The LiteLLM alias**, from inside the cluster:
 
@@ -235,8 +253,51 @@ confirm the call shows up in Langfuse.
 still succeeds more than an hour after the pod started, which exercises kubelet's in-place
 rotation of the projected token and google-auth re-reading the file.
 
+## Action log, 2026-10-19
+
+Every state-changing action taken to build the GCP side, in order. Identity for all Google
+calls: `schaff.jim@gmail.com`. Cluster: the RKE2 dev cluster at `155.37.250.221`.
+
+Read-only beforehand: confirmed no identity pools existed in the project, listed service
+accounts and enabled APIs, read the cluster's OpenID discovery document and JWKS (one RS256 key,
+kid `_sEcsu_IaVE_5SVJKSmCtYi3oj6lhCvQMorJjUmimXI`, matching the 2026-09-02 measurement).
+
+GCP, project `caia-fac-uconn-2-225-2026`:
+
+1. Saved the cluster JWKS (`kubectl get --raw /openid/v1/jwks`) to `cluster-jwks.json`.
+2. Created identity pool `vcell-ai-pool` (display name "VCell-AI on-prem RKE2").
+3. Created OIDC provider `rke2-vcell-ai` in that pool: issuer
+   `https://kubernetes.default.svc.cluster.local`, JWKS uploaded inline, mapping
+   `google.subject=assertion.sub`, condition
+   `assertion.sub == 'system:serviceaccount:vcell-ai-rke-dev:litellm'`. State ACTIVE.
+4. Created service account `vcell-ai-litellm` (display name "VCell-AI LiteLLM proxy (WIF from RKE2)").
+5. Granted it `roles/aiplatform.user` on the project.
+6. Granted `principal://iam.googleapis.com/projects/637433805721/locations/global/workloadIdentityPools/vcell-ai-pool/subject/system:serviceaccount:vcell-ai-rke-dev:litellm`
+   the role `roles/iam.workloadIdentityUser` on that service account.
+
+No APIs enabled, no service account keys created, no changes to any other principal or resource.
+
+Kubernetes, namespace `vcell-ai-rke-dev`:
+
+7. Created ServiceAccount `litellm` by hand, so a token could be minted for the test below.
+   `kustomize/base/litellm.yaml` defines the same object; Flux adopts it on merge.
+8. Minted several 10-minute tokens for that ServiceAccount with the provider audience. Nothing persisted.
+
+Verification, run with curl from a laptop:
+
+9. Token claims: `iss`, `aud` and `sub` exactly as the pool expects.
+10. STS exchange: federated token issued.
+11. Impersonation: 403 at first (binding ~2 min old), success after ~4 min.
+12. `gemini-2.5-flash:generateContent` with the impersonated token: answered.
+
+Repo: filled the pool, provider and service-account names into `kustomize/base/gcp-wif.json`
+and `kustomize/base/litellm.yaml`; rebased the branch onto `main`.
+
+Still to do: merge, then run step 5 of *Verifying a change* (a call more than an hour after the
+pod starts) against the deployed pod.
+
 ## Related
 
-- Ticket: Burwood REQ0040169
+- Ticket: Burwood REQ0040169 — superseded; the GCP side was built in-house (see action log)
 - Grant project `caia-fac-uconn-2-225-2026` has `award_end=2026-12-31`; this setup should be
   cheap to tear down or move.
