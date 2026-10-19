@@ -18,6 +18,12 @@ services:
       - "4000:4000"
     volumes:
       - ./litellm_config.yaml:/app/config.yaml
+      # Gemini only: mount your gcloud Application Default Credentials so the
+      # gemini-model alias can authenticate to Vertex AI outside the cluster.
+      # Pair with GOOGLE_APPLICATION_CREDENTIALS in litellm.env. Create the file
+      # first with `gcloud auth application-default login`, or compose will
+      # mount an empty directory in its place.
+      # - ~/.config/gcloud/application_default_credentials.json:/etc/gcp/adc.json:ro
     env_file:
       - ./litellm.env
     command: --config /app/config.yaml
