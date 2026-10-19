@@ -237,13 +237,19 @@ Reading the error matters:
 | `The given credential is rejected by the attribute condition` | the condition does not match `system:serviceaccount:vcell-ai-rke-dev:litellm` |
 | a 403 on `generateAccessToken` (`iam.serviceAccounts.getAccessToken` denied) | the `roles/iam.workloadIdentityUser` binding on the Google service account is missing, names the project ID instead of the project number, **or was created in the last few minutes** — on 2026-10-19 the binding took about four minutes to take effect, and the exact same request then succeeded |
 
-**3. The LiteLLM alias**, from inside the cluster:
+**3. The LiteLLM alias**, from inside the pod. The image has no `curl`, so use Python; the
+master key is already in the pod's environment:
 
 ```bash
-kubectl -n vcell-ai-rke-dev exec deploy/litellm -- \
-  curl -sS localhost:4000/v1/chat/completions \
-    -H "Authorization: Bearer $LITELLM_MASTER_KEY" -H 'Content-Type: application/json' \
-    -d '{"model":"gemini-model","messages":[{"role":"user","content":"say ok"}]}'
+kubectl -n vcell-ai-rke-dev exec deploy/litellm -- python -c "
+import os, json, urllib.request
+req = urllib.request.Request('http://localhost:4000/v1/chat/completions',
+    data=json.dumps({'model':'gemini-model','messages':[{'role':'user','content':'say ok'}]}).encode(),
+    headers={'Authorization':'Bearer '+os.environ['LITELLM_MASTER_KEY'],'Content-Type':'application/json'})
+try:
+    d = json.load(urllib.request.urlopen(req, timeout=60)); print(d['choices'][0]['message']['content'])
+except urllib.error.HTTPError as e:
+    print('HTTP', e.code, e.read().decode()[:800])"
 ```
 
 **4. End to end** — pick Gemini in the dropdown at https://vcell-ai-dev.cam.uchc.edu and
@@ -293,8 +299,16 @@ Verification, run with curl from a laptop:
 Repo: filled the pool, provider and service-account names into `kustomize/base/gcp-wif.json`
 and `kustomize/base/litellm.yaml`; rebased the branch onto `main`.
 
-Still to do: merge, then run step 5 of *Verifying a change* (a call more than an hour after the
-pod starts) against the deployed pod.
+Post-merge, PR #107 merged 2026-10-19 19:20 UTC (merge commit `449aabe`):
+
+13. Flux applied the new Deployment within about 45 s; the pod rolled at 19:21:27 UTC running as
+    the `litellm` ServiceAccount, with `/var/run/secrets/gcp/token` and `/etc/gcp/wif.json`
+    mounted and `GOOGLE_APPLICATION_CREDENTIALS` set.
+14. Step 2 (`google.auth.default()` + refresh) inside the pod: token acquired.
+15. Step 3 (`gemini-model` through the proxy, from inside the pod): answered.
+
+Still to do: step 4 (through the UI, with the call visible in Langfuse) and step 5 (a call more
+than an hour after pod start, confirming projected-token rotation).
 
 ## Related
 
