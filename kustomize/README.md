@@ -12,8 +12,9 @@ Deploys the VCell-AI services from `docker-compose.yml` to Kubernetes:
 
 The backend calls `litellm` for chat (`LITELLM_URL`, per-user virtual keys via
 `LITELLM_MASTER_KEY`) and also uses Azure directly for KB **embeddings**. LiteLLM
-routes `openai-model` (a group backed by **Azure OpenAI and/or hosted OpenAI** —
-provide a key for either) with a fallback to `local-model` (in-cluster Ollama),
+routes `gemini-model` (Gemini on Vertex AI, the UI default) and `openai-model` (a
+group backed by **Azure OpenAI and/or hosted OpenAI** — provide a key for either),
+each with a fallback to `local-model` (in-cluster Ollama),
 and persists virtual keys/budgets to a Postgres (`DATABASE_URL`, e.g. Supabase's
 session pooler). Structured after `../sms-api/kustomize`.
 

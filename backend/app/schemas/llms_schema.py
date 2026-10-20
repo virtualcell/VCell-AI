@@ -2,12 +2,12 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-LLMModel = Literal["openai-model", "gemini-model", "local-model"]
+LLMModel = Literal["gemini-model", "openai-model", "local-model"]
 
 
 class ChatRequest(BaseModel):
     conversation_history: list[dict] = Field(..., min_length=1)
-    model: LLMModel = "openai-model"
+    model: LLMModel = "gemini-model"
 
 
 class ChatResponse(BaseModel):
