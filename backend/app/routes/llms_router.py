@@ -38,7 +38,7 @@ async def query_llm(
 @router.post("/query/faq/{faq_id}", response_model=ChatResponse)
 async def query_faq(
     faq_id: str,
-    model: LLMModel = "openai-model",
+    model: LLMModel = "gemini-model",
     payload: dict = Depends(verify_auth0_token),
 ):
     """
@@ -59,7 +59,7 @@ async def query_faq(
 async def analyse_biomodel(
     biomodel_id: str,
     user_prompt: str,
-    model: LLMModel = "openai-model",
+    model: LLMModel = "gemini-model",
     payload: dict = Depends(verify_auth0_token),
 ):
     """
@@ -77,7 +77,7 @@ async def analyse_biomodel(
 @router.post("/analyse/{biomodel_id}/vcml", response_model=AnalysisResponse)
 async def analyse_vcml(
     biomodel_id: str,
-    model: LLMModel = "openai-model",
+    model: LLMModel = "gemini-model",
     payload: dict = Depends(verify_auth0_token),
 ):
     """
@@ -94,7 +94,7 @@ async def analyse_vcml(
 @router.post("/analyse/{biomodel_id}/diagram", response_model=AnalysisResponse)
 async def analyse_diagram(
     biomodel_id: str,
-    model: LLMModel = "openai-model",
+    model: LLMModel = "gemini-model",
     payload: dict = Depends(verify_auth0_token),
     access_token: str = Depends(get_bearer_token),
 ):

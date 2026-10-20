@@ -41,7 +41,10 @@ model_list:
 
 litellm_settings:
   success_callback: ["langfuse"]
+  # Hosted providers fail over to the in-cluster model; local-model itself has
+  # no fallback. A user-budget overrun is handled separately by the backend.
   fallbacks:
+    - gemini-model: ["local-model"]
     - openai-model: ["local-model"]
 
 general_settings:
