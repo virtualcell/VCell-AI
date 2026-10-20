@@ -23,6 +23,9 @@ logger = get_logger("llm_service")
 
 LOCAL_MODEL = "local-model"
 
+# Upper bound on model -> tool -> model rounds in get_response_with_tools.
+MAX_TOOL_ROUNDS = 5
+
 
 def _key_for_model(virtual_key: str, model: str) -> str:
     """
@@ -112,58 +115,66 @@ async def get_response_with_tools(
 
     logger.info(f"User prompt: {user_prompt}")
 
-    response = await _create_chat_completion(
-        virtual_key,
-        model,
-        messages=messages,
-        tools=tools,
-        tool_choice="auto",
-    )
-
-    # Handle the tool calls
-    response_message = response.choices[0].message
-    tool_calls = response_message.tool_calls
-
-    messages.append(response_message.model_dump(exclude_none=True))
-
     bmkeys = []
 
-    if not tool_calls:
-        final_response = response_message.content or ""
-        logger.info(f"LLM Response: {final_response}")
-        return final_response, bmkeys, response.model
-
-    for tool_call in tool_calls:
-        # Extract the function name and arguments
-        name = tool_call.function.name
-        args = json.loads(tool_call.function.arguments)
-
-        logger.info(f"Tool Call: {name} with args: {args}")
-
-        # Execute the tool function
-        result = await execute_tool(name, args, auth0_token)
-
-        logger.info(f"Tool Result: {str(result)[:500]}")
-
-        # Extract bmkeys only if result is a dictionary and contains the expected key
-        if isinstance(result, dict):
-            bmkeys = result.get("unique_model_keys (bmkey)", [])
-
-        # Send the result back to the model
-        messages.append(
-            {"role": "tool", "tool_call_id": tool_call.id, "content": str(result)}
+    # The model may need several tool rounds (search, then search again with
+    # different arguments when the first result is empty). Gemini does this
+    # readily; the old single-round code took its second tool call as the final
+    # answer, got content=None, and the route returned a 500. Keep looping
+    # until the model answers in prose, with a cap so a model that never stops
+    # asking for tools still terminates.
+    for _ in range(MAX_TOOL_ROUNDS):
+        completion = await _create_chat_completion(
+            virtual_key,
+            model,
+            messages=messages,
+            tools=tools,
+            tool_choice="auto",
         )
+        response_message = completion.choices[0].message
+        tool_calls = response_message.tool_calls
 
-    logger.info(str(messages))
+        if not tool_calls:
+            break
 
-    # Send back the final response incorporating the tool result
-    completion = await _create_chat_completion(
-        virtual_key,
-        model,
-        messages=messages,
-    )
+        messages.append(response_message.model_dump(exclude_none=True))
 
-    final_response = completion.choices[0].message.content
+        for tool_call in tool_calls:
+            # Extract the function name and arguments
+            name = tool_call.function.name
+            args = json.loads(tool_call.function.arguments)
+
+            logger.info(f"Tool Call: {name} with args: {args}")
+
+            # Execute the tool function
+            result = await execute_tool(name, args, auth0_token)
+
+            logger.info(f"Tool Result: {str(result)[:500]}")
+
+            # Extract bmkeys only if result is a dictionary and contains the expected key
+            if isinstance(result, dict):
+                bmkeys = result.get("unique_model_keys (bmkey)", [])
+
+            # Send the result back to the model
+            messages.append(
+                {"role": "tool", "tool_call_id": tool_call.id, "content": str(result)}
+            )
+
+        logger.info(str(messages))
+    else:
+        # Round cap reached with the model still asking for tools. Forbid
+        # further tool calls so this request yields prose from what it has.
+        logger.info(f"Tool round cap ({MAX_TOOL_ROUNDS}) reached; forcing a text answer")
+        completion = await _create_chat_completion(
+            virtual_key,
+            model,
+            messages=messages,
+            tools=tools,
+            tool_choice="none",
+        )
+        response_message = completion.choices[0].message
+
+    final_response = response_message.content or ""
 
     logger.info(f"LLM Response: {final_response}")
 
